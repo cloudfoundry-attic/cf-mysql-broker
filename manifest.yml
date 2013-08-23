@@ -1,0 +1,9 @@
+---
+applications:
+- name: cfmysql
+  memory: 256M
+  instances: 1
+  host: cfmysql
+  path: .
+  env:
+    AUTH_TOKEN: secret
