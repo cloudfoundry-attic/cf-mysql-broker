@@ -1,5 +1,5 @@
 CfMysqlBroker::Application.routes.draw do
-  namespace :v3 do
-    get '', to: 'statuses#show'
+  namespace :v2 do
+    resource :catalog, only: [:show]
   end
 end

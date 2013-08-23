@@ -1,4 +1,4 @@
-class V3::BaseController < ApplicationController
+class V2::BaseController < ApplicationController
   before_filter :authenticate
 
   protected
