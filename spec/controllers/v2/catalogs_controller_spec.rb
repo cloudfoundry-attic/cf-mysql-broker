@@ -16,6 +16,7 @@ describe V2::CatalogsController do
       service = services.first
       expect(service.fetch('name')).to eq('cf-mysql')
       expect(service.fetch('description')).to eq('Cloud Foundry MySQL')
+      expect(service.fetch('bindable')).to be_true
       expect(service.fetch('id')).to eq('cf-mysql-1')
 
       plans = service.fetch('plans')

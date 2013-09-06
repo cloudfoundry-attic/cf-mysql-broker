@@ -13,6 +13,7 @@ describe 'GET /v2/catalog' do
     service = services.first
     expect(service.fetch('name')).to eq('cf-mysql')
     expect(service.fetch('description')).to eq('Cloud Foundry MySQL')
+    expect(service.fetch('bindable')).to be_true
 
     plans = service.fetch('plans')
     expect(plans).to have(1).plan
