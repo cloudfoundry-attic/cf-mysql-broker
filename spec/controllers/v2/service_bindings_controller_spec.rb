@@ -1,16 +1,16 @@
 require 'spec_helper'
 
-describe V2::ServiceInstancesController do
+describe V2::ServiceBindingsController do
   before { authenticate }
 
   describe '#create' do
-    it 'sends back a dashboard url' do
+    it 'sends back credentials' do
       put :create, id: '42'
 
       expect(response.status).to eq(201)
       instance = JSON.parse(response.body)
 
-      expect(instance['dashboard_url']).to eq('http://fake.dashboard.url')
+      expect(instance['credentials']).to eq('{ "foo": "bar" }')
     end
   end
 end
