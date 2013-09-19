@@ -10,7 +10,8 @@ class V2::ServiceBindingsController < V2::BaseController
       password: "testpassword"
   }
 
-  def create
+  # This is actually the create
+  def update
     render status: 201, json: { credentials: CREDS.to_json }
   end
 

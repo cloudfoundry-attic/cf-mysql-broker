@@ -3,9 +3,9 @@ require 'spec_helper'
 describe V2::ServiceInstancesController do
   before { authenticate }
 
-  describe '#create' do
+  describe '#update' do
     it 'sends back a dashboard url' do
-      put :create, id: '42'
+      put :update, id: '42'
 
       expect(response.status).to eq(201)
       instance = JSON.parse(response.body)

@@ -3,7 +3,7 @@ require 'spec_helper'
 describe V2::ServiceBindingsController do
   before { authenticate }
 
-  describe '#create' do
+  describe '#update' do
     let(:creds) do
       {
           jdbcUrl: "jdbc:mysql://testuser:testpassword@testdb.csvbuoabzxev.us-east-1.rds.amazonaws.com:3306/testdb",
@@ -17,7 +17,7 @@ describe V2::ServiceBindingsController do
     end
 
     it 'sends back credentials' do
-      put :create, id: '42'
+      put :update, id: '42'
 
       expect(response.status).to eq(201)
       instance = JSON.parse(response.body)

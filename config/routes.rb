@@ -2,11 +2,9 @@ CfMysqlBroker::Application.routes.draw do
   namespace :v2 do
     resource :catalog, only: [:show]
 
-    resource :service_instances, only: [:destroy]
-    put '/service_instances/:id', to: 'service_instances#create'
+    resources :service_instances, only: [:update, :destroy]
 
-    resource :service_bindings, only: [:destroy]
-    put '/service_bindings/:id', to: 'service_bindings#create'
-
+    resources :service_bindings, only: [:update, :destroy]
   end
 end
+
