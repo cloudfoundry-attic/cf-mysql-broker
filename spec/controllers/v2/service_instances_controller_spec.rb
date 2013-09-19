@@ -13,4 +13,12 @@ describe V2::ServiceInstancesController do
       expect(instance['dashboard_url']).to eq('http://fake.dashboard.url')
     end
   end
+
+  describe '#destroy' do
+    it 'succeeds with 204' do
+      delete :destroy, id: '42'
+
+      expect(response.status).to eq(204)
+    end
+  end
 end

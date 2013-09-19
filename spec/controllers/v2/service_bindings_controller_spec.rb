@@ -25,4 +25,12 @@ describe V2::ServiceBindingsController do
       expect(instance['credentials']).to eq(creds)
     end
   end
+
+  describe '#destroy' do
+    it 'succeeds with 204' do
+      delete :destroy, id: '42'
+
+      expect(response.status).to eq(204)
+    end
+  end
 end
