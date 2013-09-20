@@ -1,18 +1,26 @@
 class V2::ServiceBindingsController < V2::BaseController
 
-  CREDS = {
-      jdbcUrl: "jdbc:mysql://testuser:testpassword@testdb.csvbuoabzxev.us-east-1.rds.amazonaws.com:3306/testdb",
-      uri: "mysql://testuser:testpassword@testdb.csvbuoabzxev.us-east-1.rds.amazonaws.com:3306/testdb?reconnect=true",
-      name: "fun",
-      hostname: "testdb.csvbuoabzxev.us-east-1.rds.amazonaws.com",
-      port: "3306",
-      username: "testuser",
-      password: "testpassword"
-  }
-
-  # This is actually the create
   def update
-    render status: 201, json: { credentials: CREDS.to_json }
+    database_settings = AppSettings.database
+    database_ip = database_settings.ip
+    database_name = database_settings.singleton_database
+    database_user = database_settings.admin_user
+    database_password = database_settings.admin_password
+    database_port = database_settings.port
+
+    base_database_url = "mysql://#{database_user}:#{database_password}@#{database_ip}:#{database_port}/#{database_name}"
+
+    render status: 201, :json => {
+        'credentials' => {
+            'hostname' => database_ip,
+            'name'     => database_name,
+            'username' => database_user,
+            'password' => database_password,
+            'port'     => database_port,
+            'jdbcUrl'  => "jdbc:#{base_database_url}",
+            'uri'      => "#{base_database_url}?reconnect=true",
+        }
+    }.to_json
   end
 
   def destroy

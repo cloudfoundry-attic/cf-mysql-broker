@@ -73,6 +73,7 @@ GEM
       rspec-core (~> 2.14.0)
       rspec-expectations (~> 2.14.0)
       rspec-mocks (~> 2.14.0)
+    settingslogic (2.0.9)
     sprockets (2.10.0)
       hike (~> 1.2)
       multi_json (~> 1.0)
@@ -102,4 +103,5 @@ DEPENDENCIES
   rails
   rails-api
   rspec-rails
+  settingslogic
   unicorn

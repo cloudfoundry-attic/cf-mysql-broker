@@ -2,6 +2,7 @@ source 'https://rubygems.org'
 
 gem 'rails'
 gem 'rails-api'
+gem 'settingslogic'
 
 group :production do
   gem 'unicorn'
