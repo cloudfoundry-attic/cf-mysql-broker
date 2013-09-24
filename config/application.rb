@@ -1,7 +1,7 @@
 require File.expand_path('../boot', __FILE__)
 
 # Pick the frameworks you want:
-# require 'active_record/railtie'
+require 'active_record/railtie'
 require 'action_controller/railtie'
 # require 'action_mailer/railtie'
 # require 'sprockets/railtie'
@@ -27,5 +27,9 @@ module CfMysqlBroker
 
     # Disable the asset pipeline.
     config.assets.enabled = false
+
+    config.autoload_paths += %W(#{config.root}/lib)
+    config.autoload_paths += Dir["#{config.root}/lib/**/"]
   end
 end
+

@@ -1,21 +1,27 @@
+
 class V2::ServiceBindingsController < V2::BaseController
 
   def update
     database_settings = AppSettings.database
     database_ip = database_settings.ip
     database_name = database_settings.singleton_database
-    database_user = database_settings.admin_user
-    database_password = database_settings.admin_password
     database_port = database_settings.port
 
-    base_database_url = "mysql://#{database_user}:#{database_password}@#{database_ip}:#{database_port}/#{database_name}"
+    binding_guid = params.fetch(:id)
+    creds = UserCreds.new(binding_guid)
+
+    base_database_url = "mysql://#{creds.username}:#{creds.password}@#{database_ip}:#{database_port}/#{database_name}"
+
+    ActiveRecord::Base.connection.execute("CREATE USER '#{creds.username}' IDENTIFIED BY '#{creds.password}';")
+    ActiveRecord::Base.connection.execute("GRANT ALL PRIVILEGES ON *.* TO '#{creds.username}';")
+    ActiveRecord::Base.connection.execute("FLUSH PRIVILEGES;")
 
     render status: 201, :json => {
         'credentials' => {
             'hostname' => database_ip,
             'name'     => database_name,
-            'username' => database_user,
-            'password' => database_password,
+            'username' => creds.username,
+            'password' => creds.password,
             'port'     => database_port,
             'jdbcUrl'  => "jdbc:#{base_database_url}",
             'uri'      => "#{base_database_url}?reconnect=true",

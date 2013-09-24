@@ -1,0 +1,7 @@
+---
+database:
+  admin_user: root
+  admin_password: password
+  singleton_database: test
+  ip: localhost
+  port: 3306
