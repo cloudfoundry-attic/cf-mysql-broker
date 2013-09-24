@@ -6,6 +6,16 @@ def cleanup_mysql_user(username)
 rescue
 end
 
+def create_mysql_client(username, password)
+  Mysql2::Client.new(
+      :host     => AppSettings.database.host,
+      :port     => AppSettings.database.port,
+      :database => AppSettings.database.singleton_database,
+      :username => username,
+      :password => password
+  )
+end
+
 
 describe 'POST /v2/service_bindings' do
   let(:instance_guid) { 'INSTANCE-1' }
@@ -15,8 +25,9 @@ describe 'POST /v2/service_bindings' do
 
   before do
     SecureRandom.stub(:hex).with(8).and_return(password)
-
     cleanup_mysql_user(username)
+
+    put "/v2/service_instances/#{instance_guid}", {service_plan_id: 'PLAN-1'}, env
   end
 
   after do
@@ -24,7 +35,7 @@ describe 'POST /v2/service_bindings' do
   end
 
   it 'creates a user and returns the new service binding' do
-    put "/v2/service_instances/#{instance_guid}", {service_plan_id: 'PLAN-1'}, env
+    ## Create the binding
     put "/v2/service_bindings/#{binding_guid}", {service_instance_id: instance_guid}, env
 
     expect(response.status).to eq(201)
@@ -40,17 +51,21 @@ describe 'POST /v2/service_bindings' do
       'uri' => "mysql://#{username}:#{password}@localhost:3306/test?reconnect=true",
     })
 
-    client = Mysql2::Client.new(
-        :host     => AppSettings.database.ip,
-        :port     => AppSettings.database.port,
-        :database => AppSettings.database.singleton_database,
-        :username => username,
-        :password => password,
-    )
+    ## Test the binding
+    client = create_mysql_client(username, password)
 
     client.query("CREATE TABLE IF NOT EXISTS data_values ( id VARCHAR(20), data_value VARCHAR(20));")
     client.query("INSERT INTO data_values VALUES('123', '456');")
     found = client.query("SELECT id, data_value FROM data_values;").first
     expect(found.fetch('data_value')).to eq('456')
+
+    ## Delete the binding
+    delete "/v2/service_bindings/#{binding_guid}", {service_instance_id: instance_guid}, env
+    expect(response.status).to eq(204)
+
+    ## Test that the binding no longer works
+    expect {
+      create_mysql_client(username, password)
+    }.to raise_error
   end
 end
