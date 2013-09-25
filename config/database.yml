@@ -7,6 +7,12 @@ development:
   username: root
   password: password
 
+travis:
+  adapter: mysql2
+  encoding: utf8
+  database: travis
+  pool: 5
+  username: travis
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".

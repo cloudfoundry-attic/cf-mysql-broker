@@ -1,0 +1,10 @@
+language: ruby
+
+bundler_args: --deployment --without development
+
+rvm:
+  - 1.9.3-p448
+
+env:  RAILS_ENV=travis
+
+script: bundle exec rake spec
