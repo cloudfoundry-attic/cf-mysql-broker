@@ -4,12 +4,10 @@ development:
     admin_password: password
     host: localhost
     port: 3306
-    singleton_database: development
 
 test:
   database:
     admin_user: root
-    admin_password:
+    admin_password: password
     host: localhost
     port: 3306
-    singleton_database: test
