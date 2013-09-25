@@ -10,8 +10,12 @@ class V2::ServiceInstancesController < V2::BaseController
 
   def destroy
     dbname = DatabaseName.new(params[:id])
-    ActiveRecord::Base.connection.execute("DROP DATABASE #{dbname.name};")
 
-    render status: 204, json: {}
+    # Need to use update() in order to get the number of databases dropped
+    count = ActiveRecord::Base.connection.update("DROP DATABASE IF EXISTS #{dbname.name};").to_i
+
+    status = count == 0 ? 410 : 204
+
+    render status: status, json: {}
   end
 end

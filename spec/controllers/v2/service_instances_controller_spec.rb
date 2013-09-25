@@ -36,16 +36,26 @@ describe V2::ServiceInstancesController do
     let(:instance_id) { 'INSTANCE-1' }
     let(:dbname) { DatabaseName.new(instance_id) }
 
-    before do
-      ActiveRecord::Base.connection.
-          should_receive(:execute).
-          with("DROP DATABASE #{dbname.name};")
-    end
-
     it 'succeeds with 204' do
+      ActiveRecord::Base.connection.
+          should_receive(:update).
+          with("DROP DATABASE IF EXISTS #{dbname.name};").
+          and_return("1")
+
       delete :destroy, id: instance_id
 
       expect(response.status).to eq(204)
+    end
+
+    it 'returns a 410 if record does not exist' do
+      ActiveRecord::Base.connection.
+          should_receive(:update).
+          with("DROP DATABASE IF EXISTS #{dbname.name};").
+          and_return("0")
+
+      delete :destroy, id: instance_id
+
+      expect(response.status).to eq(410)
     end
   end
 end

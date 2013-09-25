@@ -35,10 +35,17 @@ class V2::ServiceBindingsController < V2::BaseController
   def destroy
     binding_id = params.fetch(:id)
     creds = UserCreds.new(binding_id)
+    status = 204
 
-    ActiveRecord::Base.connection.execute("DROP USER '#{creds.username}';")
+    begin
+      # There is no DROP USER IF EXISTS, unfortunately
+      ActiveRecord::Base.connection.execute("DROP USER '#{creds.username}';")
+    rescue ActiveRecord::StatementInvalid
+      status = 410
+    end
+
     ActiveRecord::Base.connection.execute("FLUSH PRIVILEGES;")
 
-    render status: 204, json: {}
+    render status: status, json: {}
   end
 end

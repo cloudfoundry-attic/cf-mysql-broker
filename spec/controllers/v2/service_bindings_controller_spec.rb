@@ -58,7 +58,7 @@ describe V2::ServiceBindingsController do
     let(:binding_id) { 'BINDING-1' }
     let(:username) { UserCreds.new(binding_id).username }
 
-    before do
+    it 'succeeds with 204' do
       ActiveRecord::Base.connection.
           should_receive(:execute).
           with("DROP USER '#{username}';")
@@ -66,12 +66,27 @@ describe V2::ServiceBindingsController do
       ActiveRecord::Base.connection.
           should_receive(:execute).
           with("FLUSH PRIVILEGES;")
-    end
 
-    it 'succeeds with 204' do
       delete :destroy, id: binding_id
 
       expect(response.status).to eq(204)
+    end
+
+    context 'id does not exist' do
+      it 'returns a 410' do
+        ActiveRecord::Base.connection.
+            should_receive(:execute).
+            with("DROP USER '#{username}';").
+            and_raise(ActiveRecord::StatementInvalid, "Mysql2::Error: Operation DROP USER failed for 'foobaz'@'%': DROP USER 'foobaz';")
+
+        ActiveRecord::Base.connection.
+            should_receive(:execute).
+            with("FLUSH PRIVILEGES;")
+
+        delete :destroy, id: binding_id
+
+        expect(response.status).to eq(410)
+      end
     end
   end
 end
