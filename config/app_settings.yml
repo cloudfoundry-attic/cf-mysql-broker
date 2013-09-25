@@ -1,13 +1,5 @@
 development:
-  database:
-    admin_user: root
-    admin_password: password
-    host: localhost
-    port: 3306
+  # todo
 
 test:
-  database:
-    admin_user: root
-    admin_password: password
-    host: localhost
-    port: 3306
+  # todo

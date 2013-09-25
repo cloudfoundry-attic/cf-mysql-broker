@@ -1,20 +1,14 @@
 require 'spec_helper'
 
 describe V2::ServiceInstancesController do
-  let(:admin_user) { 'root' }
-  let(:admin_password) { 'admin_password' }
-  let(:database_host) { '10.10.1.1' }
-  let(:database_port) { '3306' }
+  let(:db_settings) { Rails.configuration.database_configuration[Rails.env] }
+  let(:admin_user) { db_settings.fetch('username') }
+  let(:admin_password) { db_settings.fetch('password') }
+  let(:database_host) { db_settings.fetch('host') }
+  let(:database_port) { db_settings.fetch('port') }
 
   before do
     authenticate
-    allow(AppSettings).to receive(:database).and_return(
-                              double(
-                                  :admin_user => admin_user,
-                                  :admin_password => admin_password,
-                                  :host => database_host,
-                                  :port => database_port)
-                          )
   end
 
   describe '#update' do

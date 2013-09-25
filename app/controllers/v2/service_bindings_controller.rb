@@ -2,14 +2,16 @@
 class V2::ServiceBindingsController < V2::BaseController
 
   def update
-    database_settings = AppSettings.database
-    database_host = database_settings.host
-    database_port = database_settings.port
+
+    # This will become more complicated when we have multiple nodes
+    database_settings =  Rails.configuration.database_configuration[Rails.env]
+    database_host = database_settings.fetch('host')
+    database_port = database_settings.fetch('port')
+
+    database_name = DatabaseName.new(params.fetch(:service_instance_id)).name
 
     binding_id= params.fetch(:id)
     creds = UserCreds.new(binding_id)
-
-    database_name = DatabaseName.new(params.fetch(:service_instance_id)).name
 
     base_database_url = "mysql://#{creds.username}:#{creds.password}@#{database_host}:#{database_port}/#{database_name}"
 

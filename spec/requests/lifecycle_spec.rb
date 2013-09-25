@@ -11,10 +11,12 @@ def cleanup_mysql_database(dbname)
 rescue
 end
 
-def create_mysql_client(username, password, database='mysql')
+def create_mysql_client(username=Rails.configuration.database_configuration[Rails.env].fetch('username'),
+                        password=Rails.configuration.database_configuration[Rails.env].fetch('password'),
+                        database='mysql')
   Mysql2::Client.new(
-      :host     => AppSettings.database.host,
-      :port     => AppSettings.database.port,
+      :host     => Rails.configuration.database_configuration[Rails.env].fetch('host'),
+      :port     => Rails.configuration.database_configuration[Rails.env].fetch('port'),
       :database => database,
       :username => username,
       :password => password
@@ -96,7 +98,7 @@ describe 'the service lifecycle' do
     ##
     ## Test that we have purged any data associated with the user
     ##
-    client = create_mysql_client(AppSettings.database.admin_user, AppSettings.database.admin_password)
+    client = create_mysql_client()
     found = client.query("SELECT * FROM mysql.db WHERE User = '#{username}';")
     expect(found.count).to eq(0)
     found = client.query("SELECT * FROM mysql.user WHERE User = '#{username}';")
