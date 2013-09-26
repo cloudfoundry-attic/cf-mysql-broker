@@ -15,5 +15,7 @@ test:
   database: test
   pool: 5
   username: root
+  # These are required by the tests, even though they have default values
+  password:
   host: localhost
   port: 3306
