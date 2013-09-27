@@ -39,4 +39,15 @@ RSpec.configure do |config|
   # the seed, which is printed after each run.
   #     --seed 1234
   config.order = 'random'
+
+  #
+  # Our tests won't work with the default localhost wildcard user record in mysql
+  #
+  config.before :suite do
+    count_of_bad_users = ActiveRecord::Base.connection.select_value("select count(*) from mysql.user where Host='localhost' and User=''")
+    if count_of_bad_users > 0
+      raise %Q{You must delete the Host='localhost' User='' record from the mysql.users table.\nRun this command:\nmysql -u root -e "DELETE FROM mysql.user WHERE Host='localhost' AND User=''"}
+    end
+  end
+
 end
