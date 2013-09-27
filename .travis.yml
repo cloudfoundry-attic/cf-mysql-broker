@@ -3,7 +3,9 @@ language: ruby
 bundler_args: --deployment --without development
 
 rvm:
-  - 1.9.3-p448
+- 1.9.3-p448
 
 script: bundle exec rspec spec
 
+before_script:
+- mysql -u root -e "DELETE FROM mysql.user WHERE Host='localhost' AND User=''"
