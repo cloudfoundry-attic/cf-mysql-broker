@@ -11,6 +11,8 @@ require 'action_controller/railtie'
 # you've limited to :test, :development, or :production.
 Bundler.require(:default, Rails.env)
 
+require File.expand_path('../../lib/settings', __FILE__)
+
 module CfMysqlBroker
   class Application < Rails::Application
     # Settings in config/environments/* take precedence over those specified here.
@@ -30,6 +32,8 @@ module CfMysqlBroker
 
     config.autoload_paths += %W(#{config.root}/lib)
     config.autoload_paths += Dir["#{config.root}/lib/**/"]
+
+    config.paths.add 'config/database', with: Settings.database_config_path
+    config.paths.add 'log', with: Settings.log_path
   end
 end
-

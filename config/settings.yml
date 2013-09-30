@@ -1,0 +1,14 @@
+# This file should not be used in deployed environments. Instead, set
+# the SETTINGS_PATH environment variable to point to a configuration
+# file that contains these settings.
+
+defaults: &defaults
+  database_config_path: 'config/database.yml'
+  log_path: 'log/<%= Rails.env %>.log'
+  auth_token: 'secret'
+
+development:
+  <<: *defaults
+
+test:
+  <<: *defaults

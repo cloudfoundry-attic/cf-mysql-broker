@@ -1,3 +1,7 @@
+# This file should not be used in deployed environments. Instead, the
+# application configuration file specified by SETTINGS_PATH should
+# include the path to a database configuration that includes these
+# settings.
 
 development:
   adapter: mysql2
