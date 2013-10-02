@@ -1,5 +1,4 @@
 class V2::ServiceInstancesController < V2::BaseController
-
   # This is actually the create
   def update
     dbname = DatabaseName.new(params[:id])
@@ -11,10 +10,15 @@ class V2::ServiceInstancesController < V2::BaseController
   def destroy
     dbname = DatabaseName.new(params[:id])
 
-    # Need to use update() in order to get the number of databases dropped
-    count = ActiveRecord::Base.connection.update("DROP DATABASE IF EXISTS #{dbname.name};").to_i
-
-    status = count == 0 ? 410 : 204
+    if ActiveRecord::Base.connection.select("SHOW DATABASES LIKE '#{dbname.name}';").any?
+      # Even though we just checked to see that the database exists, we
+      # should still guard against its absence with IF EXISTS in case
+      # we're racing another delete request.
+      ActiveRecord::Base.connection.execute("DROP DATABASE IF EXISTS #{dbname.name};")
+      status = 204
+    else
+      status = 410
+    end
 
     render status: status, json: {}
   end

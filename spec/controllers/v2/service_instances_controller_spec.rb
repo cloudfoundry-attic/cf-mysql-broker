@@ -16,7 +16,6 @@ describe V2::ServiceInstancesController do
     let(:dbname) { DatabaseName.new(instance_id) }
 
     before do
-
       ActiveRecord::Base.connection.
           should_receive(:execute).
           with("CREATE DATABASE #{dbname.name};")
@@ -38,9 +37,12 @@ describe V2::ServiceInstancesController do
 
     it 'succeeds with 204' do
       ActiveRecord::Base.connection.
-          should_receive(:update).
-          with("DROP DATABASE IF EXISTS #{dbname.name};").
-          and_return("1")
+        should_receive(:select).
+        with("SHOW DATABASES LIKE '#{dbname.name}';").
+        and_return(double(:result, any?: true))
+      ActiveRecord::Base.connection.
+        should_receive(:execute).
+        with("DROP DATABASE IF EXISTS #{dbname.name};")
 
       delete :destroy, id: instance_id
 
@@ -49,9 +51,12 @@ describe V2::ServiceInstancesController do
 
     it 'returns a 410 if record does not exist' do
       ActiveRecord::Base.connection.
-          should_receive(:update).
-          with("DROP DATABASE IF EXISTS #{dbname.name};").
-          and_return("0")
+        should_receive(:select).
+        with("SHOW DATABASES LIKE '#{dbname.name}';").
+        and_return(double(:result, any?: false))
+      ActiveRecord::Base.connection.
+        should_not_receive(:execute).
+        with("DROP DATABASE IF EXISTS #{dbname.name};")
 
       delete :destroy, id: instance_id
 
