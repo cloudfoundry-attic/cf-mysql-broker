@@ -1,8 +1,5 @@
-
 class V2::ServiceBindingsController < V2::BaseController
-
   def update
-
     # This will become more complicated when we have multiple nodes
     database_settings =  Rails.configuration.database_configuration[Rails.env]
     database_host = database_settings.fetch('host')
@@ -15,9 +12,8 @@ class V2::ServiceBindingsController < V2::BaseController
 
     base_database_url = "mysql://#{creds.username}:#{creds.password}@#{database_host}:#{database_port}/#{database_name}"
 
-    ActiveRecord::Base.connection.execute("CREATE USER '#{creds.username}' IDENTIFIED BY '#{creds.password}';")
-    ActiveRecord::Base.connection.execute("GRANT ALL PRIVILEGES ON #{database_name}.* TO '#{creds.username}';")
-    ActiveRecord::Base.connection.execute("FLUSH PRIVILEGES;")
+    db.execute("CREATE USER '#{creds.username}' IDENTIFIED BY '#{creds.password}'")
+    db.execute("GRANT ALL PRIVILEGES ON #{database_name}.* TO '#{creds.username}'")
 
     render status: 201, :json => {
         'credentials' => {
@@ -39,13 +35,17 @@ class V2::ServiceBindingsController < V2::BaseController
 
     begin
       # There is no DROP USER IF EXISTS, unfortunately
-      ActiveRecord::Base.connection.execute("DROP USER '#{creds.username}';")
+      db.execute("DROP USER '#{creds.username}'")
     rescue ActiveRecord::StatementInvalid
       status = 410
     end
 
-    ActiveRecord::Base.connection.execute("FLUSH PRIVILEGES;")
-
     render status: status, json: {}
+  end
+
+  private
+
+  def db
+    ActiveRecord::Base.connection
   end
 end

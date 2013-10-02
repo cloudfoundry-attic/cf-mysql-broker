@@ -7,6 +7,10 @@ module ControllerHelpers
 
     request.env['HTTP_AUTHORIZATION'] = ActionController::HttpAuthentication::Basic.encode_credentials(username, password)
   end
+
+  def db
+    ActiveRecord::Base.connection
+  end
 end
 
 RSpec.configure do |config|

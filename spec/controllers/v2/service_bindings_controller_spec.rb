@@ -20,37 +20,34 @@ describe V2::ServiceBindingsController do
 
     let(:creds) { double('UserCreds', username: generated_username, password: generated_password) }
 
-    before do
-      UserCreds.stub(:new).with('123').and_return(creds)
+    before { UserCreds.stub(:new).with('123').and_return(creds) }
+    after { db.execute("DROP USER '#{generated_username}'@'%'") }
 
-      ActiveRecord::Base.connection.
-          should_receive(:execute).
-          with("CREATE USER '#{generated_username}' IDENTIFIED BY '#{generated_password}';")
+    it 'grants permission to access the given database' do
+      put :update, id: 123, service_instance_id: instance_id
 
-      ActiveRecord::Base.connection.
-          should_receive(:execute).
-          with("GRANT ALL PRIVILEGES ON #{generated_dbname}.* TO '#{generated_username}';")
-
-      ActiveRecord::Base.connection.
-          should_receive(:execute).
-          with("FLUSH PRIVILEGES;")
+      expect(db.select_values("SHOW GRANTS FOR #{generated_username}")).to include("GRANT ALL PRIVILEGES ON `#{generated_dbname}`.* TO '#{generated_username}'@'%'")
     end
 
     it 'responds with generated credentials' do
       put :update, id: 123, service_instance_id: instance_id
 
-      expect(response.status).to eq(201)
       binding = JSON.parse(response.body)
-
       expect(binding['credentials']).to eq(
-                                            'hostname' => database_host,
-                                            'name' => generated_dbname,
-                                            'username' => generated_username,
-                                            'password' => generated_password,
-                                            'port' => database_port,
-                                            'jdbcUrl' => "jdbc:mysql://#{generated_username}:#{generated_password}@#{database_host}:#{database_port}/#{generated_dbname}",
-                                            'uri' => "mysql://#{generated_username}:#{generated_password}@#{database_host}:#{database_port}/#{generated_dbname}?reconnect=true",
-                                        )
+        'hostname' => database_host,
+        'name' => generated_dbname,
+        'username' => generated_username,
+        'password' => generated_password,
+        'port' => database_port,
+        'jdbcUrl' => "jdbc:mysql://#{generated_username}:#{generated_password}@#{database_host}:#{database_port}/#{generated_dbname}",
+        'uri' => "mysql://#{generated_username}:#{generated_password}@#{database_host}:#{database_port}/#{generated_dbname}?reconnect=true",
+      )
+    end
+
+    it 'returns a 201' do
+      put :update, id: 123, service_instance_id: instance_id
+
+      expect(response.status).to eq(201)
     end
   end
 
@@ -58,31 +55,29 @@ describe V2::ServiceBindingsController do
     let(:binding_id) { 'BINDING-1' }
     let(:username) { UserCreds.new(binding_id).username }
 
-    it 'succeeds with 204' do
-      ActiveRecord::Base.connection.
-          should_receive(:execute).
-          with("DROP USER '#{username}';")
+    context 'when the user exists' do
+      before { db.execute("CREATE USER '#{username}'") }
 
-      ActiveRecord::Base.connection.
-          should_receive(:execute).
-          with("FLUSH PRIVILEGES;")
+      it 'destroys the user' do
+        delete :destroy, id: binding_id
 
-      delete :destroy, id: binding_id
+        expect {
+          db.select("SHOW GRANTS FOR '#{username}'@'%'")
+        }.to raise_error(ActiveRecord::StatementInvalid, /no such grant defined/)
+        expect {
+          db.select("SHOW GRANTS FOR '#{username}'@'localhost'")
+        }.to raise_error(ActiveRecord::StatementInvalid, /no such grant defined/)
+      end
 
-      expect(response.status).to eq(204)
+      it 'returns a 204' do
+        delete :destroy, id: binding_id
+
+        expect(response.status).to eq(204)
+      end
     end
 
-    context 'id does not exist' do
+    context 'when the user does not exist' do
       it 'returns a 410' do
-        ActiveRecord::Base.connection.
-            should_receive(:execute).
-            with("DROP USER '#{username}';").
-            and_raise(ActiveRecord::StatementInvalid, "Mysql2::Error: Operation DROP USER failed for 'foobaz'@'%': DROP USER 'foobaz';")
-
-        ActiveRecord::Base.connection.
-            should_receive(:execute).
-            with("FLUSH PRIVILEGES;")
-
         delete :destroy, id: binding_id
 
         expect(response.status).to eq(410)

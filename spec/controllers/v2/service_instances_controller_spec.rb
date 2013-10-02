@@ -7,60 +7,46 @@ describe V2::ServiceInstancesController do
   let(:database_host) { db_settings.fetch('host') }
   let(:database_port) { db_settings.fetch('port') }
 
-  before do
-    authenticate
-  end
+  let(:instance_id) { 'INSTANCE-1' }
+  let(:dbname) { DatabaseName.new(instance_id) }
+
+  before { authenticate }
+  after { db.execute("DROP DATABASE IF EXISTS #{dbname.name}") }
 
   describe '#update' do
-    let(:instance_id) { 'INSTANCE-1' }
-    let(:dbname) { DatabaseName.new(instance_id) }
+    it 'creates the database and returns a 201' do
+      put :update, id: instance_id
 
-    before do
-      ActiveRecord::Base.connection.
-          should_receive(:execute).
-          with("CREATE DATABASE #{dbname.name};")
+      expect(db.select("SHOW DATABASES LIKE '#{dbname.name}'")).to have(1).record
+      expect(response.status).to eq(201)
     end
 
     it 'sends back a dashboard url' do
       put :update, id: instance_id
 
-      expect(response.status).to eq(201)
       instance = JSON.parse(response.body)
-
       expect(instance['dashboard_url']).to eq('http://fake.dashboard.url')
     end
   end
 
   describe '#destroy' do
-    let(:instance_id) { 'INSTANCE-1' }
-    let(:dbname) { DatabaseName.new(instance_id) }
+    context 'when the database exists' do
+      before { db.execute("CREATE DATABASE #{dbname.name}") }
 
-    it 'succeeds with 204' do
-      ActiveRecord::Base.connection.
-        should_receive(:select).
-        with("SHOW DATABASES LIKE '#{dbname.name}';").
-        and_return(double(:result, any?: true))
-      ActiveRecord::Base.connection.
-        should_receive(:execute).
-        with("DROP DATABASE IF EXISTS #{dbname.name};")
+      it 'drops the database and returns a 204' do
+        delete :destroy, id: instance_id
 
-      delete :destroy, id: instance_id
-
-      expect(response.status).to eq(204)
+        expect(db.select("SHOW DATABASES LIKE '#{dbname.name}'")).to have(0).records
+        expect(response.status).to eq(204)
+      end
     end
 
-    it 'returns a 410 if record does not exist' do
-      ActiveRecord::Base.connection.
-        should_receive(:select).
-        with("SHOW DATABASES LIKE '#{dbname.name}';").
-        and_return(double(:result, any?: false))
-      ActiveRecord::Base.connection.
-        should_not_receive(:execute).
-        with("DROP DATABASE IF EXISTS #{dbname.name};")
+    context 'when the database does not exist' do
+      it 'returns a 410' do
+        delete :destroy, id: instance_id
 
-      delete :destroy, id: instance_id
-
-      expect(response.status).to eq(410)
+        expect(response.status).to eq(410)
+      end
     end
   end
 end

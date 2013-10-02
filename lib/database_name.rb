@@ -12,7 +12,7 @@ class DatabaseName
     end
 
     # mysql database names are limited to [0-9,a-z,A-Z$_] and 64 chars
-    @name = instance_id.gsub('-', '_')
+    @name = instance_id.gsub('-', '_').downcase
   end
 end
 
