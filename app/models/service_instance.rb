@@ -1,6 +1,8 @@
 class ServiceInstance < BaseModel
   attr_accessor :id
 
+  DATABASE_PREFIX = 'cf_'.freeze
+
   def self.find_by_id(id)
     instance = new(id: id)
     instance if connection.select("SHOW DATABASES LIKE '#{instance.database}'").any?
@@ -21,7 +23,9 @@ class ServiceInstance < BaseModel
         raise 'Only ids matching [0-9,a-z,A-Z$-]+ are allowed'
       end
 
-      id.gsub('-', '_')
+      database = id.gsub('-', '_')
+
+      "#{DATABASE_PREFIX}#{database}"
     end
   end
 

@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe ServiceInstance do
   let(:id) { '88f6fa22-c8b7-4cdc-be3a-dc09ea7734db' }
-  let(:database) { '88f6fa22_c8b7_4cdc_be3a_dc09ea7734db' }
+  let(:database) { 'cf_88f6fa22_c8b7_4cdc_be3a_dc09ea7734db' }
   let(:instance) { ServiceInstance.new(id: id) }
 
   describe '.find_by_id' do
@@ -64,7 +64,14 @@ describe ServiceInstance do
   end
 
   describe '#save' do
-    after { connection.execute("DROP DATABASE IF EXISTS `#{database}`") }
+    let(:existing_database) { 'existing' }
+
+    before { connection.execute("CREATE DATABASE IF NOT EXISTS `#{existing_database}`") }
+
+    after do
+      connection.execute("DROP DATABASE IF EXISTS `#{existing_database}`")
+      connection.execute("DROP DATABASE IF EXISTS `#{database}`")
+    end
 
     it 'creates the database' do
       expect {
@@ -73,11 +80,26 @@ describe ServiceInstance do
         connection.select("SHOW DATABASES LIKE '#{database}'").count
       }.from(0).to(1)
     end
+
+    it 'avoids collisions with existing databases' do
+      instance = ServiceInstance.new(id: existing_database)
+
+      expect {
+        instance.save
+      }.to_not change {
+        connection.select("SHOW DATABASES LIKE '#{id}'").count
+      }.from(1)
+    end
   end
 
   describe '#destroy' do
+    let(:existing_database) { 'existing' }
+
+    before { connection.execute("CREATE DATABASE IF NOT EXISTS `#{existing_database}`") }
+    after { connection.execute("DROP DATABASE IF EXISTS `#{existing_database}`") }
+
     context 'when the database exists' do
-      before { connection.execute("CREATE DATABASE `#{database}`") }
+      before { connection.execute("CREATE DATABASE IF NOT EXISTS `#{database}`") }
       after { connection.execute("DROP DATABASE IF EXISTS `#{database}`") }
 
       it 'drops the database' do
@@ -96,12 +118,22 @@ describe ServiceInstance do
         }.to_not raise_error
       end
     end
+
+    it 'avoids collisions with existing databases' do
+      instance = ServiceInstance.new(id: existing_database)
+
+      expect {
+        instance.destroy
+      }.to_not change {
+        connection.select("SHOW DATABASES LIKE '#{id}'").count
+      }.from(1)
+    end
   end
 
   describe '#database' do
-    it 'returns a MySQL-safe database name from the id' do
+    it 'returns a namespaced, MySQL-safe database name from the id' do
       instance = ServiceInstance.new(id: '88f6fa22-c8b7-4cdc-be3a-dc09ea7734db')
-      expect(instance.database).to eq('88f6fa22_c8b7_4cdc_be3a_dc09ea7734db')
+      expect(instance.database).to eq('cf_88f6fa22_c8b7_4cdc_be3a_dc09ea7734db')
     end
 
     # Technically we should allow any kind of character in an id;
