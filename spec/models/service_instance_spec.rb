@@ -46,6 +46,22 @@ describe ServiceInstance do
     end
   end
 
+  describe '.exists?' do
+    context 'when the database exists' do
+      before { connection.execute("CREATE DATABASE `#{database}`") }
+      after { connection.execute("DROP DATABASE IF EXISTS `#{database}`") }
+
+      it 'returns true' do
+        expect(ServiceInstance.exists?(id)).to eq(true)
+      end
+    end
+
+    context 'when the database does not exist' do
+      it 'returns false' do
+        expect(ServiceInstance.exists?(id)).to eq(false)
+      end
+    end
+  end
 
   describe '#save' do
     after { connection.execute("DROP DATABASE IF EXISTS `#{database}`") }

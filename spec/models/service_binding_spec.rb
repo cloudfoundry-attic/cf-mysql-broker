@@ -24,7 +24,7 @@ describe ServiceBinding do
 
   describe '.find_by_id' do
     context 'when the user exists' do
-      before { ServiceBinding.new(id: id, service_instance: instance).save }
+      before { connection.execute("CREATE USER '#{username}' IDENTIFIED BY '#{password}'") }
 
       it 'returns the binding' do
         binding = ServiceBinding.find_by_id(id)
@@ -37,6 +37,58 @@ describe ServiceBinding do
       it 'returns nil' do
         binding = ServiceBinding.find_by_id(id)
         expect(binding).to be_nil
+      end
+    end
+  end
+
+  describe '.find_by_id_and_service_instance_id' do
+    context 'when the user exists and has all privileges' do
+      before { connection.execute("GRANT ALL PRIVILEGES ON `#{database}`.* TO '#{username}'@'%' IDENTIFIED BY '#{password}'") }
+
+      it 'returns the binding' do
+        binding = ServiceBinding.find_by_id_and_service_instance_id(id, instance_id)
+        expect(binding).to be_a(ServiceBinding)
+        expect(binding.id).to eq(id)
+      end
+    end
+
+    context 'when the user exists but does not have all privileges' do
+      before { connection.execute("CREATE USER '#{username}' IDENTIFIED BY '#{password}'") }
+
+      it 'returns nil' do
+        binding = ServiceBinding.find_by_id_and_service_instance_id(id, instance_id)
+        expect(binding).to be_nil
+      end
+    end
+
+    context 'when the user does not exist' do
+      it 'returns nil' do
+        binding = ServiceBinding.find_by_id_and_service_instance_id(id, instance_id)
+        expect(binding).to be_nil
+      end
+    end
+  end
+
+  describe '.exists?' do
+    context 'when the user exists and has all privileges' do
+      before { connection.execute("GRANT ALL PRIVILEGES ON `#{database}`.* TO '#{username}'@'%' IDENTIFIED BY '#{password}'") }
+
+      it 'returns true' do
+        expect(ServiceBinding.exists?(id: id, service_instance_id: instance_id)).to eq(true)
+      end
+    end
+
+    context 'when the user exists but does not have all privileges' do
+      before { connection.execute("CREATE USER '#{username}' IDENTIFIED BY '#{password}'") }
+
+      it 'returns false' do
+        expect(ServiceBinding.exists?(id: id, service_instance_id: instance_id)).to eq(false)
+      end
+    end
+
+    context 'when the user does not exist' do
+      it 'returns false' do
+        expect(ServiceBinding.exists?(id: id, service_instance_id: instance_id)).to eq(false)
       end
     end
   end

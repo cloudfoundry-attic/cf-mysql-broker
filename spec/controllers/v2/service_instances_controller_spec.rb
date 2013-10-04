@@ -5,13 +5,15 @@ describe V2::ServiceInstancesController do
   let(:database) { ServiceInstance.new(id: instance_id).database }
 
   before { authenticate }
-  after { db.execute("DROP DATABASE IF EXISTS `#{database}`") }
+  after { ServiceInstance.new(id: instance_id).destroy }
 
   describe '#update' do
     it 'creates the database and returns a 201' do
+      expect(ServiceInstance.exists?(instance_id)).to eq(false)
+
       put :update, id: instance_id
 
-      expect(db.select("SHOW DATABASES LIKE '#{database}'")).to have(1).record
+      expect(ServiceInstance.exists?(instance_id)).to eq(true)
       expect(response.status).to eq(201)
     end
 
@@ -25,12 +27,14 @@ describe V2::ServiceInstancesController do
 
   describe '#destroy' do
     context 'when the database exists' do
-      before { db.execute("CREATE DATABASE `#{database}`") }
+      before { ServiceInstance.new(id: instance_id).save }
 
       it 'drops the database and returns a 204' do
+        expect(ServiceInstance.exists?(instance_id)).to eq(true)
+
         delete :destroy, id: instance_id
 
-        expect(db.select("SHOW DATABASES LIKE '#{database}'")).to have(0).records
+        expect(ServiceInstance.exists?(instance_id)).to eq(false)
         expect(response.status).to eq(204)
       end
     end

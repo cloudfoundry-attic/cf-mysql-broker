@@ -10,6 +10,10 @@ class ServiceInstance < BaseModel
     find_by_id(id) || raise
   end
 
+  def self.exists?(id)
+    find_by_id(id).present?
+  end
+
   def database
     @database ||= begin
                     # MySQL database names are limited to [0-9,a-z,A-Z$_] and 64 chars

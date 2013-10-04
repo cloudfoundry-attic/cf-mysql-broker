@@ -25,12 +25,14 @@ describe V2::ServiceBindingsController do
     let(:generated_password) { 'generated_pw' }
 
     before { SecureRandom.stub(:hex).with(8).and_return(generated_password, 'not-the-password') }
-    after { db.execute("DROP USER '#{generated_username}'@'%'") }
+    after { ServiceBinding.new(id: binding_id, service_instance: instance).destroy }
 
     it 'grants permission to access the given database' do
+      expect(ServiceBinding.exists?(id: binding_id, service_instance_id: instance_id)).to eq(false)
+
       put :update, id: binding_id, service_instance_id: instance_id
 
-      expect(db.select_values("SHOW GRANTS FOR #{generated_username}")).to include("GRANT ALL PRIVILEGES ON `#{generated_dbname}`.* TO '#{generated_username}'@'%'")
+      expect(ServiceBinding.exists?(id: binding_id, service_instance_id: instance_id)).to eq(true)
     end
 
     it 'responds with generated credentials' do
@@ -62,24 +64,14 @@ describe V2::ServiceBindingsController do
 
     context 'when the user exists' do
       before { binding.save }
-
-      after do
-        begin
-          db.execute("DROP USER #{username}")
-        rescue ActiveRecord::StatementInvalid => e
-          raise unless e.message =~ /DROP USER failed/
-        end
-      end
+      after { binding.destroy }
 
       it 'destroys the user' do
+        expect(ServiceBinding.exists?(id: binding.id, service_instance_id: instance.id)).to eq(true)
+
         delete :destroy, id: binding.id
 
-        expect {
-          db.select("SHOW GRANTS FOR '#{username}'@'%'")
-        }.to raise_error(ActiveRecord::StatementInvalid, /no such grant defined/)
-        expect {
-          db.select("SHOW GRANTS FOR '#{username}'@'localhost'")
-        }.to raise_error(ActiveRecord::StatementInvalid, /no such grant defined/)
+        expect(ServiceBinding.exists?(id: binding.id, service_instance_id: instance.id)).to eq(false)
       end
 
       it 'returns a 204' do
