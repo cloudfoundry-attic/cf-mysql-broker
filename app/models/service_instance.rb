@@ -7,7 +7,7 @@ class ServiceInstance < BaseModel
   end
 
   def self.find(id)
-    find_by_id(id) || raise
+    find_by_id(id) || raise("Couldn't find ServiceInstance with id=#{id}")
   end
 
   def self.exists?(id)
