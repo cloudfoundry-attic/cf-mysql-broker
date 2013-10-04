@@ -25,15 +25,15 @@ end
 
 
 describe 'the service lifecycle' do
-  let(:instance_id) { 'INSTANCE-1' }
-  let(:dbname) { DatabaseName.new(instance_id).name }
+  let(:instance_id) { 'instance-1' }
+  let(:dbname) { ServiceInstance.new(id: instance_id).database }
 
-  let(:binding_id) { 'BINDING-1' }
+  let(:binding_id) { 'binding-1' }
   let(:password) { 'somepassword' }
-  let(:username) { UserCreds.new(binding_id).username }
+  let(:username) { ServiceBinding.new(id: binding_id).username }
 
   before do
-    SecureRandom.stub(:hex).with(8).and_return(password)
+    SecureRandom.stub(:hex).with(8).and_return(password, 'not-the-password')
     cleanup_mysql_user(username)
     cleanup_mysql_database(dbname)
   end

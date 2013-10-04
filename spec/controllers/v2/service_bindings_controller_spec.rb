@@ -7,30 +7,34 @@ describe V2::ServiceBindingsController do
   let(:database_host) { db_settings.fetch('host') }
   let(:database_port) { db_settings.fetch('port') }
 
+  let(:instance_id) { 'instance-1' }
+  let(:instance) { ServiceInstance.new(id: instance_id) }
+
   before do
     authenticate
+    instance.save
   end
 
-  describe '#update' do
-    let(:instance_id) { 'INSTANCE-1' }
-    let(:generated_dbname) { DatabaseName.new(instance_id).name }
+  after { instance.destroy }
 
-    let(:generated_username) { 'generated_user' }
+  describe '#update' do
+    let(:binding_id) { '123' }
+    let(:generated_dbname) { ServiceInstance.new(id: instance_id).database }
+
+    let(:generated_username) { ServiceBinding.new(id: binding_id).username }
     let(:generated_password) { 'generated_pw' }
 
-    let(:creds) { double('UserCreds', username: generated_username, password: generated_password) }
-
-    before { UserCreds.stub(:new).with('123').and_return(creds) }
+    before { SecureRandom.stub(:hex).with(8).and_return(generated_password, 'not-the-password') }
     after { db.execute("DROP USER '#{generated_username}'@'%'") }
 
     it 'grants permission to access the given database' do
-      put :update, id: 123, service_instance_id: instance_id
+      put :update, id: binding_id, service_instance_id: instance_id
 
       expect(db.select_values("SHOW GRANTS FOR #{generated_username}")).to include("GRANT ALL PRIVILEGES ON `#{generated_dbname}`.* TO '#{generated_username}'@'%'")
     end
 
     it 'responds with generated credentials' do
-      put :update, id: 123, service_instance_id: instance_id
+      put :update, id: binding_id, service_instance_id: instance_id
 
       binding = JSON.parse(response.body)
       expect(binding['credentials']).to eq(
@@ -45,7 +49,7 @@ describe V2::ServiceBindingsController do
     end
 
     it 'returns a 201' do
-      put :update, id: 123, service_instance_id: instance_id
+      put :update, id: binding_id, service_instance_id: instance_id
 
       expect(response.status).to eq(201)
     end
@@ -53,13 +57,22 @@ describe V2::ServiceBindingsController do
 
   describe '#destroy' do
     let(:binding_id) { 'BINDING-1' }
-    let(:username) { UserCreds.new(binding_id).username }
+    let(:binding) { ServiceBinding.new(id: binding_id, service_instance: instance) }
+    let(:username) { binding.username }
 
     context 'when the user exists' do
-      before { db.execute("CREATE USER '#{username}'") }
+      before { binding.save }
+
+      after do
+        begin
+          db.execute("DROP USER #{username}")
+        rescue ActiveRecord::StatementInvalid => e
+          raise unless e.message =~ /DROP USER failed/
+        end
+      end
 
       it 'destroys the user' do
-        delete :destroy, id: binding_id
+        delete :destroy, id: binding.id
 
         expect {
           db.select("SHOW GRANTS FOR '#{username}'@'%'")
@@ -70,7 +83,7 @@ describe V2::ServiceBindingsController do
       end
 
       it 'returns a 204' do
-        delete :destroy, id: binding_id
+        delete :destroy, id: binding.id
 
         expect(response.status).to eq(204)
       end
@@ -78,7 +91,7 @@ describe V2::ServiceBindingsController do
 
     context 'when the user does not exist' do
       it 'returns a 410' do
-        delete :destroy, id: binding_id
+        delete :destroy, id: binding.id
 
         expect(response.status).to eq(410)
       end
