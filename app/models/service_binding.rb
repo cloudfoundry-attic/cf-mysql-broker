@@ -18,11 +18,23 @@ class ServiceBinding < BaseModel
 
   def save
     connection.execute("GRANT ALL PRIVILEGES ON `#{database}`.* TO '#{username}'@'%' IDENTIFIED BY '#{password}'")
+
+    # Some MySQL installations, e.g., Travis, seem to need privileges
+    # to be flushed even when using the appropriate account management
+    # statements, despite what the MySQL documentation says:
+    # http://dev.mysql.com/doc/refman/5.6/en/privilege-changes.html
+    connection.execute('FLUSH PRIVILEGES')
   end
 
   def destroy
     begin
       connection.execute("DROP USER '#{username}'")
+
+      # Some MySQL installations, e.g., Travis, seem to need privileges
+      # to be flushed even when using the appropriate account management
+      # statements, despite what the MySQL documentation says:
+      # http://dev.mysql.com/doc/refman/5.6/en/privilege-changes.html
+      connection.execute('FLUSH PRIVILEGES')
     rescue ActiveRecord::StatementInvalid => e
       raise unless e.message =~ /DROP USER failed/
     end
