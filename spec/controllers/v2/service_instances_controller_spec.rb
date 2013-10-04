@@ -11,14 +11,14 @@ describe V2::ServiceInstancesController do
     it 'creates the database and returns a 201' do
       expect(ServiceInstance.exists?(instance_id)).to eq(false)
 
-      put :update, id: instance_id
+      put :update, id: instance_id, format: :json
 
       expect(ServiceInstance.exists?(instance_id)).to eq(true)
       expect(response.status).to eq(201)
     end
 
     it 'sends back a dashboard url' do
-      put :update, id: instance_id
+      put :update, id: instance_id, format: :json
 
       instance = JSON.parse(response.body)
       expect(instance['dashboard_url']).to eq('http://fake.dashboard.url')
@@ -32,7 +32,7 @@ describe V2::ServiceInstancesController do
       it 'drops the database and returns a 204' do
         expect(ServiceInstance.exists?(instance_id)).to eq(true)
 
-        delete :destroy, id: instance_id
+        delete :destroy, id: instance_id, format: :json
 
         expect(ServiceInstance.exists?(instance_id)).to eq(false)
         expect(response.status).to eq(204)
@@ -41,7 +41,7 @@ describe V2::ServiceInstancesController do
 
     context 'when the database does not exist' do
       it 'returns a 410' do
-        delete :destroy, id: instance_id
+        delete :destroy, id: instance_id, format: :json
 
         expect(response.status).to eq(410)
       end

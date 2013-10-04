@@ -30,13 +30,13 @@ describe V2::ServiceBindingsController do
     it 'grants permission to access the given database' do
       expect(ServiceBinding.exists?(id: binding_id, service_instance_id: instance_id)).to eq(false)
 
-      put :update, id: binding_id, service_instance_id: instance_id
+      put :update, id: binding_id, service_instance_id: instance_id, format: :json
 
       expect(ServiceBinding.exists?(id: binding_id, service_instance_id: instance_id)).to eq(true)
     end
 
     it 'responds with generated credentials' do
-      put :update, id: binding_id, service_instance_id: instance_id
+      put :update, id: binding_id, service_instance_id: instance_id, format: :json
 
       binding = JSON.parse(response.body)
       expect(binding['credentials']).to eq(
@@ -51,7 +51,7 @@ describe V2::ServiceBindingsController do
     end
 
     it 'returns a 201' do
-      put :update, id: binding_id, service_instance_id: instance_id
+      put :update, id: binding_id, service_instance_id: instance_id, format: :json
 
       expect(response.status).to eq(201)
     end
@@ -69,13 +69,13 @@ describe V2::ServiceBindingsController do
       it 'destroys the user' do
         expect(ServiceBinding.exists?(id: binding.id, service_instance_id: instance.id)).to eq(true)
 
-        delete :destroy, id: binding.id
+        delete :destroy, id: binding.id, format: :json
 
         expect(ServiceBinding.exists?(id: binding.id, service_instance_id: instance.id)).to eq(false)
       end
 
       it 'returns a 204' do
-        delete :destroy, id: binding.id
+        delete :destroy, id: binding.id, format: :json
 
         expect(response.status).to eq(204)
       end
@@ -83,7 +83,7 @@ describe V2::ServiceBindingsController do
 
     context 'when the user does not exist' do
       it 'returns a 410' do
-        delete :destroy, id: binding.id
+        delete :destroy, id: binding.id, format: :json
 
         expect(response.status).to eq(410)
       end

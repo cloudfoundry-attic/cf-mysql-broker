@@ -7,14 +7,14 @@ describe 'endpoints' do
   context 'id does not exist' do
     describe 'deleting an instance' do
       it 'returns 410' do
-        delete '/v2/service_instances/DOESNOTEXIST', nil, env
+        delete '/v2/service_instances/DOESNOTEXIST', {format: :json}, env
         expect(response.status).to eq(410)
       end
     end
 
     describe 'deleting a binding' do
       it 'returns 410' do
-        delete '/v2/service_bindings/DOESNOTEXIST', nil, env
+        delete '/v2/service_bindings/DOESNOTEXIST', {format: :json}, env
         expect(response.status).to eq(410)
       end
     end

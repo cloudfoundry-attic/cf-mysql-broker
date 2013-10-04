@@ -5,7 +5,7 @@ describe V2::CatalogsController do
 
   describe '#show' do
     it 'returns the catalog of services' do
-      get :show
+      get :show, format: :json
 
       expect(response.status).to eq(200)
       catalog = JSON.parse(response.body)

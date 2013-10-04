@@ -1,6 +1,6 @@
 class V2::CatalogsController < V2::BaseController
   def show
-    render json: {
+    respond_with(
       services: [
         {
           id: 'cf-mysql-1',
@@ -16,6 +16,6 @@ class V2::CatalogsController < V2::BaseController
           ]
         }
       ]
-    }
+    )
   end
 end

@@ -4,17 +4,14 @@ class V2::ServiceInstancesController < V2::BaseController
     instance = ServiceInstance.new(id: params.fetch(:id))
     instance.save
 
-    render status: 201, json: instance
+    respond_with instance
   end
 
   def destroy
     if instance = ServiceInstance.find_by_id(params.fetch(:id))
       instance.destroy
-      status = 204
-    else
-      status = 410
     end
 
-    render status: status, json: {}
+    respond_with instance
   end
 end
