@@ -139,6 +139,17 @@ describe ServiceBinding do
       grant_sql = "GRANT ALL PRIVILEGES ON `#{database}`.* TO '#{username}'@'%'"
       expect(connection.select_values("SHOW GRANTS FOR #{username}")).to include(grant_sql)
     end
+
+    it 'raises an error when creating the same user twice' do
+      binding.save
+
+      expect {
+        ServiceBinding.new(id: id, service_instance: instance).save
+      }.to raise_error
+
+      password_sql = "SELECT * FROM mysql.user WHERE user = '#{username}' AND password = PASSWORD('#{password}')"
+      expect(connection.select(password_sql).count).to eq(1)
+    end
   end
 
   describe '#destroy' do

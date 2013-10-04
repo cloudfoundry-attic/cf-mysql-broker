@@ -63,7 +63,8 @@ class ServiceBinding < BaseModel
   end
 
   def save
-    connection.execute("GRANT ALL PRIVILEGES ON `#{database}`.* TO '#{username}'@'%' IDENTIFIED BY '#{password}'")
+    connection.execute("CREATE USER '#{username}' IDENTIFIED BY '#{password}'")
+    connection.execute("GRANT ALL PRIVILEGES ON `#{database}`.* TO '#{username}'@'%'")
 
     # Some MySQL installations, e.g., Travis, seem to need privileges
     # to be flushed even when using the appropriate account management
