@@ -7,6 +7,7 @@ class V2::CatalogsController < V2::BaseController
           name: 'cf-mysql',
           description: 'Cloud Foundry MySQL',
           bindable: true,
+          tags: ['mysql', 'relational'],
           plans: [
             {
               id: 'cf-mysql-plan-1',
