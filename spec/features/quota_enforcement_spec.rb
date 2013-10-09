@@ -64,7 +64,8 @@ describe 'Quota enforcement' do
 
   def recalculate_usage
     instance = ServiceInstance.new(id: instance_id)
-    ActiveRecord::Base.connection.execute("ANALYZE TABLE #{instance.database}.stuff")
+    # For some reason, ANALYZE TABLE doesn't update statistics in Travis' environment
+    ActiveRecord::Base.connection.execute("OPTIMIZE TABLE #{instance.database}.stuff")
   end
 
   def enforce_quota
