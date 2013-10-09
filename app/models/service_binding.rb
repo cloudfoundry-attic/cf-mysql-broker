@@ -58,8 +58,24 @@ class ServiceBinding < BaseModel
     find_by_id_and_service_instance_id(id, instance_id).present?
   end
 
+  def host
+    connection_config.fetch('host')
+  end
+
+  def port
+    connection_config.fetch('port')
+  end
+
+  def database
+    service_instance.database
+  end
+
   def username
     Digest::MD5.base64digest(id).gsub(/[^a-zA-Z0-9]+/, '')[0...16]
+  end
+
+  def password
+    @password ||= SecureRandom.hex(8)
   end
 
   def save
@@ -105,22 +121,6 @@ class ServiceBinding < BaseModel
 
   def connection_config
     Rails.configuration.database_configuration[Rails.env]
-  end
-
-  def host
-    connection_config.fetch('host')
-  end
-
-  def port
-    connection_config.fetch('port')
-  end
-
-  def database
-    service_instance.database
-  end
-
-  def password
-    @password ||= SecureRandom.hex(8)
   end
 
   def uri
