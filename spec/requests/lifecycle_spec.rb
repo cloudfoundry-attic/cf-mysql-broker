@@ -47,7 +47,7 @@ describe 'the service lifecycle' do
     ##
     ## Provision the instance
     ##
-    put "/v2/service_instances/#{instance_id}", {service_plan_id: 'PLAN-1'}, env
+    put "/v2/service_instances/#{instance_id}", {service_plan_id: 'PLAN-1'}
 
     expect(response.status).to eq(201)
     instance = JSON.parse(response.body)
@@ -57,7 +57,7 @@ describe 'the service lifecycle' do
     ##
     ## Bind
     ##
-    put "/v2/service_bindings/#{binding_id}", {service_instance_id: instance_id}, env
+    put "/v2/service_bindings/#{binding_id}", {service_instance_id: instance_id}
 
     expect(response.status).to eq(201)
     instance = JSON.parse(response.body)
@@ -85,7 +85,7 @@ describe 'the service lifecycle' do
     ##
     ## Unbind
     ##
-    delete "/v2/service_bindings/#{binding_id}", nil, env
+    delete "/v2/service_bindings/#{binding_id}"
     expect(response.status).to eq(204)
 
     ##
@@ -107,7 +107,7 @@ describe 'the service lifecycle' do
     ##
     ## Deprovision
     ##
-    delete "/v2/service_instances/#{instance_id}", nil, env
+    delete "/v2/service_instances/#{instance_id}"
     expect(response.status).to eq(204)
 
     ##

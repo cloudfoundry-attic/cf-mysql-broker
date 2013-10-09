@@ -12,6 +12,26 @@ module RequestHelpers
     end
     let(:env) { default_env }
   end
+
+  def get(*args)
+    args[2] ||= env
+    super(*args)
+  end
+
+  def post(*args)
+    args[2] ||= env
+    super(*args)
+  end
+
+  def put(*args)
+    args[2] ||= env
+    super(*args)
+  end
+
+  def delete(*args)
+    args[2] ||= env
+    super(*args)
+  end
 end
 
 RSpec.configure do |config|

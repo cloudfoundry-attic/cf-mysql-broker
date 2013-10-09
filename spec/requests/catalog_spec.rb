@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe 'GET /v2/catalog' do
   it 'returns the catalog of services' do
-    get '/v2/catalog', {}, env
+    get '/v2/catalog'
 
     expect(response.status).to eq(200)
     catalog = JSON.parse(response.body)
