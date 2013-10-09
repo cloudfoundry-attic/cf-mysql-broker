@@ -89,6 +89,8 @@ describe ServiceInstance do
       }.to_not change {
         connection.select("SHOW DATABASES LIKE '#{id}'").count
       }.from(1)
+
+      instance.destroy
     end
   end
 
