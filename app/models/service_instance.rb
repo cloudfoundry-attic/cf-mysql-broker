@@ -18,7 +18,7 @@ class ServiceInstance < BaseModel
 
   def database
     @database ||= begin
-                    # MySQL database names are limited to [0-9,a-z,A-Z$_] and 64 chars
+      # MySQL database names are limited to [0-9,a-z,A-Z$_] and 64 chars
       if id =~ /[^0-9,a-z,A-Z$-]+/
         raise 'Only ids matching [0-9,a-z,A-Z$-]+ are allowed'
       end
