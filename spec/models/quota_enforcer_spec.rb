@@ -29,11 +29,11 @@ describe QuotaEnforcer do
 
         client = create_mysql_client
         expect {
-          client.query("INSERT INTO stuff (id, data) VALUES (10, 'This should fail.')")
+          client.query("INSERT INTO stuff (id, data) VALUES (99999, 'This should fail.')")
         }.to raise_error(Mysql2::Error, /INSERT command denied/)
 
         expect {
-          client.query("UPDATE stuff SET data = 'This should also fail.' WHERE id = 9")
+          client.query("UPDATE stuff SET data = 'This should also fail.' WHERE id = 1")
         }.to raise_error(Mysql2::Error, /UPDATE command denied/)
 
         expect {
@@ -45,7 +45,7 @@ describe QuotaEnforcer do
         }.to_not raise_error
 
         expect {
-          client.query('DELETE FROM stuff WHERE id = 9')
+          client.query('DELETE FROM stuff WHERE id = 1')
         }.to_not raise_error
       end
 
@@ -106,11 +106,11 @@ describe QuotaEnforcer do
 
         client = create_mysql_client
         expect {
-          client.query("INSERT INTO stuff (id, data) VALUES (10, 'This should succeed.')")
+          client.query("INSERT INTO stuff (id, data) VALUES (99999, 'This should succeed.')")
         }.to_not raise_error
 
         expect {
-          client.query("UPDATE stuff SET data = 'This should also succeed.' WHERE id = 10")
+          client.query("UPDATE stuff SET data = 'This should also succeed.' WHERE id = 99999")
         }.to_not raise_error
 
         expect {
@@ -122,7 +122,7 @@ describe QuotaEnforcer do
         }.to_not raise_error
 
         expect {
-          client.query('DELETE FROM stuff WHERE id = 10')
+          client.query('DELETE FROM stuff WHERE id = 99999')
         }.to_not raise_error
       end
 
@@ -200,7 +200,7 @@ describe QuotaEnforcer do
       data = '1' * (1024 * 1024) # 1 MB
       data = client.escape(data)
 
-      10.times do |n|
+      max_storage_mb.times do |n|
         client.query("INSERT INTO stuff (id, data) VALUES (#{n}, '#{data}')")
       end
 
@@ -221,6 +221,10 @@ describe QuotaEnforcer do
     def recalculate_usage
       # For some reason, ANALYZE TABLE doesn't update statistics in Travis' environment
       ActiveRecord::Base.connection.execute("OPTIMIZE TABLE #{binding.database}.stuff")
+    end
+
+    def max_storage_mb
+      Settings.services[0].plans[0].max_storage_mb.to_i
     end
   end
 end

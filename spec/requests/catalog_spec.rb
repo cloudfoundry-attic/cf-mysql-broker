@@ -11,7 +11,7 @@ describe 'GET /v2/catalog' do
     expect(services).to have(1).service
 
     service = services.first
-    expect(service.fetch('name')).to eq('cf-mysql')
+    expect(service.fetch('name')).to eq('cf-mysql2')
     expect(service.fetch('description')).to eq('Cloud Foundry MySQL')
     expect(service.fetch('bindable')).to be_true
 
@@ -19,7 +19,7 @@ describe 'GET /v2/catalog' do
     expect(plans).to have(1).plan
 
     plan = plans.first
-    expect(plan.fetch('name')).to eq('free')
+    expect(plan.fetch('name')).to eq('free2')
     expect(plan.fetch('description')).to eq('Free Trial')
   end
 end

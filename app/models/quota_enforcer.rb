@@ -1,6 +1,6 @@
 module QuotaEnforcer
   class << self
-    QUOTA_IN_MB = 10
+    QUOTA_IN_MB = Settings.services[0].plans[0].max_storage_mb.to_i
 
     def enforce!
       # When debugging, the following code will show you the list of databases and their usage:

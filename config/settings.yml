@@ -7,6 +7,19 @@ defaults: &defaults
   log_path: 'log/<%= Rails.env %>.log'
   auth_token: 'secret'
 
+  services:
+  - id: cf-mysql-1
+    name: cf-mysql2
+    description: Cloud Foundry MySQL
+    bindable: true
+    plans:
+    - id: cf-mysql-plan-1
+      name: free2
+      description: Free Trial
+      max_storage_mb: 5 # in MB
+      max_user_connections: 20
+
+
 development:
   <<: *defaults
 

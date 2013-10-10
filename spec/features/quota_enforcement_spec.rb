@@ -49,7 +49,7 @@ describe 'Quota enforcement' do
     data = '1' * (1024 * 1024) # 1 MB
     data = client.escape(data)
 
-    10.times do |n|
+    max_storage_mb.times do |n|
       client.query("INSERT INTO stuff (id, data) VALUES (#{n}, '#{data}')")
     end
 
@@ -57,7 +57,7 @@ describe 'Quota enforcement' do
   end
 
   def prune_database(client)
-    client.query('DELETE FROM stuff WHERE id = 9')
+    client.query('DELETE FROM stuff WHERE id = 1')
 
     recalculate_usage
   end
@@ -81,11 +81,11 @@ describe 'Quota enforcement' do
   def verify_write_privileges_revoked(client)
     # see that insert/update/create privileges have been revoked
     expect {
-      client.query("INSERT INTO stuff (id, data) VALUES (10, 'This should fail.')")
+      client.query("INSERT INTO stuff (id, data) VALUES (99999, 'This should fail.')")
     }.to raise_error(Mysql2::Error, /INSERT command denied/)
 
     expect {
-      client.query("UPDATE stuff SET data = 'This should also fail.' WHERE id = 9")
+      client.query("UPDATE stuff SET data = 'This should also fail.' WHERE id = 1")
     }.to raise_error(Mysql2::Error, /UPDATE command denied/)
 
     expect {
@@ -97,7 +97,11 @@ describe 'Quota enforcement' do
   end
 
   def verify_write_privileges_restored(client)
-    client.query("INSERT INTO stuff (id, data) VALUES (10, 'This should succeed.')")
-    client.query("UPDATE stuff SET data = 'This should also succeed.' WHERE id = 10")
+    client.query("INSERT INTO stuff (id, data) VALUES (99999, 'This should succeed.')")
+    client.query("UPDATE stuff SET data = 'This should also succeed.' WHERE id = 99999")
+  end
+
+  def max_storage_mb
+    Settings.services[0].plans[0].max_storage_mb.to_i
   end
 end
