@@ -12,6 +12,7 @@ defaults: &defaults
     name: cf-mysql2
     description: Cloud Foundry MySQL
     bindable: true
+    max_db_per_node: 200
     plans:
     - id: cf-mysql-plan-1
       name: free2

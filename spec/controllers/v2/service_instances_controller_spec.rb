@@ -8,20 +8,88 @@ describe V2::ServiceInstancesController do
   after { ServiceInstance.new(id: instance_id).destroy }
 
   describe '#update' do
-    it 'creates the database and returns a 201' do
-      expect(ServiceInstance.exists?(instance_id)).to eq(false)
-
-      put :update, id: instance_id
-
-      expect(ServiceInstance.exists?(instance_id)).to eq(true)
-      expect(response.status).to eq(201)
+    let(:services) do
+      [
+        {
+          'id' => 'foo',
+          'name' => 'bar',
+          'description' => 'desc',
+          'bindable' => true,
+          'max_db_per_node' => 5
+        }
+      ]
     end
 
-    it 'sends back a dashboard url' do
-      put :update, id: instance_id
+    before do
+      Settings.stub(:[]).with('services').and_return(services)
+    end
 
-      instance = JSON.parse(response.body)
-      expect(instance['dashboard_url']).to eq('http://fake.dashboard.url')
+    context 'when below max_db_per_node quota' do
+
+      before do
+        ServiceInstance.stub(:get_number_of_existing_instances).and_return(3)
+      end
+
+      it 'creates the database and returns a 201' do
+        expect(ServiceInstance.exists?(instance_id)).to eq(false)
+
+        put :update, id: instance_id
+
+        expect(ServiceInstance.exists?(instance_id)).to eq(true)
+        expect(response.status).to eq(201)
+      end
+
+      it 'sends back a dashboard url' do
+        put :update, id: instance_id
+
+        instance = JSON.parse(response.body)
+        expect(instance['dashboard_url']).to eq('http://fake.dashboard.url')
+      end
+
+    end
+
+    context 'no max_db_per_node set' do
+      let(:services) do
+        [
+          {
+            'id' => 'foo',
+            'name' => 'bar',
+            'description' => 'desc',
+            'bindable' => true
+          }
+        ]
+      end
+
+      it 'creates the database and returns a 201' do
+        expect(ServiceInstance.exists?(instance_id)).to eq(false)
+
+        put :update, id: instance_id
+
+        expect(ServiceInstance.exists?(instance_id)).to eq(true)
+        expect(response.status).to eq(201)
+      end
+    end
+
+    context 'when above max_db_per_node quota' do
+      let(:extra_instance_id) { '88f6fa22-c8b7-4cdc-be3a-dc09ea7734da' }
+
+      before do
+        ServiceInstance.new(id: instance_id).save
+        ServiceInstance.stub(:get_number_of_existing_instances).and_return(5)
+      end
+
+      after { ServiceInstance.new(id: instance_id).destroy }
+
+      it 'does not create a database and gives you a 409' do
+        expect(ServiceInstance.exists?(instance_id)).to eq(true)
+        expect(ServiceInstance.exists?(extra_instance_id)).to eq(false)
+
+        put :update, id: extra_instance_id
+
+        expect(ServiceInstance.exists?(instance_id)).to eq(true)
+        expect(ServiceInstance.exists?(extra_instance_id)).to eq(false)
+        expect(response.status).to eq(409)
+      end
     end
   end
 

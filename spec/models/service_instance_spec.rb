@@ -63,6 +63,23 @@ describe ServiceInstance do
     end
   end
 
+  describe '.get_number_of_existing_instances' do
+    context 'when the database exists' do
+      before { connection.execute("CREATE DATABASE `#{database}`") }
+      after { connection.execute("DROP DATABASE IF EXISTS `#{database}`") }
+
+      it 'returns the number of instances' do
+        expect(ServiceInstance.get_number_of_existing_instances).to eq(1)
+      end
+    end
+
+    context 'when the database does not exist' do
+      it 'returns zero' do
+        expect(ServiceInstance.get_number_of_existing_instances).to eq(0)
+      end
+    end
+  end
+
   describe '#save' do
     let(:existing_database) { 'existing' }
 

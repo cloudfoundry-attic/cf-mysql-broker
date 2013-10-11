@@ -16,6 +16,10 @@ class ServiceInstance < BaseModel
     find_by_id(id).present?
   end
 
+  def self.get_number_of_existing_instances
+    connection.select("select count(*) from information_schema.SCHEMATA where schema_name LIKE 'cf_%'").rows.first.first
+  end
+
   def database
     @database ||= begin
       # MySQL database names are limited to [0-9,a-z,A-Z$_] and 64 chars
