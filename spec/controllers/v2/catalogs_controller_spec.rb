@@ -29,15 +29,45 @@ describe V2::CatalogsController do
       expect(plan.fetch('id')).to eq('cf-mysql-plan-1')
     end
 
-    #context 'when settings are misconfigured' do
-    #  it "expects a 'services' node" do
-    #    Settings.stub(:[]).with('services').and_return(nil)
-    #    get :show
-    #    expect(response.status).to eq(500)
-    #    error = JSON.parse(response.body)
-    #
-    #    expect(error.fetch('description')).to match(/Missing configuration 'services'/)
-    #  end
-    #end
+    context 'with invalid catalog data' do
+      let(:services) { nil }
+      before do
+        Settings.stub(:[]).with('services').and_return(services)
+      end
+
+      context 'when there are no services' do
+        it 'produces an empty catalog' do
+          get :show
+          expect(response.status).to eq(200)
+          catalog = JSON.parse(response.body)
+
+          services = catalog.fetch('services')
+          expect(services).to have(0).service
+        end
+      end
+
+      context 'when there are no plans' do
+        let(:services) do
+          [
+            {
+              'id' => 'foo',
+              'name' => 'bar',
+              'description' => 'desc',
+              'bindable' => true,
+            }
+          ]
+        end
+
+        it 'produces a catalog with no plans' do
+          get :show
+          expect(response.status).to eq(200)
+          catalog = JSON.parse(response.body)
+
+          services = catalog.fetch('services')
+          expect(services).to have(1).service
+          expect(services.first.fetch('plans')).to eq([])
+        end
+      end
+    end
   end
 end
