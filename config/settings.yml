@@ -5,7 +5,6 @@
 defaults: &defaults
   database_config_path: 'config/database.yml'
   log_path: 'log/<%= Rails.env %>.log'
-  auth_token: 'secret'
 
   services:
   - id: cf-mysql-1
@@ -22,7 +21,9 @@ defaults: &defaults
 
 
 development:
+  auth_token: 'secret'
   <<: *defaults
 
 test:
+  auth_token: 'secret'
   <<: *defaults

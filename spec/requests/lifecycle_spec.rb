@@ -33,7 +33,7 @@ describe 'the service lifecycle' do
   let(:username) { ServiceBinding.new(id: binding_id).username }
 
   before do
-    SecureRandom.stub(:hex).with(8).and_return(password, 'not-the-password')
+    SecureRandom.stub(:base64).and_return(password, 'notthepassword')
     cleanup_mysql_user(username)
     cleanup_mysql_database(dbname)
   end

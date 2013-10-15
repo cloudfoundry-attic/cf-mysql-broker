@@ -22,9 +22,9 @@ describe V2::ServiceBindingsController do
     let(:generated_dbname) { ServiceInstance.new(id: instance_id).database }
 
     let(:generated_username) { ServiceBinding.new(id: binding_id).username }
-    let(:generated_password) { 'generated_pw' }
+    let(:generated_password) { 'generatedpw' }
 
-    before { SecureRandom.stub(:hex).with(8).and_return(generated_password, 'not-the-password') }
+    before { SecureRandom.stub(:base64).and_return(generated_password, 'notthepassword') }
     after { ServiceBinding.new(id: binding_id, service_instance: instance).destroy }
 
     it 'grants permission to access the given database' do

@@ -75,7 +75,7 @@ class ServiceBinding < BaseModel
   end
 
   def password
-    @password ||= SecureRandom.hex(8)
+    @password ||= SecureRandom.base64(20).gsub(/[^a-zA-Z0-9]+/, '')[0...16]
   end
 
   def save

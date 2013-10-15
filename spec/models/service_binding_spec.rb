@@ -3,7 +3,7 @@ require 'spec_helper'
 describe ServiceBinding do
   let(:id) { 'fa790aea-ab7f-41e8-b6f9-a2a1d60403f5' }
   let(:username) { Digest::MD5.base64digest(id)[0...16] }
-  let(:password) { 'random-password' }
+  let(:password) { 'randompassword' }
   let(:binding) { ServiceBinding.new(id: id, service_instance: instance) }
 
   let(:instance_id) { '88f6fa22-c8b7-4cdc-be3a-dc09ea7734db' }
@@ -11,7 +11,7 @@ describe ServiceBinding do
   let(:database) { instance.database }
 
   before do
-    SecureRandom.stub(:hex).with(8).and_return(password, 'not-the-password')
+    SecureRandom.stub(:base64).and_return(password, 'notthepassword')
   end
 
   after do

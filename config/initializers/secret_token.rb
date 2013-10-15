@@ -16,4 +16,4 @@
 # Using secret_token for rails3 compatibility. Change to secret_key_base
 # to avoid deprecation warning.
 # Can be safely removed in a rails3 api-only application.
-CfMysqlBroker::Application.config.secret_key_base = 'ac5d9f77267383f3d02c7050954edd354c80a8d554195160fd25bca5b1cd56baca0201de08dccb5fef7f551095d7283b66cac933edc74c628de8684c9be284e7'
+CfMysqlBroker::Application.config.secret_key_base = ENV['SECRET_TOKEN'] || 'none'
