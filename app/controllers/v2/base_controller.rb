@@ -5,7 +5,7 @@ class V2::BaseController < ApplicationController
 
   def authenticate
     authenticate_or_request_with_http_basic do |_, password|
-      password == Settings.auth_token
+      password == Settings.auth_password
     end
   end
 end

@@ -3,7 +3,7 @@ module ControllerHelpers
 
   def authenticate
     username = 'test'
-    password = Settings.auth_token
+    password = Settings.auth_password
 
     request.env['HTTP_AUTHORIZATION'] = ActionController::HttpAuthentication::Basic.encode_credentials(username, password)
   end

@@ -13,7 +13,7 @@ module FeatureHelpers
 
     let(:default_env) do
       username = 'test'
-      password = Settings.auth_token
+      password = Settings.auth_password
 
       {
         'HTTP_AUTHORIZATION' => ActionController::HttpAuthentication::Basic.encode_credentials(username, password)

@@ -17,13 +17,12 @@ defaults: &defaults
       name: free2
       description: Free Trial
       max_storage_mb: 5 # in MB
-      max_user_connections: 20
 
 
 development:
-  auth_token: 'secret'
+  auth_password: 'secret'
   <<: *defaults
 
 test:
-  auth_token: 'secret'
+  auth_password: 'secret'
   <<: *defaults
