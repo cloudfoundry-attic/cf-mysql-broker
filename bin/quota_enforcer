@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 # Load the Rails application.
-require File.expand_path('../application', __FILE__)
+require File.expand_path('../../config/application', __FILE__)
 
 # Initialize the Rails application.
 CfMysqlBroker::Application.initialize!
