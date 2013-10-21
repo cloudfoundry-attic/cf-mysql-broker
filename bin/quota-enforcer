@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+
+# Load the Rails application.
+require File.expand_path('../application', __FILE__)
+
+# Initialize the Rails application.
+CfMysqlBroker::Application.initialize!
+
+loop do
+  QuotaEnforcer.enforce!
+  sleep 0.1
+end
