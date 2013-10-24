@@ -57,7 +57,7 @@ describe 'the service lifecycle' do
     ##
     ## Bind
     ##
-    put "/v2/service_bindings/#{binding_id}", {service_instance_id: instance_id}
+    put "/v2/service_instances/#{instance_id}/service_bindings/#{binding_id}"
 
     expect(response.status).to eq(201)
     instance = JSON.parse(response.body)
@@ -85,7 +85,7 @@ describe 'the service lifecycle' do
     ##
     ## Unbind
     ##
-    delete "/v2/service_bindings/#{binding_id}"
+    delete "/v2/service_instances/#{instance_id}/service_bindings/#{binding_id}"
     expect(response.status).to eq(204)
 
     ##
