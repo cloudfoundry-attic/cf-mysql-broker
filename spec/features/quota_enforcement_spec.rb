@@ -6,11 +6,11 @@ describe 'Quota enforcement' do
 
   before do
     put "/v2/service_instances/#{instance_id}", {service_plan_id: 'PLAN-1'}
-    put "/v2/service_bindings/#{binding_id}", {service_instance_id: instance_id}
+    put "/v2/service_instances/#{instance_id}/service_bindings/#{binding_id}"
   end
 
   after do
-    delete "/v2/service_bindings/#{binding_id}"
+    delete "/v2/service_instances/#{instance_id}/service_bindings/#{binding_id}"
     delete "/v2/service_instances/#{instance_id}"
   end
 

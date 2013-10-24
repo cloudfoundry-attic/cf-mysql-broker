@@ -69,13 +69,13 @@ describe V2::ServiceBindingsController do
       it 'destroys the user' do
         expect(ServiceBinding.exists?(id: binding.id, service_instance_id: instance.id)).to eq(true)
 
-        delete :destroy, id: binding.id
+        delete :destroy, service_instance_id: instance.id, id: binding.id
 
         expect(ServiceBinding.exists?(id: binding.id, service_instance_id: instance.id)).to eq(false)
       end
 
       it 'returns a 204' do
-        delete :destroy, id: binding.id
+        delete :destroy, service_instance_id: instance.id, id: binding.id
 
         expect(response.status).to eq(204)
       end
@@ -83,7 +83,7 @@ describe V2::ServiceBindingsController do
 
     context 'when the user does not exist' do
       it 'returns a 410' do
-        delete :destroy, id: binding.id
+        delete :destroy, service_instance_id: instance.id, id: binding.id
 
         expect(response.status).to eq(410)
       end
