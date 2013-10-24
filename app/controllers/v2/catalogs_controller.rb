@@ -16,7 +16,8 @@ class V2::CatalogsController < V2::BaseController
         description: service['description'],
         bindable: service['bindable'],
         tags: ['mysql', 'relational'],
-        plans: plans_list(service['plans'])
+        metadata: service['metadata'],
+        plans: plans_list(service['plans']),
       }
     end
   end
@@ -27,7 +28,8 @@ class V2::CatalogsController < V2::BaseController
       {
         id: plan['id'],
         name: plan['name'],
-        description: plan['description']
+        description: plan['description'],
+        metadata: plan['metadata']
       }
     end
   end
