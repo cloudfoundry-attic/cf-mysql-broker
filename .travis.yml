@@ -9,3 +9,4 @@ script: bundle exec rspec spec
 
 before_script:
 - mysql -u root -e "DELETE FROM mysql.user WHERE Host='localhost' AND User=''"
+- mysql -u root -e "SHOW VARIABLES"
