@@ -10,7 +10,7 @@ defaults: &defaults
   - id: cf-mysql-1
     name: cf-mysql2
     description: Cloud Foundry MySQL
-    bindable: true
+    tags: ['mysql', 'relational']
     max_db_per_node: 200
     metadata:
       listing:

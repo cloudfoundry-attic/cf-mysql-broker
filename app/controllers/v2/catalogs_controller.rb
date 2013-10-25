@@ -1,36 +1,11 @@
 class V2::CatalogsController < V2::BaseController
   def show
-    services = Settings['services']
-
-    render json: {
-      services: services_list(services)
-    }
+    render json: { services: services.map(&:to_hash) }
   end
 
-  def services_list(services)
-    services ||= []
-    services.map do |service|
-      {
-        id: service['id'],
-        name: service['name'],
-        description: service['description'],
-        bindable: service['bindable'],
-        tags: ['mysql', 'relational'],
-        metadata: service['metadata'],
-        plans: plans_list(service['plans']),
-      }
-    end
-  end
+  private
 
-  def plans_list(plans)
-    plans ||= []
-    plans.map do |plan|
-      {
-        id: plan['id'],
-        name: plan['name'],
-        description: plan['description'],
-        metadata: plan['metadata']
-      }
-    end
+  def services
+    (Settings['services'] || []).map {|attrs| Service.build(attrs)}
   end
 end
