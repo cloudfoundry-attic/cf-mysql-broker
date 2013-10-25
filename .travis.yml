@@ -9,6 +9,6 @@ script: bundle exec rspec spec
 
 before_script:
 - mysql -u root -e "DELETE FROM mysql.user WHERE Host='localhost' AND User=''"
-- mysql -u root -e "SET GLOBAL innodb_stats_auto_recalc=ON, innodb_stats_on_metadata=ON, innodb_stats_persistent=OFF;"
+- mysql -u root -e "SET GLOBAL innodb_stats_on_metadata=ON, innodb_stats_persistent=OFF;"
 - mysql -u root -e "SHOW VARIABLES"
 

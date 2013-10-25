@@ -55,7 +55,6 @@ RSpec.configure do |config|
       variable_records.map { |record| [record['Variable_name'], record['Value']] }
     ]
 
-    raise 'innodb_stats_auto_recalc must be ON' unless variables['innodb_stats_auto_recalc'] == 'ON'
     raise 'innodb_stats_on_metadata must be ON' unless variables['innodb_stats_on_metadata'] == 'ON'
     raise 'innodb_stats_persistent must be OFF' unless variables['innodb_stats_persistent'] == 'OFF'
   end
