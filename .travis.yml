@@ -8,6 +8,13 @@ rvm:
 script: bundle exec rspec spec
 
 before_script:
+
+# Travis says that the way to get MySQL 5.6 is to install it yourself with this gist:
+# https://gist.github.com/drogus/6718448
+#
+# We have modified this to leave the 5.5 client intact because the mysql2 gem has
+# already been installed at this point, compiled against the 5.5 library.
+
 # uninstall MySQL 5.5
 - "sudo apt-get remove mysql-server-5.5 mysql-server-core-5.5"
 - "sudo apt-get autoremove"
