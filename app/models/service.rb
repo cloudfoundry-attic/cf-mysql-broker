@@ -11,7 +11,7 @@ class Service
     @id          = attrs.fetch('id')
     @name        = attrs.fetch('name')
     @description = attrs.fetch('description')
-    @tags        = attrs.fetch('tags')
+    @tags        = attrs.fetch('tags', [])
     @metadata    = attrs.fetch('metadata', nil)
     @plans       = attrs.fetch('plans', [])
   end

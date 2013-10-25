@@ -70,6 +70,22 @@ describe Service do
         expect(service.metadata).to be_nil
       end
     end
+
+    context 'when the tags attr is missing' do
+      let(:service) do
+        Service.build(
+          'id'          => 'my-id',
+          'name'        => 'my-name',
+          'description' => 'my description',
+          'metadata'    => { 'stuff' => 'goes here' },
+          'plans'       => []
+        )
+      end
+
+      it 'sets the field to an empty array' do
+        expect(service.tags).to eq([])
+      end
+    end
   end
 
   describe '#to_hash' do
