@@ -3,6 +3,7 @@ require 'spec_helper'
 describe 'Quota enforcement' do
   let(:instance_id) { SecureRandom.uuid }
   let(:binding_id) { SecureRandom.uuid }
+  let(:max_storage_mb) { Settings.services[0].plans[0].max_storage_mb.to_i }
 
   before do
     put "/v2/service_instances/#{instance_id}", {service_plan_id: 'PLAN-1'}
@@ -35,8 +36,8 @@ describe 'Quota enforcement' do
 
   def create_mysql_client(config)
     Mysql2::Client.new(
-      :host     => config.fetch('hostname'),
-      :port     => config.fetch('port'),
+      :host => config.fetch('hostname'),
+      :port => config.fetch('port'),
       :database => config.fetch('name'),
       :username => config.fetch('username'),
       :password => config.fetch('password')
@@ -47,7 +48,6 @@ describe 'Quota enforcement' do
     client.query('CREATE TABLE stuff (id INT PRIMARY KEY, data LONGTEXT) ENGINE=InnoDB')
 
     data = '1' * (1024 * 1024) # 1 MB
-    data = client.escape(data)
 
     max_storage_mb.times do |n|
       client.query("INSERT INTO stuff (id, data) VALUES (#{n}, '#{data}')")
@@ -57,15 +57,18 @@ describe 'Quota enforcement' do
   end
 
   def prune_database(client)
-    client.query('DELETE FROM stuff WHERE id = 1')
+    client.query('DELETE FROM stuff LIMIT 2')
 
     recalculate_usage
   end
 
   def recalculate_usage
-    instance = ServiceInstance.new(id: instance_id)
-    # For some reason, ANALYZE TABLE doesn't update statistics in Travis' environment
-    ActiveRecord::Base.connection.execute("OPTIMIZE TABLE #{instance.database}.stuff")
+    # Getting Mysql to update statistics is a little tricky. With the right configuration settings,
+    # Mysql will do it automatically. With the wrong settings, you may need to ANALYZE or OPTIMIZE.
+
+    #instance = ServiceInstance.new(id: instance_id)
+    #ActiveRecord::Base.connection.execute("ANALYZE TABLE #{instance.database}.stuff")
+    #ActiveRecord::Base.connection.execute("OPTIMIZE TABLE #{instance.database}.stuff")
   end
 
   def enforce_quota
@@ -99,9 +102,5 @@ describe 'Quota enforcement' do
   def verify_write_privileges_restored(client)
     client.query("INSERT INTO stuff (id, data) VALUES (99999, 'This should succeed.')")
     client.query("UPDATE stuff SET data = 'This should also succeed.' WHERE id = 99999")
-  end
-
-  def max_storage_mb
-    Settings.services[0].plans[0].max_storage_mb.to_i
   end
 end

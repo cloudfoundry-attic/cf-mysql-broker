@@ -42,12 +42,22 @@ RSpec.configure do |config|
 
   #
   # Our tests won't work with the default localhost wildcard user record in mysql
+  # We also need a few innodb settings in order for stats to update automatically.
   #
   config.before :suite do
     count_of_bad_users = ActiveRecord::Base.connection.select_value("select count(*) from mysql.user where Host='localhost' and User=''")
     if count_of_bad_users > 0
       raise %Q{You must delete the Host='localhost' User='' record from the mysql.users table.\nRun this command:\nmysql -u root -e "DELETE FROM mysql.user WHERE Host='localhost' AND User=''"}
     end
+
+    variable_records = ActiveRecord::Base.connection.select("show variables like 'innodb_stats_%'")
+    variables = Hash[
+      variable_records.map { |record| [record['Variable_name'], record['Value']] }
+    ]
+
+    raise 'innodb_stats_auto_recalc must be ON' unless variables['innodb_stats_auto_recalc'] == 'ON'
+    raise 'innodb_stats_on_metadata must be ON' unless variables['innodb_stats_on_metadata'] == 'ON'
+    raise 'innodb_stats_persistent must be OFF' unless variables['innodb_stats_persistent'] == 'OFF'
   end
 
 end

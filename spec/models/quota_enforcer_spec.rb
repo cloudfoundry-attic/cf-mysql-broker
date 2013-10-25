@@ -8,6 +8,8 @@ describe QuotaEnforcer do
     let(:binding_id) { SecureRandom.uuid }
     let(:binding) { ServiceBinding.new(id: binding_id, service_instance: instance) }
 
+    let(:max_storage_mb) { Settings.services[0].plans[0].max_storage_mb.to_i }
+
     before do
       instance.save
       binding.save
@@ -220,11 +222,7 @@ describe QuotaEnforcer do
     # enforcement decisions.
     def recalculate_usage
       # For some reason, ANALYZE TABLE doesn't update statistics in Travis' environment
-      ActiveRecord::Base.connection.execute("OPTIMIZE TABLE #{binding.database}.stuff")
-    end
-
-    def max_storage_mb
-      Settings.services[0].plans[0].max_storage_mb.to_i
+      #ActiveRecord::Base.connection.execute("OPTIMIZE TABLE #{binding.database}.stuff")
     end
   end
 end
