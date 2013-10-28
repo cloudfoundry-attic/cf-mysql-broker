@@ -8,5 +8,5 @@ CfMysqlBroker::Application.initialize!
 
 loop do
   QuotaEnforcer.enforce!
-  sleep 0.1
+  sleep 1
 end
