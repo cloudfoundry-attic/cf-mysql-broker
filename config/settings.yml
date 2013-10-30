@@ -5,6 +5,7 @@
 defaults: &defaults
   database_config_path: 'config/database.yml'
   log_path: 'log/<%= Rails.env %>.log'
+  auth_username: cc
 
   services:
   - id: cf-mysql-1

@@ -12,7 +12,7 @@ module FeatureHelpers
     metadata[:type] = :feature
 
     let(:default_env) do
-      username = 'test'
+      username = Settings.auth_username
       password = Settings.auth_password
 
       {

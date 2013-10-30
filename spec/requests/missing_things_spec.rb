@@ -3,7 +3,6 @@ require 'spec_helper'
 # Behavior when calling endpoints associated with things that do not exist.
 
 describe 'endpoints' do
-
   describe 'deleting an instance' do
     context 'when the service instance does not exist' do
       it 'returns 410' do
