@@ -1,8 +1,10 @@
 module QuotaEnforcer
   class << self
-    QUOTA_IN_MB = Settings.services[0].plans[0].max_storage_mb.to_i
+    QUOTA_IN_MB = Settings.services[0].plans[0].max_storage_mb.to_i rescue nil
 
     def enforce!
+      raise 'You must specify a service and a plan' if QUOTA_IN_MB == nil
+
       # When debugging, the following code will show you the list of databases and their usage:
       #
       #     pp connection.select(<<-SQL).rows.map { |result| {database: result[0], usage: result[1].to_f} }
