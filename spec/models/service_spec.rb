@@ -131,12 +131,30 @@ describe Service do
 
     context 'when there is no plans key' do
       let(:service) do
-        Service.new(
+        Service.build(
           'id'          => 'my-id',
           'name'        => 'my-name',
           'description' => 'my-description',
           'tags'        => ['tagA', 'tagB'],
           'metadata'    => { 'meta' => 'data' },
+        )
+      end
+
+      it 'has an empty list of plans' do
+        expect(service.to_hash.fetch('plans')).to eq([])
+      end
+    end
+
+    # There might be a dangling "plans:" in the yaml, which assigns a nil value
+    context 'when the plans key is nil' do
+      let(:service) do
+        Service.build(
+          'id'          => 'my-id',
+          'name'        => 'my-name',
+          'description' => 'my-description',
+          'tags'        => ['tagA', 'tagB'],
+          'metadata'    => { 'meta' => 'data' },
+          'plans'       => nil,
         )
       end
 

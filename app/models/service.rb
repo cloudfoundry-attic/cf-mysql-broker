@@ -2,7 +2,7 @@ class Service
   attr_reader :id, :name, :description, :tags, :metadata, :plans
 
   def self.build(attrs)
-    plan_attrs = attrs.fetch('plans')
+    plan_attrs = attrs['plans'] || []
     plans      = plan_attrs.map { |attr| Plan.build(attr) }
     new(attrs.merge('plans' => plans))
   end
