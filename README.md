@@ -4,6 +4,22 @@ This is the broker for a new Cloud Foundry MySQL service that demonstrates the v
 
 ### The new services API is still in progress and may change at any time. Do not build a broker against this API.
 
+## API
+
+During development you can inspect the current API routes:
+
+```
+$ rake routes
+                             Prefix Verb   URI Pattern                                                               Controller#Action
+                         v2_catalog GET    /v2/catalog(.:format)                                                     v2/catalogs#show
+v2_service_instance_service_binding PATCH  /v2/service_instances/:service_instance_id/service_bindings/:id(.:format) v2/service_bindings#update
+                                    PUT    /v2/service_instances/:service_instance_id/service_bindings/:id(.:format) v2/service_bindings#update
+                                    DELETE /v2/service_instances/:service_instance_id/service_bindings/:id(.:format) v2/service_bindings#destroy
+                v2_service_instance PATCH  /v2/service_instances/:id(.:format)                                       v2/service_instances#update
+                                    PUT    /v2/service_instances/:id(.:format)                                       v2/service_instances#update
+                                    DELETE /v2/service_instances/:id(.:format)                                       v2/service_instances#destroy
+```
+
 ## Local usage
 
 In one terminal:
