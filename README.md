@@ -122,9 +122,9 @@ As you can see, the service binding ID (`my-binding-1` above) is designated by t
 To delete the service binding and service instance:
 
 ```
-curl -i -X DELETE http://cc:secret@localhost:3000/v2/service_instances/my-own-id-1/service_bindings/my-binding-1 -d ''
+curl -i -X DELETE http://cc:secret@localhost:3000/v2/service_instances/my-own-id-1/service_bindings/my-binding-1
 HTTP/1.1 204 No Content 
 
-$ curl -i -X DELETE http://cc:secret@localhost:3000/v2/service_instances/my-own-id-1 -d ''
+$ curl -i -X DELETE http://cc:secret@localhost:3000/v2/service_instances/my-own-id-1
 HTTP/1.1 204 No Content 
 ```
