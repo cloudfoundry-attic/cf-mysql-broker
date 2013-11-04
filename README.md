@@ -90,3 +90,20 @@ Outputs:
 ```
 
 This output matches the plans described in `config/settings.yml`.
+
+To create and then delete a service instance:
+
+```
+$ curl -i -X PUT http://cc:secret@localhost:3000/v2/service_instances/my-own-id-1 -d ''
+HTTP/1.1 201 Created 
+...
+
+{"dashboard_url":"http://fake.dashboard.url"}
+
+$ curl -i -X DELETE http://cc:secret@localhost:3000/v2/service_instances/my-own-id-1 -d ''
+HTTP/1.1 204 No Content 
+```
+
+As you can see, the service instance ID (`my-own-id-1` above) is designated by the called, rather than the service broker.
+
+
