@@ -22,6 +22,8 @@ v2_service_instance_service_binding PATCH  /v2/service_instances/:service_instan
 
 ## Local usage
 
+NOTE: At the time of writing this section, there was no way to select a service plan from the calalog where creating a service.
+
 In one terminal:
 
 ```
