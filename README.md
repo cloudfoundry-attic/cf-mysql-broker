@@ -107,11 +107,13 @@ As you can see, the service instance ID (`my-own-id-1` above) is designated by t
 
 To then bind a service instance:
 
+```
 curl -i -X PUT http://cc:secret@localhost:3000/v2/service_instances/my-own-id-1/service_bindings/my-binding-1 -d ''
 HTTP/1.1 201 Created
 ...
 
 {"credentials":{"hostname":"localhost","port":3306,"name":"cf_my_own_id_1","username":"eKDT9XsB0csSjWfe","password":"y4ZOo3pQXwt4HuHC","uri":"mysql://eKDT9XsB0csSjWfe:y4ZOo3pQXwt4HuHC@localhost:3306/cf_my_own_id_1?reconnect=true","jdbcUrl":"jdbc:mysql://eKDT9XsB0csSjWfe:y4ZOo3pQXwt4HuHC@localhost:3306/cf_my_own_id_1"}}
+```
 
 The response includes all the details required to connect and authenticate to the running MySQL server database.
 
