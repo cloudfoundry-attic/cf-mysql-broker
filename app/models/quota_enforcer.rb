@@ -36,6 +36,7 @@ module QuotaEnforcer
       SQL
 
       violators.each do |database|
+        puts "#{Time.now}: Database over quota #{database.inspect}, removing privileges"
         connection.update(<<-SQL)
           UPDATE mysql.db
           SET    Insert_priv = 'N', Update_priv = 'N', Create_priv = 'N'
@@ -58,6 +59,7 @@ module QuotaEnforcer
       SQL
 
       reformed.each do |database|
+        puts "#{Time.now}: Database now under quota #{database.inspect}, reinstating privileges"
         connection.update(<<-SQL)
           UPDATE mysql.db
           SET    Insert_priv = 'Y', Update_priv = 'Y', Create_priv = 'Y'
