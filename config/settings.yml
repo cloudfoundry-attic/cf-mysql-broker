@@ -8,7 +8,7 @@ defaults: &defaults
   auth_username: cc
 
   services:
-  - id: p-mysql-1
+  - id: cf-mysql-1
     name: p-mysql
     description: MySQL service for application development and testing
     tags: ['mysql', 'relational']
@@ -18,7 +18,7 @@ defaults: &defaults
         imageUrl: ~
         blurb: MySQL service for application development and testing
     plans:
-    - id: p-mysql-plan-1
+    - id: cf-mysql-plan-1
       name: 100mb
       description: Shared MySQL Server, 100mb persistent disk, 40 max concurrent connections
       max_storage_mb: 100 # in MB
