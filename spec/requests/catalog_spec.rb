@@ -16,6 +16,7 @@ describe 'GET /v2/catalog' do
     expect(service.fetch('bindable')).to be_true
     expect(service.fetch('metadata')).to eq(
       {
+        'provider' => { 'name' => nil },
         'listing' => {
           'imageUrl' => nil,
           'blurb' => 'MySQL service for application development and testing',
@@ -33,9 +34,9 @@ describe 'GET /v2/catalog' do
       {
         'cost' => 0.0,
         'bullets' => [
-          { 'content' => 'Shared MySQL server'},
-          { 'content' => '5 MB storage'},
-          { 'content' => '40 concurrent connections'},
+          { 'content' => 'Shared MySQL server' },
+          { 'content' => '5 MB storage' },
+          { 'content' => '40 concurrent connections' },
         ]
       }
     )
