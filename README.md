@@ -9,10 +9,6 @@ The broker does not include a MySQL server.  Instead, it is meant to be deployed
 * Removal of credentials (unbind)
 * Unprovisioning of database instances (delete)
 
-## Warning
-
-####The new services API is still in progress and may change at any time.  Do not build a broker against this API.
-
 ## Running Tests
 
 The CF MySQL Broker integration specs will exercise the catalog fetch, create, bind, unbind, and delete functions against its locally installed database.
