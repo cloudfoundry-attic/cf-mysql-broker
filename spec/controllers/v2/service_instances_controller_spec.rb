@@ -39,11 +39,11 @@ describe V2::ServiceInstancesController do
         expect(response.status).to eq(201)
       end
 
-      it 'sends back a dashboard url' do
+      it 'sends back empty json' do
         put :update, id: instance_id
 
         instance = JSON.parse(response.body)
-        expect(instance['dashboard_url']).to eq('http://fake.dashboard.url')
+        expect(instance).to eq({})
       end
 
     end

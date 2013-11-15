@@ -52,7 +52,7 @@ describe 'the service lifecycle' do
     expect(response.status).to eq(201)
     instance = JSON.parse(response.body)
 
-    expect(instance.fetch('dashboard_url')).to eq('http://fake.dashboard.url')
+    expect(instance).to eq({})
 
     ##
     ## Bind

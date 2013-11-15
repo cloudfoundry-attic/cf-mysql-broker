@@ -170,9 +170,9 @@ describe ServiceInstance do
   end
 
   describe '#to_json' do
-    it 'includes a dashboard_url' do
+    it 'is empty json' do
       hash = JSON.parse(instance.to_json)
-      expect(hash.fetch('dashboard_url')).to eq('http://fake.dashboard.url')
+      expect(hash).to eq({})
     end
   end
 end
