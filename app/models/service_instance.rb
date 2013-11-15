@@ -42,8 +42,6 @@ class ServiceInstance < BaseModel
   end
 
   def to_json(*)
-    {
-      'dashboard_url' => 'http://fake.dashboard.url'
-    }.to_json
+    {}.to_json
   end
 end
