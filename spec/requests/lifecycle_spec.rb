@@ -108,7 +108,7 @@ describe 'the service lifecycle' do
     ## Deprovision
     ##
     delete "/v2/service_instances/#{instance_id}"
-    expect(response.status).to eq(204)
+    expect(response.status).to eq(200)
 
     ##
     ## Test that the database no longer exists

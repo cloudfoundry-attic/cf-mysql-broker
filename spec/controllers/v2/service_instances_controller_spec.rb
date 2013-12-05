@@ -97,13 +97,15 @@ describe V2::ServiceInstancesController do
     context 'when the database exists' do
       before { ServiceInstance.new(id: instance_id).save }
 
-      it 'drops the database and returns a 204' do
+      it 'drops the database and returns a 200' do
         expect(ServiceInstance.exists?(instance_id)).to eq(true)
 
         delete :destroy, id: instance_id
 
         expect(ServiceInstance.exists?(instance_id)).to eq(false)
-        expect(response.status).to eq(204)
+        expect(response.status).to eq(200)
+        body = JSON.parse(response.body)
+        expect(body).to eq({})
       end
     end
 

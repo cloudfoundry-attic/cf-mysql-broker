@@ -18,7 +18,7 @@ class V2::ServiceInstancesController < V2::BaseController
   def destroy
     if instance = ServiceInstance.find_by_id(params.fetch(:id))
       instance.destroy
-      status = 204
+      status = 200
     else
       status = 410
     end
