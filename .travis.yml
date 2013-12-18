@@ -3,7 +3,7 @@ language: ruby
 bundler_args: --deployment --without development
 
 rvm:
-- 1.9.3-p484
+- 2.0.0-p353
 
 script: bundle exec rspec spec
 
