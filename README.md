@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/cloudfoundry/cf-mysql-broker.png?branch=master)](https://travis-ci.org/cloudfoundry/cf-mysql-broker)
+
 #CF MySQL Broker
 
 CF MySQL Broker provides MySQL databases as a Cloud Foundry service.  This broker demonstrates the v2 services API between cloud controllers and service brokers. This API is not to be confused with the cloud controller API; for more info see [http://docs.cloudfoundry.com/docs/running/architecture/services/].
