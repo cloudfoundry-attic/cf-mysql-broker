@@ -20,6 +20,7 @@ describe 'GET /v2/catalog' do
         'listing' => {
           'imageUrl' => nil,
           'blurb' => 'MySQL service for application development and testing',
+          'long_description' => 'A MySQL relational database service appropriate for development and testing. Servers are multi-tenant and are not redundant.'
         }
       }
     )
