@@ -8,6 +8,7 @@ describe V2::ServiceInstancesController do
   after { ServiceInstance.new(id: instance_id).destroy }
 
   describe '#update' do
+    let(:max_db_per_node) { 5 }
     let(:services) do
       [
         {
@@ -15,7 +16,7 @@ describe V2::ServiceInstancesController do
           'name' => 'bar',
           'description' => 'desc',
           'bindable' => true,
-          'max_db_per_node' => 5
+          'max_db_per_node' => max_db_per_node
         }
       ]
     end
@@ -75,7 +76,7 @@ describe V2::ServiceInstancesController do
 
       before do
         ServiceInstance.new(id: instance_id).save
-        ServiceInstance.stub(:get_number_of_existing_instances).and_return(5)
+        ServiceInstance.stub(:get_number_of_existing_instances).and_return(max_db_per_node)
       end
 
       after { ServiceInstance.new(id: instance_id).destroy }
@@ -88,7 +89,9 @@ describe V2::ServiceInstancesController do
 
         expect(ServiceInstance.exists?(instance_id)).to eq(true)
         expect(ServiceInstance.exists?(extra_instance_id)).to eq(false)
-        expect(response.status).to eq(409)
+        expect(response.status).to eq(507)
+        response_json = JSON.parse(response.body)
+        expect(response_json['description']).to eq('Service plan capacity has been reached')
       end
     end
   end

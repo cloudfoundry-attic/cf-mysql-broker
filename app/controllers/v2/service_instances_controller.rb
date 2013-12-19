@@ -10,7 +10,7 @@ class V2::ServiceInstancesController < V2::BaseController
 
       render status: 201, json: instance
     else
-      render status: 409, json: {}
+      render status: 507, json: {'description' => 'Service plan capacity has been reached'}
     end
 
   end

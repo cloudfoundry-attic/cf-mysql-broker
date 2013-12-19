@@ -14,7 +14,7 @@ defaults: &defaults
     tags:
       - mysql
       - relational
-    max_db_per_node: 250
+    max_db_per_node: 5
     metadata:
       provider:
         name:
