@@ -20,7 +20,7 @@ describe 'GET /v2/catalog' do
         'listing' => {
           'imageUrl' => nil,
           'blurb' => 'MySQL service for application development and testing',
-          'long_description' => 'A MySQL relational database service appropriate for development and testing. Servers are multi-tenant and are not redundant.'
+          'longDescription' => 'A MySQL relational database service appropriate for development and testing. The service delivers databases on a multi-tenant non-redundant server. Unique user credentials are generated for each application binding.'
         },
         'displayName' => 'Pivotal MySQL Dev'
       }
