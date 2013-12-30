@@ -14,15 +14,7 @@ describe 'GET /v2/catalog' do
     expect(service.fetch('name')).to eq('p-mysql')
     expect(service.fetch('description')).to eq('MySQL service for application development and testing')
     expect(service.fetch('bindable')).to be_true
-    expect(service.fetch('metadata')).to eq(
-      {
-        'provider' => { 'name' => nil },
-        'listing' => {
-          'imageUrl' => nil,
-          'blurb' => 'MySQL service for application development and testing',
-        }
-      }
-    )
+    expect(service.fetch('metadata')).to eq({})
 
     plans = service.fetch('plans')
     expect(plans).to have(1).plan
@@ -30,15 +22,10 @@ describe 'GET /v2/catalog' do
     plan = plans.first
     expect(plan.fetch('name')).to eq('5mb')
     expect(plan.fetch('description')).to eq('Shared MySQL Server, 5mb persistent disk, 40 max concurrent connections')
-    expect(plan.fetch('metadata')).to eq(
-      {
-        'cost' => 0.0,
-        'bullets' => [
-          { 'content' => 'Shared MySQL server' },
-          { 'content' => '5 MB storage' },
-          { 'content' => '40 concurrent connections' },
-        ]
-      }
-    )
+    expect(plan.fetch('metadata').fetch('bullets')).to eq([
+      'Shared MySQL server' ,
+      '5 MB storage',
+      '40 concurrent connections',
+    ])
   end
 end

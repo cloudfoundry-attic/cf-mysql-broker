@@ -15,12 +15,8 @@ defaults: &defaults
       - mysql
       - relational
     max_db_per_node: 250
-    metadata:
-      provider:
-        name:
-      listing:
-        imageUrl: ~
-        blurb: MySQL service for application development and testing
+    metadata: {}
+
     plans:
     - name: 5mb
       id: 2451fa22-df16-4c10-ba6e-1f682d3dcdc9
@@ -29,9 +25,9 @@ defaults: &defaults
       metadata:
         cost: 0.0
         bullets:
-        - content: Shared MySQL server
-        - content: 5 MB storage
-        - content: 40 concurrent connections
+          - Shared MySQL server
+          - 5 MB storage
+          - 40 concurrent connections
 
 development:
   auth_password: 'secret'
