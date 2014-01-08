@@ -50,9 +50,7 @@ describe 'the service lifecycle' do
     put "/v2/service_instances/#{instance_id}", {service_plan_id: 'PLAN-1'}
 
     expect(response.status).to eq(201)
-    instance = JSON.parse(response.body)
-
-    expect(instance).to eq({})
+    expect(response.body).to eq('{}')
 
     ##
     ## Bind
@@ -86,7 +84,8 @@ describe 'the service lifecycle' do
     ## Unbind
     ##
     delete "/v2/service_instances/#{instance_id}/service_bindings/#{binding_id}"
-    expect(response.status).to eq(204)
+    expect(response.status).to eq(200)
+    expect(response.body).to eq('{}')
 
     ##
     ## Test that the binding no longer works
@@ -109,6 +108,7 @@ describe 'the service lifecycle' do
     ##
     delete "/v2/service_instances/#{instance_id}"
     expect(response.status).to eq(200)
+    expect(response.body).to eq('{}')
 
     ##
     ## Test that the database no longer exists

@@ -62,11 +62,11 @@ describe V2::ServiceBindingsController do
     let(:binding) { ServiceBinding.new(id: binding_id, service_instance: instance) }
     let(:username) { binding.username }
 
-    context 'when the user exists' do
+    context 'when the binding exists' do
       before { binding.save }
       after { binding.destroy }
 
-      it 'destroys the user' do
+      it 'destroys the binding' do
         expect(ServiceBinding.exists?(id: binding.id, service_instance_id: instance.id)).to eq(true)
 
         delete :destroy, service_instance_id: instance.id, id: binding.id
@@ -74,14 +74,15 @@ describe V2::ServiceBindingsController do
         expect(ServiceBinding.exists?(id: binding.id, service_instance_id: instance.id)).to eq(false)
       end
 
-      it 'returns a 204' do
+      it 'returns a 200' do
         delete :destroy, service_instance_id: instance.id, id: binding.id
 
-        expect(response.status).to eq(204)
+        expect(response.status).to eq(200)
+        expect(response.body).to eq('{}')
       end
     end
 
-    context 'when the user does not exist' do
+    context 'when the binding does not exist' do
       it 'returns a 410' do
         delete :destroy, service_instance_id: instance.id, id: binding.id
 
