@@ -6,41 +6,24 @@ describe 'GET /v2/catalog' do
 
     expect(response.status).to eq(200)
     catalog = JSON.parse(response.body)
+    service_settings = YAML.load_file(Rails.root + 'config/settings.yml').fetch('test').fetch('services').first
 
     services = catalog.fetch('services')
     expect(services).to have(1).service
 
     service = services.first
-    expect(service.fetch('name')).to eq('p-mysql')
-    expect(service.fetch('description')).to eq('MySQL service for application development and testing')
+    expect(service.fetch('name')).to eq(service_settings.fetch('name'))
+    expect(service.fetch('description')).to eq(service_settings.fetch('description'))
     expect(service.fetch('bindable')).to be_true
-    expect(service.fetch('metadata')).to eq(
-      {
-        'provider' => { 'name' => nil },
-        'listing' => {
-          'imageUrl' => nil,
-          'blurb' => 'MySQL service for application development and testing',
-          'longDescription' => 'A MySQL relational database service appropriate for development and testing. The service delivers databases on a multi-tenant non-redundant server. Unique user credentials are generated for each application binding.'
-        },
-        'displayName' => 'Pivotal MySQL Dev'
-      }
-    )
+    expect(service.fetch('metadata')).to eq(service_settings.fetch('metadata'))
 
     plans = service.fetch('plans')
     expect(plans).to have(1).plan
 
     plan = plans.first
-    expect(plan.fetch('name')).to eq('5mb')
-    expect(plan.fetch('description')).to eq('Shared MySQL Server, 5mb persistent disk, 40 max concurrent connections')
-    expect(plan.fetch('metadata')).to eq(
-      {
-        'cost' => 0.0,
-        'bullets' => [
-          { 'content' => 'Shared MySQL server' },
-          { 'content' => '5 MB storage' },
-          { 'content' => '40 concurrent connections' },
-        ]
-      }
-    )
+    plan_settings = service_settings.fetch('plans').first
+    expect(plan.fetch('name')).to eq(plan_settings.fetch('name'))
+    expect(plan.fetch('description')).to eq(plan_settings.fetch('description'))
+    expect(plan.fetch('metadata')).to eq(plan_settings.fetch('metadata'))
   end
 end
