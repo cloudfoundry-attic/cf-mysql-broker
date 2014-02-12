@@ -1,5 +1,5 @@
 class Service
-  attr_reader :id, :name, :description, :tags, :metadata, :plans
+  attr_reader :id, :name, :description, :tags, :metadata, :plans, :dashboard_client
 
   def self.build(attrs)
     plan_attrs = attrs['plans'] || []
@@ -14,6 +14,7 @@ class Service
     @tags        = attrs.fetch('tags', [])
     @metadata    = attrs.fetch('metadata', nil)
     @plans       = attrs.fetch('plans', [])
+    @dashboard_client = attrs.fetch('dashboard_client', {})
   end
 
   def bindable?
@@ -22,13 +23,14 @@ class Service
 
   def to_hash
     {
-      'id'          => self.id,
-      'name'        => self.name,
-      'description' => self.description,
-      'tags'        => self.tags,
-      'metadata'    => self.metadata,
-      'plans'       => self.plans.map(&:to_hash),
-      'bindable'    => self.bindable?
+      'id'               => id,
+      'name'             => name,
+      'description'      => description,
+      'tags'             => tags,
+      'metadata'         => metadata,
+      'plans'            => plans.map(&:to_hash),
+      'bindable'         => bindable?,
+      'dashboard_client' => dashboard_client
     }
   end
 

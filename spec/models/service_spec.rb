@@ -13,13 +13,23 @@ describe Service do
         'description' => 'my description',
         'tags'        => ['tagA', 'tagB'],
         'metadata'    => { 'stuff' => 'goes here' },
-        'plans'       => []
+        'plans'       => [],
+        'dashboard_client' => {
+          'id'           => 'sso-client',
+          'secret'       => 'something-secret',
+          'redirect_uri' => 'example.com'
+        }
       )
       expect(service.id).to eq('my-id')
       expect(service.name).to eq('my-name')
       expect(service.description).to eq('my description')
       expect(service.tags).to eq(['tagA', 'tagB'])
       expect(service.metadata).to eq({ 'stuff' => 'goes here' })
+      expect(service.dashboard_client).to eql({
+        'id'           => 'sso-client',
+        'secret'       => 'something-secret',
+        'redirect_uri' => 'example.com'
+      })
     end
 
     it 'is bindable' do
@@ -86,6 +96,22 @@ describe Service do
         expect(service.tags).to eq([])
       end
     end
+
+    context 'when the dashboard_client attr is missing' do
+      let(:service) do
+        Service.build(
+          'id'          => 'my-id',
+          'name'        => 'my-name',
+          'description' => 'my description',
+          'metadata'    => { 'stuff' => 'goes here' },
+          'plans'       => []
+        )
+      end
+
+      it 'sets the field to an empty hash' do
+        expect(service.dashboard_client).to eql({})
+      end
+    end
   end
 
   describe '#to_hash' do
@@ -96,7 +122,12 @@ describe Service do
         'description' => 'my-description',
         'tags'        => ['tagA', 'tagB'],
         'metadata'    => { 'meta' => 'data' },
-        'plans'       => []
+        'plans'       => [],
+        'dashboard_client' => {
+          'id'           => 'sso-client',
+          'secret'       => 'something-secret',
+          'redirect_uri' => 'example.com'
+        }
       )
 
       expect(service.to_hash.fetch('id')).to eq('my-id')
@@ -106,6 +137,11 @@ describe Service do
       expect(service.to_hash.fetch('tags')).to eq(['tagA', 'tagB'])
       expect(service.to_hash.fetch('metadata')).to eq({ 'meta' => 'data' })
       expect(service.to_hash).to have_key('plans')
+      expect(service.to_hash.fetch('dashboard_client')).to eq({
+        'id'           => 'sso-client',
+        'secret'       => 'something-secret',
+        'redirect_uri' => 'example.com'
+      })
     end
 
     it 'includes the #to_hash for each plan' do

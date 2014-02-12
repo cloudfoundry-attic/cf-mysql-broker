@@ -1,0 +1,13 @@
+OmniAuth.config.failure_raise_out_environments = []
+OmniAuth.config.path_prefix = '/manage/auth'
+
+client = Settings.services[0].dashboard_client
+
+Rails.application.config.middleware.use OmniAuth::Builder do
+  unless Rails.env.test?
+    provider :cloudfoundry, client.id, client.secret, {
+      auth_server_url: Configuration.auth_server_url,
+      token_server_url: Configuration.token_server_url
+    }
+  end
+end

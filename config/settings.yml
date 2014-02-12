@@ -6,9 +6,10 @@ defaults: &defaults
   database_config_path: 'config/database.yml'
   log_path: 'log/<%= Rails.env %>.log'
   auth_username: cc
+  cookie_secret: e7247dae-a252-4393-afa3-2219c1c02efd
 
   services:
-  - name: p-mysql
+  - name: p-mysql-local
     id: 3101b971-1044-4816-a7ac-9ded2e028079
     description: MySQL service for application development and testing
     tags:
@@ -22,6 +23,10 @@ defaults: &defaults
       providerDisplayName: "Pivotal Software"
       documentationUrl:
       supportUrl: "http://support.cloudfoundry.com/"
+    dashboard_client:
+      id: 'p-mysql-client'
+      secret: 'p-mysql-secret'
+      redirect_uri: 'http://10.80.130.98:3000/manage/auth/cloudfoundry/callback'
     plans:
     - name: 5mb
       id: 2451fa22-df16-4c10-ba6e-1f682d3dcdc9
@@ -37,6 +42,8 @@ defaults: &defaults
           - Shared MySQL server
           - 5 MB storage
           - 40 concurrent connections
+
+  cc_api_url: 'http://api.10.244.0.34.xip.io'
 
 development:
   auth_password: 'secret'
