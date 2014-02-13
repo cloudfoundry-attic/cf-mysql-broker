@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/cloudfoundry/omniauth-uaa-oauth2.git
-  revision: 5fac3962651c480f473d92ab357090a72e6e8aee
+  revision: 9034154c929a01763869a3e4658a5c94b9efe12a
   branch: error_handling
   specs:
     omniauth-uaa-oauth2 (0.0.3)
