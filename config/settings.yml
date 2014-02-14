@@ -43,7 +43,7 @@ defaults: &defaults
           - 5 MB storage
           - 40 concurrent connections
 
-  cc_api_url: 'http://api.10.244.0.34.xip.io'
+  cc_api_uri: 'http://api.10.244.0.34.xip.io'
 
 development:
   auth_password: 'secret'

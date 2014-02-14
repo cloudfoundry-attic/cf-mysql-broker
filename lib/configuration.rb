@@ -10,7 +10,7 @@ module Configuration
   end
 
   def cc_api_info
-    store[:cc_api_info] ||= JSON.parse(Net::HTTP.get(URI.parse("#{Settings.cc_api_url}/info")))
+    store[:cc_api_info] ||= JSON.parse(Net::HTTP.get(URI.parse("#{Settings.cc_api_uri}/info")))
   end
 
   def store
