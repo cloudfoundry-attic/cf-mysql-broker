@@ -12,6 +12,10 @@ describe Manage::AuthController do
           'raw_info' => {
             'user_id' => 'mister_tee'
           }
+        },
+        'credentials' => {
+          'token' => 'UAA access token',
+          'refresh_token' => 'UAA refresh token'
         }
       }
     end
@@ -23,6 +27,8 @@ describe Manage::AuthController do
       expect(response).to redirect_to(manage_instance_path(instance_id))
 
       expect(session[:uaa_user_id]).to eql('mister_tee')
+      expect(session[:uaa_access_token]).to eql('UAA access token')
+      expect(session[:uaa_refresh_token]).to eql('UAA refresh token')
     end
   end
 
