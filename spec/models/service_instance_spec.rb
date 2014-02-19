@@ -168,11 +168,4 @@ describe ServiceInstance do
       end
     end
   end
-
-  describe '#to_json' do
-    it 'is empty json' do
-      hash = JSON.parse(instance.to_json)
-      expect(hash).to eq({})
-    end
-  end
 end

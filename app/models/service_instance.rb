@@ -40,8 +40,4 @@ class ServiceInstance < BaseModel
   def destroy
     connection.execute("DROP DATABASE IF EXISTS `#{database}`")
   end
-
-  def to_json(*)
-    {}.to_json
-  end
 end

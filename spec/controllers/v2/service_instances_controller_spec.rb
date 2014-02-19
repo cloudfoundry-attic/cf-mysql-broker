@@ -2,7 +2,6 @@ require 'spec_helper'
 
 describe V2::ServiceInstancesController do
   let(:instance_id) { '88f6fa22-c8b7-4cdc-be3a-dc09ea7734db' }
-  let(:database) { ServiceInstance.new(id: instance_id).database }
 
   before { authenticate }
   after { ServiceInstance.new(id: instance_id).destroy }
@@ -40,13 +39,12 @@ describe V2::ServiceInstancesController do
         expect(response.status).to eq(201)
       end
 
-      it 'sends back empty json' do
+      it 'returns the dashboard_url' do
         put :update, id: instance_id
 
         instance = JSON.parse(response.body)
-        expect(instance).to eq({})
+        expect(instance).to eq({ 'dashboard_url' => "http://test.host/manage/instances/#{instance_id}" })
       end
-
     end
 
     context 'no max_db_per_node set' do
@@ -68,6 +66,13 @@ describe V2::ServiceInstancesController do
 
         expect(ServiceInstance.exists?(instance_id)).to eq(true)
         expect(response.status).to eq(201)
+      end
+
+      it 'returns the dashboard_url' do
+        put :update, id: instance_id
+
+        instance = JSON.parse(response.body)
+        expect(instance).to eq({ 'dashboard_url' => "http://test.host/manage/instances/#{instance_id}" })
       end
     end
 

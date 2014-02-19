@@ -8,7 +8,7 @@ class V2::ServiceInstancesController < V2::BaseController
       instance = ServiceInstance.new(id: params.fetch(:id))
       instance.save
 
-      render status: 201, json: instance
+      render status: 201, json: { dashboard_url: manage_instance_url(instance.id) }
     else
       render status: 507, json: {'description' => 'Service plan capacity has been reached'}
     end
