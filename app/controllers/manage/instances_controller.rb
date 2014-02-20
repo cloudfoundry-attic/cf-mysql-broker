@@ -24,11 +24,16 @@ module Manage
 
     def can_manage_instance?(instance)
       uri = URI.parse("#{Settings.cc_api_uri}/v2/service_instances/#{instance.id}/permissions")
+
+      http = Net::HTTP.new(uri.hostname, uri.port)
+      http.use_ssl = uri.scheme == 'https'
+
       request = Net::HTTP::Get.new(uri)
       request['Authorization'] = AccessTokenHandler.new(session[:uaa_access_token], session[:uaa_refresh_token]).auth_header
-      response = Net::HTTP.start(uri.hostname, uri.port) {|http| http.request(request) }
+
+      response = http.request(request)
+
       JSON.parse(response.body)['manage']
     end
-
   end
 end

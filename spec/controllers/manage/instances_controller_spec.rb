@@ -35,17 +35,54 @@ describe Manage::InstancesController do
       after { instance.destroy }
 
       context 'when the user has permissions to manage the instance' do
-        before do
-          stub_request(:get, 'http://api.example.com/v2/service_instances/abc-123/permissions').
-            with(headers: { 'Authorization' => 'bearer <token>' }).
-            to_return(body: JSON.generate({ manage: true }))
+
+        context 'when the uri has https' do
+          before do
+            Settings.stub(:cc_api_uri) { 'https://api.example.com' }
+
+            stub_request(:get, 'https://api.example.com/v2/service_instances/abc-123/permissions').
+              with(headers: { 'Authorization' => 'bearer <token>' }).
+              to_return(body: JSON.generate({ manage: true }))
+          end
+
+          it 'displays the usage information for the given instance' do
+            get :show, id: 'abc-123'
+            expect(response.status).to eql(200)
+            expect(response.body).to match(/10\.3 MB used/)
+            expect(query).to have_received(:execute).once
+          end
+
+          it 'uses ssl' do
+            get :show, id: 'abc-123'
+
+            a_request(:get, 'https://api.example.com/v2/service_instances/abc-123/permissions').
+              should have_been_made
+          end
         end
 
-        it 'displays the usage information for the given instance' do
-          get :show, id: 'abc-123'
-          expect(response.status).to eql(200)
-          expect(response.body).to match(/10\.3 MB used/)
-          expect(query).to have_received(:execute).once
+        context 'when the uri does not have https' do
+          before do
+            Settings.stub(:cc_api_uri) { 'http://api.example.com' }
+
+            stub_request(:get, 'http://api.example.com/v2/service_instances/abc-123/permissions').
+              with(headers: { 'Authorization' => 'bearer <token>' }).
+              to_return(body: JSON.generate({ manage: true }))
+          end
+
+          it 'displays the usage information for the given instance' do
+            get :show, id: 'abc-123'
+            expect(response.status).to eql(200)
+            expect(response.body).to match(/10\.3 MB used/)
+            expect(query).to have_received(:execute).once
+          end
+
+          it 'does not use ssl' do
+            get :show, id: 'abc-123'
+
+            a_request(:get, 'http://api.example.com/v2/service_instances/abc-123/permissions').
+              should have_been_made
+          end
+
         end
       end
 
