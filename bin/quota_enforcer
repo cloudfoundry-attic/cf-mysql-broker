@@ -1,10 +1,12 @@
 #!/usr/bin/env ruby
 
-# Load the Rails application.
 require File.expand_path('../../config/application', __FILE__)
+require 'quota_enforcer'
 
-# Initialize the Rails application.
-CfMysqlBroker::Application.initialize!
+dbconfig = YAML.load(File.read(Settings.database_config_path))
+ActiveRecord::Base.establish_connection dbconfig[Rails.env]
+
+Rails.logger = Logger.new(STDOUT)
 
 loop do
   QuotaEnforcer.enforce!

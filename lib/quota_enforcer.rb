@@ -1,3 +1,6 @@
+require Rails.root.join('app/models/base_model')
+require Rails.root.join('app/models/service_instance')
+
 module QuotaEnforcer
   class << self
     QUOTA_IN_MB = Settings.services[0].plans[0].max_storage_mb.to_i rescue nil
