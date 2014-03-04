@@ -8,7 +8,7 @@ class V2::ServiceInstancesController < V2::BaseController
       instance = ServiceInstance.new(id: params.fetch(:id))
       instance.save
 
-      render status: 201, json: { dashboard_url: manage_instance_url(instance.id) }
+      render status: 201, json: { dashboard_url: build_dashboard_url(instance) }
     else
       render status: 507, json: {'description' => 'Service plan capacity has been reached'}
     end
@@ -24,5 +24,14 @@ class V2::ServiceInstancesController < V2::BaseController
     end
 
     render status: status, json: {}
+  end
+
+  private
+
+  def build_dashboard_url(instance)
+    domain = Settings.external_host
+    path   = manage_instance_path(instance.id)
+
+    "http://#{domain}#{path}"
   end
 end

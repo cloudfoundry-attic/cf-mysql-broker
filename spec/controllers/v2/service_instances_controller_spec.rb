@@ -43,7 +43,7 @@ describe V2::ServiceInstancesController do
         put :update, id: instance_id
 
         instance = JSON.parse(response.body)
-        expect(instance).to eq({ 'dashboard_url' => "http://test.host/manage/instances/#{instance_id}" })
+        expect(instance).to eq({ 'dashboard_url' => "http://pmysql.vcap.me/manage/instances/#{instance_id}" })
       end
     end
 
