@@ -65,10 +65,11 @@ describe 'Quota enforcement' do
   def recalculate_usage
     # Getting Mysql to update statistics is a little tricky. With the right configuration settings,
     # Mysql will do it automatically. With the wrong settings, you may need to ANALYZE or OPTIMIZE.
+    # For the tests we will run OPTIMIZE to ensure the settings update immediately.
 
-    #instance = ServiceInstance.new(id: instance_id)
+    instance = ServiceInstance.new(id: instance_id)
     #ActiveRecord::Base.connection.execute("ANALYZE TABLE #{instance.database}.stuff")
-    #ActiveRecord::Base.connection.execute("OPTIMIZE TABLE #{instance.database}.stuff")
+    ActiveRecord::Base.connection.execute("OPTIMIZE TABLE #{instance.database}.stuff")
   end
 
   def enforce_quota

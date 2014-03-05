@@ -222,7 +222,7 @@ describe QuotaEnforcer do
     # enforcement decisions.
     def recalculate_usage
       # For some reason, ANALYZE TABLE doesn't update statistics in Travis' environment
-      #ActiveRecord::Base.connection.execute("OPTIMIZE TABLE #{binding.database}.stuff")
+      ActiveRecord::Base.connection.execute("OPTIMIZE TABLE #{binding.database}.stuff")
     end
   end
 end
