@@ -7,7 +7,7 @@ module Manage
       if logged_in?
         instance = ServiceInstance.find(params[:id])
         if can_manage_instance?(instance)
-          render text: "#{ServiceInstanceUsageQuery.new(instance).execute} MB used."
+          render text: "#{ServiceInstanceUsageQuery.new(instance).execute} MB of #{QuotaEnforcer::QUOTA_IN_MB} MB used."
         else
           render text: 'Not Authorized'
         end
