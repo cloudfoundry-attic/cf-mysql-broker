@@ -73,9 +73,12 @@ describe Manage::InstancesController do
           end
 
           it 'displays the usage information for the given instance' do
+            quota = Settings.services[0].plans[0].max_storage_mb.to_i
+
             get :show, id: 'abc-123'
+
             expect(response.status).to eql(200)
-            expect(response.body).to match(/10\.3 MB used/)
+            expect(response.body).to match(/10\.3 MB of #{quota} MB used./)
             expect(query).to have_received(:execute).once
           end
 
