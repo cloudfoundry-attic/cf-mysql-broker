@@ -35,14 +35,19 @@ describe Manage::InstancesController do
       after { instance.destroy }
 
       context 'when the user has permissions to manage the instance' do
+        let(:schema) { 'http' }
+
+        before do
+          stub_request(:get, "#{schema}://api.example.com/v2/service_instances/abc-123/permissions").
+            with(headers: { 'Authorization' => 'bearer <token>' }).
+            to_return(body: JSON.generate({ manage: true }))
+        end
 
         context 'when the uri has https' do
+          let(:schema) { 'https' }
+
           before do
             Settings.stub(:cc_api_uri) { 'https://api.example.com' }
-
-            stub_request(:get, 'https://api.example.com/v2/service_instances/abc-123/permissions').
-              with(headers: { 'Authorization' => 'bearer <token>' }).
-              to_return(body: JSON.generate({ manage: true }))
           end
 
           it 'displays the usage information for the given instance' do
@@ -64,12 +69,10 @@ describe Manage::InstancesController do
         end
 
         context 'when the uri does not have https' do
+          let(:schema) { 'http' }
+
           before do
             Settings.stub(:cc_api_uri) { 'http://api.example.com' }
-
-            stub_request(:get, 'http://api.example.com/v2/service_instances/abc-123/permissions').
-              with(headers: { 'Authorization' => 'bearer <token>' }).
-              to_return(body: JSON.generate({ manage: true }))
           end
 
           it 'displays the usage information for the given instance' do
@@ -87,6 +90,43 @@ describe Manage::InstancesController do
 
             a_request(:get, 'http://api.example.com/v2/service_instances/abc-123/permissions').
               should have_been_made
+          end
+
+        end
+
+        context 'when storage usage is greater than allowed quota' do
+          let(:warning_message) do
+            'Warning:
+Write permissions have been revoked due to storage utilization exceeding the plan quota. Read and delete permissions remain enabled. Write permissions will be restored when storage utilization has been reduced to below the plan quota.'
+          end
+
+          context 'and permissions have been revoked' do
+            let(:binding) { ServiceBinding.new(id: SecureRandom.uuid, service_instance: instance) }
+
+            before do
+              binding.save
+              revoke_permissions(instance)
+            end
+
+            after do
+              binding.destroy
+            end
+
+            it 'displays warning message' do
+              get :show, id: 'abc-123'
+
+              expect(response.status).to eql(200)
+              expect(response.body).to match(/#{warning_message}/)
+            end
+          end
+
+          context 'and permissions have not been revoked' do
+            it 'does not display warning message' do
+              get :show, id: 'abc-123'
+
+              expect(response.status).to eql(200)
+              expect(response.body).to_not match(/#{warning_message}/)
+            end
           end
 
         end
@@ -109,4 +149,11 @@ describe Manage::InstancesController do
     end
   end
 
+  def revoke_permissions(instance)
+     ActiveRecord::Base.connection.update(<<-SQL)
+      UPDATE mysql.db
+      SET    Insert_priv = 'N', Update_priv = 'N', Create_priv = 'N'
+      WHERE  Db = '#{instance.database}'
+    SQL
+  end
 end

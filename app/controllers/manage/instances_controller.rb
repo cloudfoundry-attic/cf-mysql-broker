@@ -1,13 +1,25 @@
 module Manage
   class InstancesController < ActionController::Base
 
+    WARNING = 'Warning:
+Write permissions have been revoked due to storage utilization exceeding the plan quota. Read and delete permissions remain enabled. Write permissions will be restored when storage utilization has been reduced to below the plan quota.'
+
     def show
       session[:instance_id] = params[:id]
 
       if logged_in?
         instance = ServiceInstance.find(params[:id])
         if can_manage_instance?(instance)
-          render text: "#{ServiceInstanceUsageQuery.new(instance).execute} MB of #{QuotaEnforcer::QUOTA_IN_MB} MB used."
+          used_mb = ServiceInstanceUsageQuery.new(instance).execute
+          permissions_revoked = ServiceInstancePermissionsRevokedQuery.new(instance).execute
+
+          output_message = "#{used_mb} MB of #{QuotaEnforcer::QUOTA_IN_MB} MB used."
+          if(permissions_revoked)
+            output_message = "#{output_message}<br/>#{WARNING}"
+          end
+
+          render :show
+          #render text: output_message
         else
           render text: 'Not Authorized'
         end
