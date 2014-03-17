@@ -1,7 +1,9 @@
 unless Rails.env.test?
 
+  max_fixnum = (2**(0.size * 8 -2) -1)
+
   register_thread = Thread.new do
-    NATS.start(:uri => Settings.message_bus_servers) do
+    NATS.start(:uri => Settings.message_bus_servers, :max_reconnect_attempts => max_fixnum) do
       registrar.register_with_router
     end
   end
