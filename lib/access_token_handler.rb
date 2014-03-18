@@ -14,8 +14,8 @@ class AccessTokenHandler
 
   def client
     @client ||= CF::UAA::TokenIssuer.new(Configuration.auth_server_url,
-                                         Settings.dashboard_client.id,
-                                         Settings.dashboard_client.secret,
+                                         dashboard_client.id,
+                                         dashboard_client.secret,
                                          { token_target: Configuration.token_server_url })
   end
 
@@ -25,7 +25,7 @@ class AccessTokenHandler
 
   def token_expired?
     header = existing_token_info.auth_header
-    expiry = CF::UAA::TokenCoder.decode(header.split()[1], verify: false)[:expires_at]
+    expiry = CF::UAA::TokenCoder.decode(header.split()[1], verify: false)['exp']
     expiry.is_a?(Integer) && expiry <= Time.now.to_i
   end
 
@@ -34,7 +34,15 @@ class AccessTokenHandler
   end
 
   def refreshed_token_info
-    client.refresh_token_grant(refresh_token)
+    token_info = client.refresh_token_grant(refresh_token)
+
+    @access_token  = token_info.info[:access_token]
+    @refresh_token = token_info.info[:refresh_token]
+
+    token_info
   end
 
+  def dashboard_client
+    Settings.services[0].dashboard_client
+  end
 end

@@ -23,17 +23,26 @@ module Manage
     end
 
     def can_manage_instance?(instance)
+      token_handler = AccessTokenHandler.new(session[:uaa_access_token], session[:uaa_refresh_token])
+      auth_header   = token_handler.auth_header
+      update_session(token_handler)
+
       uri = URI.parse("#{Settings.cc_api_uri}/v2/service_instances/#{instance.id}/permissions")
 
       http = Net::HTTP.new(uri.hostname, uri.port)
       http.use_ssl = uri.scheme == 'https'
 
       request = Net::HTTP::Get.new(uri)
-      request['Authorization'] = AccessTokenHandler.new(session[:uaa_access_token], session[:uaa_refresh_token]).auth_header
+      request['Authorization'] = auth_header
 
       response = http.request(request)
 
       JSON.parse(response.body)['manage']
+    end
+
+    def update_session(token_handler)
+      session[:uaa_access_token]  = token_handler.access_token
+      session[:uaa_refresh_token] = token_handler.refresh_token
     end
   end
 end

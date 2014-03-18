@@ -19,6 +19,7 @@ describe Manage::InstancesController do
     context 'when the user is authenticated' do
       let(:query) { double(ServiceInstanceUsageQuery) }
       let(:instance) { ServiceInstance.new(id: 'abc-123') }
+      let(:token_handler) { double(AccessTokenHandler, auth_header: 'bearer <token>') }
 
       before do
         instance.save
@@ -28,8 +29,11 @@ describe Manage::InstancesController do
         session[:uaa_user_id] = 'some-user-id'
         session[:uaa_access_token] = '<access token>'
         session[:uaa_refresh_token] = '<refresh token>'
-        token_handler = double(AccessTokenHandler, auth_header: 'bearer <token>')
-        AccessTokenHandler.should_receive(:new).with('<access token>', '<refresh token>') { token_handler }
+
+        allow(AccessTokenHandler).to receive(:new).with('<access token>', '<refresh token>').and_return(token_handler)
+
+        allow(token_handler).to receive(:access_token).and_return('new_access_token')
+        allow(token_handler).to receive(:refresh_token).and_return('new_refresh_token')
       end
 
       after { instance.destroy }
@@ -43,6 +47,13 @@ describe Manage::InstancesController do
             stub_request(:get, 'https://api.example.com/v2/service_instances/abc-123/permissions').
               with(headers: { 'Authorization' => 'bearer <token>' }).
               to_return(body: JSON.generate({ manage: true }))
+          end
+
+          it 'updates the session tokens' do
+            get :show, id: 'abc-123'
+
+            expect(session[:uaa_access_token]).to eql('new_access_token')
+            expect(session[:uaa_refresh_token]).to eql('new_refresh_token')
           end
 
           it 'displays the usage information for the given instance' do
@@ -70,6 +81,13 @@ describe Manage::InstancesController do
             stub_request(:get, 'http://api.example.com/v2/service_instances/abc-123/permissions').
               with(headers: { 'Authorization' => 'bearer <token>' }).
               to_return(body: JSON.generate({ manage: true }))
+          end
+
+          it 'updates the session tokens' do
+            get :show, id: 'abc-123'
+
+            expect(session[:uaa_access_token]).to eql('new_access_token')
+            expect(session[:uaa_refresh_token]).to eql('new_refresh_token')
           end
 
           it 'displays the usage information for the given instance' do
