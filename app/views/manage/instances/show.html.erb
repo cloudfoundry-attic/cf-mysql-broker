@@ -1,0 +1,12 @@
+<p>
+  <%= @used_data %> MB of <%= @quota %> MB used.
+</p>
+
+<% if @over_quota %>
+    <p>
+      Warning: Write permissions have been revoked due to storage utilization
+      exceeding the plan quota. Read and delete permissions remain enabled.
+      Write permissions will be restored when storage utilization has been
+      reduced to below the plan quota.
+    </p>
+<% end %>

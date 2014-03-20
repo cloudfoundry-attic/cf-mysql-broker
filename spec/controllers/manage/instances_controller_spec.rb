@@ -3,6 +3,8 @@ require 'spec_helper'
 describe Manage::InstancesController do
 
   describe 'show' do
+    render_views
+
     before do
       Settings.stub(:cc_api_uri) { 'http://api.example.com' }
     end
@@ -26,8 +28,8 @@ describe Manage::InstancesController do
         allow(ServiceInstanceUsageQuery).to receive(:new).and_return(query)
         allow(query).to receive(:execute).and_return(10.3)
 
-        session[:uaa_user_id] = 'some-user-id'
-        session[:uaa_access_token] = '<access token>'
+        session[:uaa_user_id]       = 'some-user-id'
+        session[:uaa_access_token]  = '<access token>'
         session[:uaa_refresh_token] = '<refresh token>'
 
         allow(AccessTokenHandler).to receive(:new).with('<access token>', '<refresh token>').and_return(token_handler)
@@ -39,82 +41,47 @@ describe Manage::InstancesController do
       after { instance.destroy }
 
       context 'when the user has permissions to manage the instance' do
+        before do
+          Settings.stub(:cc_api_uri) { 'http://api.example.com' }
 
-        context 'when the uri has https' do
-          before do
-            Settings.stub(:cc_api_uri) { 'https://api.example.com' }
-
-            stub_request(:get, 'https://api.example.com/v2/service_instances/abc-123/permissions').
-              with(headers: { 'Authorization' => 'bearer <token>' }).
-              to_return(body: JSON.generate({ manage: true }))
-          end
-
-          it 'updates the session tokens' do
-            get :show, id: 'abc-123'
-
-            expect(session[:uaa_access_token]).to eql('new_access_token')
-            expect(session[:uaa_refresh_token]).to eql('new_refresh_token')
-          end
-
-          it 'displays the usage information for the given instance' do
-            quota = Settings.services[0].plans[0].max_storage_mb.to_i
-
-            get :show, id: 'abc-123'
-
-            expect(response.status).to eql(200)
-            expect(response.body).to match(/10\.3 MB of #{quota} MB used./)
-            expect(query).to have_received(:execute).once
-          end
-
-          it 'uses ssl' do
-            get :show, id: 'abc-123'
-
-            a_request(:get, 'https://api.example.com/v2/service_instances/abc-123/permissions').
-              should have_been_made
-          end
+          allow(ServiceInstanceAccessVerifier).to receive(:can_manage_instance?).
+                                                    with('abc-123', anything).
+                                                    and_return(true)
         end
 
-        context 'when the uri does not have https' do
+        it 'updates the session tokens' do
+          get :show, id: 'abc-123'
+
+          expect(session[:uaa_access_token]).to eql('new_access_token')
+          expect(session[:uaa_refresh_token]).to eql('new_refresh_token')
+        end
+
+        it 'displays the usage information for the given instance' do
+          quota = Settings.services[0].plans[0].max_storage_mb.to_i
+
+          get :show, id: 'abc-123'
+
+          expect(response.status).to eql(200)
+          expect(response.body).to match(/10\.3 MB of #{quota} MB used./)
+          expect(query).to have_received(:execute).once
+        end
+
+        context 'when the user is over the quota' do
           before do
-            Settings.stub(:cc_api_uri) { 'http://api.example.com' }
-
-            stub_request(:get, 'http://api.example.com/v2/service_instances/abc-123/permissions').
-              with(headers: { 'Authorization' => 'bearer <token>' }).
-              to_return(body: JSON.generate({ manage: true }))
+            allow(query).to receive(:execute).and_return(120)
           end
-
-          it 'updates the session tokens' do
+          it 'displays a warning' do
             get :show, id: 'abc-123'
-
-            expect(session[:uaa_access_token]).to eql('new_access_token')
-            expect(session[:uaa_refresh_token]).to eql('new_refresh_token')
+            expect(response.body).to include("Warning:")
           end
-
-          it 'displays the usage information for the given instance' do
-            quota = Settings.services[0].plans[0].max_storage_mb.to_i
-
-            get :show, id: 'abc-123'
-
-            expect(response.status).to eql(200)
-            expect(response.body).to match(/10\.3 MB of #{quota} MB used./)
-            expect(query).to have_received(:execute).once
-          end
-
-          it 'does not use ssl' do
-            get :show, id: 'abc-123'
-
-            a_request(:get, 'http://api.example.com/v2/service_instances/abc-123/permissions').
-              should have_been_made
-          end
-
         end
       end
 
       context 'when the user does not have permission to manage the instance' do
         before do
-          stub_request(:get, 'http://api.example.com/v2/service_instances/abc-123/permissions').
-            with(headers: { 'Authorization' => 'bearer <token>' }).
-            to_return(body: JSON.generate({ manage: false }))
+          allow(ServiceInstanceAccessVerifier).to receive(:can_manage_instance?).
+                                                    with('abc-123', anything).
+                                                    and_return(false)
         end
 
         it 'displays a "not authorized" message' do
