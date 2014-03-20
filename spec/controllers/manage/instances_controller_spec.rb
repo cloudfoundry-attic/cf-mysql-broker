@@ -21,7 +21,7 @@ describe Manage::InstancesController do
     context 'when the user is authenticated' do
       let(:query) { double(ServiceInstanceUsageQuery) }
       let(:instance) { ServiceInstance.new(id: 'abc-123') }
-      let(:token_handler) { double(AccessTokenHandler, auth_header: 'bearer <token>') }
+      let(:uaa_session) { double(UaaSession, auth_header: 'bearer <token>') }
 
       before do
         instance.save
@@ -32,10 +32,9 @@ describe Manage::InstancesController do
         session[:uaa_access_token]  = '<access token>'
         session[:uaa_refresh_token] = '<refresh token>'
 
-        allow(AccessTokenHandler).to receive(:new).with('<access token>', '<refresh token>').and_return(token_handler)
+        allow(UaaSession).to receive(:build).with('<access token>', '<refresh token>').and_return(uaa_session)
 
-        allow(token_handler).to receive(:access_token).and_return('new_access_token')
-        allow(token_handler).to receive(:refresh_token).and_return('new_refresh_token')
+        allow(uaa_session).to receive(:access_token).and_return('new_access_token')
       end
 
       after { instance.destroy }
@@ -53,7 +52,6 @@ describe Manage::InstancesController do
           get :show, id: 'abc-123'
 
           expect(session[:uaa_access_token]).to eql('new_access_token')
-          expect(session[:uaa_refresh_token]).to eql('new_refresh_token')
         end
 
         it 'displays the usage information for the given instance' do

@@ -2,7 +2,7 @@ module Manage
   class InstancesController < ActionController::Base
 
     before_filter :require_login
-    before_filter :store_token
+    before_filter :build_uaa_session
     before_filter :ensure_can_manage_instance
 
     def show
@@ -23,15 +23,13 @@ module Manage
       end
     end
 
-    def store_token
-      token_handler = AccessTokenHandler.new(session[:uaa_access_token], session[:uaa_refresh_token])
-      session[:uaa_access_token]  = token_handler.access_token
-      session[:uaa_refresh_token] = token_handler.refresh_token
-      @auth_header   = token_handler.auth_header
+    def build_uaa_session
+      @uaa_session = UaaSession.build(session[:uaa_access_token], session[:uaa_refresh_token])
+      session[:uaa_access_token]  = @uaa_session.access_token
     end
 
     def ensure_can_manage_instance
-      cc_client = CloudControllerHttpClient.new(Settings.cc_api_uri, @auth_header)
+      cc_client = CloudControllerHttpClient.new(Settings.cc_api_uri, @uaa_session.auth_header)
       unless ServiceInstanceAccessVerifier.can_manage_instance?(params[:id], cc_client)
         render(text: 'Not Authorized')
         return false
