@@ -37,7 +37,14 @@ module Manage
     end
 
     def logged_in?
-      session[:uaa_user_id].present?
+      oldest_allowable_last_seen_time = Time.now - Settings.session_expiry
+
+      if session[:uaa_user_id].present? && (session[:last_seen] > oldest_allowable_last_seen_time)
+        session[:last_seen] = Time.now
+        return true
+      end
+
+      return false
     end
   end
 end

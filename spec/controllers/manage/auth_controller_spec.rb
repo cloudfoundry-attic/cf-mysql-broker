@@ -29,6 +29,7 @@ describe Manage::AuthController do
       expect(session[:uaa_user_id]).to eql('mister_tee')
       expect(session[:uaa_access_token]).to eql('UAA access token')
       expect(session[:uaa_refresh_token]).to eql('UAA refresh token')
+      expect(session[:last_seen]).to be_a_kind_of(Time)
     end
   end
 
