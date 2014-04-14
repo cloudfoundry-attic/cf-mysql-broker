@@ -12,6 +12,7 @@ defaults: &defaults
     - nats://127.0.0.1:4222
   external_host: pmysql.vcap.me
   external_ip: 127.0.0.1
+  ssl_enabled: true
 
   services:
   - name: p-mysql-local

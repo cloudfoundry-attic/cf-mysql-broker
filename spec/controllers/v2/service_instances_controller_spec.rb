@@ -6,6 +6,7 @@ describe V2::ServiceInstancesController do
   before { authenticate }
   after { ServiceInstance.new(id: instance_id).destroy }
 
+  # this is actually the create
   describe '#update' do
     let(:max_db_per_node) { 5 }
     let(:services) do
@@ -22,6 +23,20 @@ describe V2::ServiceInstancesController do
 
     before do
       Settings.stub(:[]).with('services').and_return(services)
+      Settings.stub(:[]).with('ssl_enabled').and_return(true)
+    end
+
+    context 'when ssl is set to false' do
+      before do
+        Settings.stub(:[]).with('ssl_enabled').and_return(false)
+      end
+
+      it 'returns a dashboard URL without https' do
+        put :update, id: instance_id
+
+        instance = JSON.parse(response.body)
+        expect(instance).to eq({ 'dashboard_url' => "http://pmysql.vcap.me/manage/instances/#{instance_id}" })
+      end
     end
 
     context 'when below max_db_per_node quota' do
@@ -43,7 +58,7 @@ describe V2::ServiceInstancesController do
         put :update, id: instance_id
 
         instance = JSON.parse(response.body)
-        expect(instance).to eq({ 'dashboard_url' => "http://pmysql.vcap.me/manage/instances/#{instance_id}" })
+        expect(instance).to eq({ 'dashboard_url' => "https://pmysql.vcap.me/manage/instances/#{instance_id}" })
       end
     end
 
@@ -72,7 +87,7 @@ describe V2::ServiceInstancesController do
         put :update, id: instance_id
 
         instance = JSON.parse(response.body)
-        expect(instance).to eq({ 'dashboard_url' => "http://pmysql.vcap.me/manage/instances/#{instance_id}" })
+        expect(instance).to eq({ 'dashboard_url' => "https://pmysql.vcap.me/manage/instances/#{instance_id}" })
       end
     end
 

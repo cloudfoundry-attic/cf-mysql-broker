@@ -32,6 +32,10 @@ class V2::ServiceInstancesController < V2::BaseController
     domain = Settings.external_host
     path   = manage_instance_path(instance.id)
 
-    "http://#{domain}#{path}"
+    "#{scheme}://#{domain}#{path}"
+  end
+
+  def scheme
+    Settings['ssl_enabled'] == false ? 'http': 'https'
   end
 end
