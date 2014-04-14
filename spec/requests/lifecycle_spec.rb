@@ -50,7 +50,7 @@ describe 'the service lifecycle' do
     put "/v2/service_instances/#{instance_id}", {service_plan_id: 'PLAN-1'}
 
     expect(response.status).to eq(201)
-    expect(response.body).to eq("{\"dashboard_url\":\"http://pmysql.vcap.me/manage/instances/#{instance_id}\"}")
+    expect(response.body).to eq("{\"dashboard_url\":\"https://pmysql.vcap.me/manage/instances/#{instance_id}\"}")
 
     ##
     ## Bind
