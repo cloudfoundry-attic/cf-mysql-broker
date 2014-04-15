@@ -7,7 +7,8 @@ Rails.application.config.middleware.use OmniAuth::Builder do
   unless Rails.env.test?
     provider :cloudfoundry, client.id, client.secret, {
       auth_server_url: Configuration.auth_server_url,
-      token_server_url: Configuration.token_server_url
+      token_server_url: Configuration.token_server_url,
+      scope: %w(cloud_controller.read openid)
     }
   end
 end
