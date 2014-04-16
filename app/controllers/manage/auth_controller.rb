@@ -1,5 +1,5 @@
 module Manage
-  class AuthController < ActionController::Base
+  class AuthController < ApplicationController
 
     def create
       auth                        = request.env['omniauth.auth'].to_hash

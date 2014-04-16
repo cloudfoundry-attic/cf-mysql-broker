@@ -1,5 +1,5 @@
 module Manage
-  class InstancesController < ActionController::Base
+  class InstancesController < ApplicationController
 
     before_filter :require_login
     before_filter :build_uaa_session

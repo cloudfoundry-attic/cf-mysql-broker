@@ -1,4 +1,4 @@
-class V2::BaseController < ApplicationController
+class V2::BaseController < ApiController
   before_filter :authenticate
 
   protected

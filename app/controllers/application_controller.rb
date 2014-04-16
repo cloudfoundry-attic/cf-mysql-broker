@@ -1,3 +1,2 @@
-class ApplicationController < ActionController::API
-  include ActionController::HttpAuthentication::Basic::ControllerMethods
+class ApplicationController < ActionController::Base
 end
