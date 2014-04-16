@@ -3,6 +3,7 @@ module Manage
 
     before_filter :require_login
     before_filter :build_uaa_session
+    before_filter :ensure_all_necessary_scopes_are_approved
     before_filter :ensure_can_manage_instance
 
     def show
@@ -26,6 +27,14 @@ module Manage
     def build_uaa_session
       @uaa_session = UaaSession.build(session[:uaa_access_token], session[:uaa_refresh_token])
       session[:uaa_access_token]  = @uaa_session.access_token
+    end
+
+    def ensure_all_necessary_scopes_are_approved
+      token_hash = CF::UAA::TokenCoder.decode(@uaa_session.access_token, verify: false)
+      unless %w(openid cloud_controller.read).all? { |scope| token_hash['scope'].include?(scope) }
+        render 'errors/approvals_error'
+        return false
+      end
     end
 
     def ensure_can_manage_instance

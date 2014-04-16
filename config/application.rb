@@ -36,5 +36,6 @@ module CfMysqlBroker
     config.paths.add 'config/database', with: Settings.database_config_path
     config.paths.add 'log', with: Settings.log_path
     config.middleware.use Rack::Session::Cookie, secret: Settings.cookie_secret, expire_after: Settings.session_expiry
+    config.middleware.insert_before ActionDispatch::ParamsParser, "CatchOauthErrors"
   end
 end

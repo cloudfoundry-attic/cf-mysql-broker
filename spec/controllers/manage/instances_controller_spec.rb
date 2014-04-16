@@ -6,7 +6,8 @@ describe Manage::InstancesController do
     render_views
 
     before do
-      Settings.stub(:cc_api_uri) { 'http://api.example.com' }
+      allow(Settings).to receive(:cc_api_uri) { 'http://api.example.com' }
+      allow(CF::UAA::TokenCoder).to receive(:decode).and_return('scope' => ['openid', 'cloud_controller.read'])
     end
 
     describe 'redirecting a user that is not logged in' do
@@ -128,6 +129,31 @@ describe Manage::InstancesController do
           expect(response.body).to match(/Not\ Authorized/)
           expect(query).not_to have_received(:execute)
         end
+      end
+    end
+
+    context 'when an authenticated user does not approve the necessary scopes' do
+      let(:uaa_session) { double(UaaSession, auth_header: 'bearer <token>') }
+
+      before do
+        session[:uaa_user_id]       = 'some-user-id'
+        session[:uaa_access_token]  = '<access token>'
+        session[:uaa_refresh_token] = '<refresh token>'
+        session[:last_seen]         = Time.now
+
+        allow(UaaSession).to receive(:build).with('<access token>', '<refresh token>').and_return(uaa_session)
+
+        allow(uaa_session).to receive(:access_token).and_return('new_access_token')
+        allow(CF::UAA::TokenCoder).to receive(:decode).with('new_access_token', verify: false).and_return({'scope' => ['openid']} )
+
+        allow(Configuration).to receive(:manage_user_profile_url).and_return('login.com/profile')
+      end
+
+      it 'renders the approval errors page' do
+        get :show, id: 'abc-123'
+
+        expect(response.status).to eq 200
+        expect(response.body).to include('This application requires the following permissions')
       end
     end
   end

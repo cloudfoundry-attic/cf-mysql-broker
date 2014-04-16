@@ -1,6 +1,10 @@
 module Configuration
   extend self
 
+  def manage_user_profile_url
+    "#{auth_server_url}/profile"
+  end
+
   def auth_server_url
     cc_api_info["authorization_endpoint"]
   end
