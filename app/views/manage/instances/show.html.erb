@@ -1,12 +1,23 @@
-<p>
-  <%= @used_data %> MB of <%= @quota %> MB used.
-</p>
+<div class="header-container pvm">
+  <img src="<%= image_path "icon-PivotalMySQLDev.png" %>"
+  <span class="phm">
+  Pivotal™ <strong>MySQL Dev</strong>
+  </span>
+</div>
+
+<div class="pvl panel panel-message">
+  <div class="panel-body type-em-4 txt-m">
+    <%= @used_data %> MB of <%= @quota %> MB used.
+  </div>
+</div>
 
 <% if @over_quota %>
-    <p>
+  <div class="pvl panel panel-message">
+    <div class="panel-body panel-text txt-m">
       Warning: Write permissions have been revoked due to storage utilization
       exceeding the plan quota. Read and delete permissions remain enabled.
       Write permissions will be restored when storage utilization has been
       reduced to below the plan quota.
-    </p>
+    </div>
+  </div>
 <% end %>

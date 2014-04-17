@@ -2,8 +2,19 @@
 <html>
     <head>
       <title>MySQL Management Dashboard</title>
+      <%= favicon_link_tag %>
+      <%= stylesheet_link_tag    "application", media: "all" %>
     </head>
     <body>
-      <%= yield %>
+      <div class="container-gmajor">
+        <div class="main-wrapper services-main-wrapper">
+          <div class="header pvl phxl teal-text">
+              Pivotal CF Services
+          </div>
+          <div class="services-container">
+            <%= yield %>
+          </div>
+        </div>
+      </div>
     </body>
 </html>
