@@ -31,4 +31,35 @@ describe Configuration do
     end
   end
 
+  describe '#documentation_url' do
+    it 'uses the documentationUrl of the first service in the catalog' do
+      expect(Configuration.documentation_url).to eql('http://docs.run.pivotal.io')
+    end
+
+    context 'when the catalog is empty' do
+      before do
+        Settings.stub(:services).and_return([])
+      end
+
+      it 'is nil' do
+        expect(Configuration.documentation_url).to be_nil
+      end
+    end
+  end
+
+  describe '#support_url' do
+    it 'uses the supportUrl of the first service in the catalog' do
+      expect(Configuration.support_url).to eql('http://support.run.pivotal.io/home')
+    end
+
+    context 'when the catalog is empty' do
+      before do
+        Settings.stub(:services).and_return([])
+      end
+
+      it 'is nil' do
+        expect(Configuration.support_url).to be_nil
+      end
+    end
+  end
 end

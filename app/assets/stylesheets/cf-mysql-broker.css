@@ -9,6 +9,10 @@
     background-color: #243640;
 }
 
+.float-right {
+    float: right;
+}
+
 .services-container {
     padding: 0 15px;
 }

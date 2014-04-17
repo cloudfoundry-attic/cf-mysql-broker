@@ -1,6 +1,14 @@
 module Configuration
   extend self
 
+  def documentation_url
+    Settings.services.first.metadata.documentationUrl rescue nil
+  end
+
+  def support_url
+    Settings.services.first.metadata.supportUrl rescue nil
+  end
+
   def manage_user_profile_url
     "#{auth_server_url}/profile"
   end

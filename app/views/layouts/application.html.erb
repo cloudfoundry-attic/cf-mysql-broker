@@ -8,15 +8,27 @@
     <body>
       <div class="container-gmajor">
         <div class="main-wrapper services-main-wrapper">
-          <div class="header pvl phxl teal-text">
+          <div class="row header pvl phxl">
+            <div class="teal-text col-lg-18 col-md-18 col-sm-18 col-xs-14">
               Pivotal CF Services
+            </div>
+            <% if Configuration.documentation_url %>
+            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-5 txt-r float-right">
+              <%= link_to "Docs", Configuration.documentation_url %>
+            </div>
+            <% end %>
+            <% if Configuration.support_url %>
+            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-5 txt-r float-right">
+              <%= link_to "Support", Configuration.support_url %>
+            </div>
+            <% end %>
           </div>
 
           <div class="services-container">
             <div class="header-container pvm">
-              <img src="<%= image_path "icon-PivotalMySQLDev.png" %>">
+              <%= image_tag "icon-PivotalMySQLDev.png" %>
               <span class="phm">
-                Pivotal™ <strong>MySQL Dev</strong>
+                Pivotal <strong>MySQL Dev</strong>
               </span>
             </div>
 
