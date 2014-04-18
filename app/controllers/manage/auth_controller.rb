@@ -4,8 +4,14 @@ module Manage
     def create
       auth                        = request.env['omniauth.auth'].to_hash
       credentials                 = auth['credentials']
-      token                       = credentials['token']
-      unless token
+
+      token = credentials['token']
+      if token.empty?
+        return render 'errors/approvals_error'
+      end
+
+      raw_info = auth['extra']['raw_info']
+      unless raw_info
         return render 'errors/approvals_error'
       end
 

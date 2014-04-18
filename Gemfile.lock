@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/dsabeti/omniauth-uaa-oauth2.git
-  revision: b4478a5da5fa9c03cfbda2948bb531002a01c685
+  revision: a35776f4ff136c259ac6cfba46311da6f76edd77
   branch: master
   specs:
     omniauth-uaa-oauth2 (0.0.3)
@@ -99,7 +99,7 @@ GEM
     mime-types (1.25)
     minitest (4.7.5)
     msgpack (0.5.8)
-    multi_json (1.8.4)
+    multi_json (1.9.2)
     mysql2 (0.3.14)
     nats (0.5.0.beta.12)
       daemons (>= 1.1.9)
