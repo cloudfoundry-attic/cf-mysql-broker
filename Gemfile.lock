@@ -1,7 +1,7 @@
 GIT
-  remote: git://github.com/dsabeti/omniauth-uaa-oauth2.git
-  revision: a35776f4ff136c259ac6cfba46311da6f76edd77
-  branch: master
+  remote: git://github.com/cloudfoundry/omniauth-uaa-oauth2.git
+  revision: c959d31df0e6802dd1efd237610f977a58af4367
+  branch: error_handling
   specs:
     omniauth-uaa-oauth2 (0.0.3)
       cf-uaa-lib
