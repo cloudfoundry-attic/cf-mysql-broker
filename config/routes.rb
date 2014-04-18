@@ -13,5 +13,6 @@ CfMysqlBroker::Application.routes.draw do
     get 'auth/failure' => 'auth#failure'
 
     resources :instances, only: [:show]
+    get 'instances/failure', to: 'instances#failure'
   end
 end
