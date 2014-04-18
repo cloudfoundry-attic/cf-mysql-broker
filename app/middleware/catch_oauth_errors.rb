@@ -1,4 +1,6 @@
 class CatchOauthErrors
+    include CfMysqlBroker::Application.routes.url_helpers
+
   def initialize(app)
     @app = app
   end
@@ -7,7 +9,14 @@ class CatchOauthErrors
     begin
       @app.call(env)
     rescue CF::UAA::InvalidToken, CF::UAA::TargetError => e
-      [200, { "Content-Type" => "text/html" }, [error_html]]
+      puts "RESCUED"
+      puts e.class
+      puts e.message
+      puts e.backtrace
+      [302, {'Location' => url_for(controller: 'manage/instances', action: 'failure', only_path: true)}, []]
+    #  @app.call(env)
+    #rescue CF::UAA::InvalidToken, CF::UAA::TargetError => e
+    #  [200, { "Content-Type" => "text/html" }, [error_html]]
     end
   end
 

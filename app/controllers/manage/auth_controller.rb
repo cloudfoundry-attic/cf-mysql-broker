@@ -4,6 +4,10 @@ module Manage
     def create
       auth                        = request.env['omniauth.auth'].to_hash
       credentials                 = auth['credentials']
+      token                       = credentials['token']
+      unless token
+        return render 'errors/approvals_error'
+      end
 
       session[:uaa_user_id]       = auth['extra']['raw_info']['user_id']
       session[:uaa_access_token]  = credentials['token']
