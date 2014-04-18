@@ -14,7 +14,7 @@ class ServiceBinding < BaseModel
     binding = new(id: id)
 
     begin
-      connection.execute("SHOW GRANTS FOR '#{binding.username}'")
+      connection.execute("SHOW GRANTS FOR #{connection.quote(binding.username)}")
       binding
     rescue ActiveRecord::StatementInvalid => e
       raise unless e.message =~ /no such grant/
@@ -33,11 +33,11 @@ class ServiceBinding < BaseModel
     binding = new(id: id)
 
     begin
-      grants = connection.select_values("SHOW GRANTS FOR '#{binding.username}'")
+      grants = connection.select_values("SHOW GRANTS FOR #{connection.quote(binding.username)}")
 
       # Can we do this more elegantly, i.e., without checking for a
       # particular raw GRANT statement?
-      if grants.include?("GRANT ALL PRIVILEGES ON `#{instance.database}`.* TO '#{binding.username}'@'%'")
+      if grants.include?("GRANT ALL PRIVILEGES ON `#{instance.database}`.* TO #{connection.quote(binding.username)}@'%'")
         binding
       end
     rescue ActiveRecord::StatementInvalid => e
@@ -79,8 +79,8 @@ class ServiceBinding < BaseModel
   end
 
   def save
-    connection.execute("CREATE USER '#{username}' IDENTIFIED BY '#{password}'")
-    connection.execute("GRANT ALL PRIVILEGES ON `#{database}`.* TO '#{username}'@'%'")
+    connection.execute("CREATE USER #{connection.quote(username)} IDENTIFIED BY #{connection.quote(password)}")
+    connection.execute("GRANT ALL PRIVILEGES ON `#{database}`.* TO #{connection.quote(username)}@'%'")
 
     # Some MySQL installations, e.g., Travis, seem to need privileges
     # to be flushed even when using the appropriate account management
@@ -91,7 +91,7 @@ class ServiceBinding < BaseModel
 
   def destroy
     begin
-      connection.execute("DROP USER '#{username}'")
+      connection.execute("DROP USER #{connection.quote(username)}")
     rescue ActiveRecord::StatementInvalid => e
       raise unless e.message =~ /DROP USER failed/
     else
