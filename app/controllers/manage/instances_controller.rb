@@ -1,10 +1,10 @@
 module Manage
   class InstancesController < ApplicationController
 
-    before_filter :require_login, except: [:failure]
-    before_filter :build_uaa_session, except: [:failure]
-    before_filter :ensure_all_necessary_scopes_are_approved, except: [:failure]
-    before_filter :ensure_can_manage_instance, except: [:failure]
+    before_filter :require_login
+    before_filter :build_uaa_session
+    before_filter :ensure_all_necessary_scopes_are_approved
+    before_filter :ensure_can_manage_instance
 
     def show
       instance = ServiceInstance.find(params[:id])

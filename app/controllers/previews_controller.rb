@@ -10,10 +10,6 @@ class PreviewsController < ApplicationController
     render 'manage/instances/show'
   end
 
-  def test
-    render text: "Hello!"
-  end
-
   private
 
   def restrict_to_development
