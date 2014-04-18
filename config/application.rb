@@ -28,7 +28,8 @@ module CfMysqlBroker
     # config.i18n.default_locale = :de
 
     # Disable the asset pipeline.
-    config.assets.enabled = false
+    config.assets.enabled = true
+    config.assets.initialize_on_precompile = false
 
     config.autoload_paths += %W(#{config.root}/lib)
     config.autoload_paths += Dir["#{config.root}/lib/**/"]
