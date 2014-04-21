@@ -3,6 +3,20 @@
 # include the path to a database configuration that includes these
 # settings.
 
+
+# This is included because our app connects to the database when Rails starts,
+# and Rails gets loaded when static assets are being precompiled in the 'assets'
+# environment.
+assets:
+  adapter: mysql2
+  encoding: utf8
+  database: development
+  pool: 5
+  username: root
+  password:
+  host: localhost
+  port: 3306
+
 development:
   adapter: mysql2
   encoding: utf8

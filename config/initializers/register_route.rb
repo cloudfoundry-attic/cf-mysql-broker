@@ -1,4 +1,4 @@
-unless Rails.env.test?
+unless (Rails.env.test? || Rails.env.assets?)
 
   max_fixnum = (2**(0.size * 8 -2) -1)
 

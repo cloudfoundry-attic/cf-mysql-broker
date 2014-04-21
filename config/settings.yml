@@ -51,6 +51,10 @@ defaults: &defaults
 
   cc_api_uri: 'http://api.10.244.0.34.xip.io'
 
+assets:
+  auth_password: 'secret'
+  <<: *defaults
+
 development:
   auth_password: 'secret'
   <<: *defaults
