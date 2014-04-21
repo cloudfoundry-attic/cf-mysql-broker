@@ -1,5 +1,4 @@
 unless (Rails.env.test? || Rails.env.assets?)
-
   max_fixnum = (2**(0.size * 8 -2) -1)
 
   register_thread = Thread.new do
@@ -25,5 +24,4 @@ unless (Rails.env.test? || Rails.env.assets?)
       :uri                 => Settings.external_host,
       :tags                => { "component" => "P-MySQL" })
   end
-
 end
