@@ -31,7 +31,14 @@ module Manage
 
     def ensure_all_necessary_scopes_are_approved
       token_hash = CF::UAA::TokenCoder.decode(@uaa_session.access_token, verify: false)
-      unless %w(openid cloud_controller.read).all? { |scope| token_hash['scope'].include?(scope) }
+      return true if has_necessary_scopes?(token_hash)
+
+      if need_to_retry?
+        session[:has_retried] = 'true'
+        redirect_to '/manage/auth/cloudfoundry'
+        return false
+      else
+        session[:has_retried] = 'false'
         render 'errors/approvals_error'
         return false
       end
@@ -54,6 +61,14 @@ module Manage
       end
 
       return false
+    end
+
+    def has_necessary_scopes?(token_hash)
+      %w(openid cloud_controller.read).all? { |scope| token_hash['scope'].include?(scope) }
+    end
+
+    def need_to_retry?
+      session[:has_retried].nil? || session[:has_retried] == 'false'
     end
   end
 end

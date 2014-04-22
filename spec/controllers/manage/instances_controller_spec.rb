@@ -41,6 +41,53 @@ describe Manage::InstancesController do
       end
     end
 
+    describe 'verifying that the user has approved the necessary scopes' do
+      let(:uaa_session) { double(UaaSession, auth_header: 'bearer <token>') }
+      let(:all_scopes) { ['openid', 'cloud_controller.read'] }
+      let(:missing_scopes) { ['openid'] }
+
+      before do
+        session[:uaa_user_id]       = 'some-user-id'
+        session[:uaa_access_token]  = '<access token>'
+        session[:uaa_refresh_token] = '<refresh token>'
+        session[:last_seen]         = Time.now
+        session[:has_retried]       = has_retried
+
+        allow(UaaSession).to receive(:build).with('<access token>', '<refresh token>').and_return(uaa_session)
+
+        allow(uaa_session).to receive(:access_token).and_return('new_access_token')
+        allow(CF::UAA::TokenCoder).to receive(:decode).with('new_access_token', verify: false).and_return({'scope' => scopes} )
+
+        allow(Configuration).to receive(:manage_user_profile_url).and_return('login.com/profile')
+      end
+
+
+      context 'when the user has not approved the necessary scopes' do
+        let(:scopes) { missing_scopes }
+        let(:has_retried) { 'true' }
+
+        it 'renders the approval errors page' do
+          get :show, id: 'abc-123'
+
+          expect(response.status).to eq 200
+          expect(response.body).to include('This application requires the following permissions')
+        end
+      end
+
+      context 'when the user updates his approvals to include the necessary scopes' do
+        context 'the first attempt that fails' do
+          let(:scopes) { missing_scopes }
+          let(:has_retried) { nil }
+
+          it 'redirects to the auth endpoint' do
+            get :show, id: 'abc-123'
+
+            expect(response).to redirect_to '/manage/auth/cloudfoundry'
+          end
+        end
+      end
+    end
+
     context 'when the user is not authenticated' do
       it 'stores the instance id in the session and redirects to the auth endpoint' do
         get :show, id: 'abc-123'
@@ -131,31 +178,5 @@ describe Manage::InstancesController do
         end
       end
     end
-
-    context 'when an authenticated user does not approve the necessary scopes' do
-      let(:uaa_session) { double(UaaSession, auth_header: 'bearer <token>') }
-
-      before do
-        session[:uaa_user_id]       = 'some-user-id'
-        session[:uaa_access_token]  = '<access token>'
-        session[:uaa_refresh_token] = '<refresh token>'
-        session[:last_seen]         = Time.now
-
-        allow(UaaSession).to receive(:build).with('<access token>', '<refresh token>').and_return(uaa_session)
-
-        allow(uaa_session).to receive(:access_token).and_return('new_access_token')
-        allow(CF::UAA::TokenCoder).to receive(:decode).with('new_access_token', verify: false).and_return({'scope' => ['openid']} )
-
-        allow(Configuration).to receive(:manage_user_profile_url).and_return('login.com/profile')
-      end
-
-      it 'renders the approval errors page' do
-        get :show, id: 'abc-123'
-
-        expect(response.status).to eq 200
-        expect(response.body).to include('This application requires the following permissions')
-      end
-    end
   end
-
 end
