@@ -12,18 +12,13 @@
             <div class="teal-text col-xs-16 phn pvn">
               Pivotal CF Services
             </div>
-            <div class="col-xs-8 phn pvn">
-              <div class="col-sm-12 phn pvn"></div>
-              <% if Configuration.documentation_url %>
-                  <div class="col-sm-6 phn pvn text-right">
-                    <%= link_to "Docs", Configuration.documentation_url %>
-                  </div>
-              <% end %>
-              <% if Configuration.support_url %>
-                  <div class="col-sm-6 phn pvn text-right">
-                    <%= link_to "Support", Configuration.support_url %>
-                  </div>
-              <% end %>
+            <div class="col-xs-8 phn pvn text-right">
+            <% if Configuration.documentation_url %>
+                <%= link_to "Docs", Configuration.documentation_url, class: 'mlxl' %>
+            <% end %>
+            <% if Configuration.support_url %>
+                <%= link_to "Support", Configuration.support_url, class: 'mlxl' %>
+            <% end %>
             </div>
           </div>
 
