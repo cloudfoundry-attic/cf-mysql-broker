@@ -7,21 +7,24 @@
     </head>
     <body>
       <div class="container-gmajor">
-        <div class="main-wrapper services-main-wrapper">
-          <div class="row header pvl phxl">
-            <div class="teal-text col-lg-18 col-md-18 col-sm-18 col-xs-14">
+        <div class="main-wrapper no-sidebar-main-wrapper">
+          <div class="row header pvl mhn">
+            <div class="teal-text col-xs-16 phn pvn">
               Pivotal CF Services
             </div>
-            <% if Configuration.documentation_url %>
-            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-5 txt-r float-right">
-              <%= link_to "Docs", Configuration.documentation_url %>
+            <div class="col-xs-8 phn pvn">
+              <div class="col-sm-12 phn pvn"></div>
+              <% if Configuration.documentation_url %>
+                  <div class="col-sm-6 phn pvn text-right">
+                    <%= link_to "Docs", Configuration.documentation_url %>
+                  </div>
+              <% end %>
+              <% if Configuration.support_url %>
+                  <div class="col-sm-6 phn pvn text-right">
+                    <%= link_to "Support", Configuration.support_url %>
+                  </div>
+              <% end %>
             </div>
-            <% end %>
-            <% if Configuration.support_url %>
-            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-5 txt-r float-right">
-              <%= link_to "Support", Configuration.support_url %>
-            </div>
-            <% end %>
           </div>
 
           <div class="services-container">
