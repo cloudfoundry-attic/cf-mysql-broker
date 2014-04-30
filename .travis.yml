@@ -3,7 +3,7 @@ language: ruby
 bundler_args: --deployment --without development
 
 rvm:
-- 2.0.0-p353
+- 2.0.0
 
 env:
   global:
