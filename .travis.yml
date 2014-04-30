@@ -5,6 +5,10 @@ bundler_args: --deployment --without development
 rvm:
 - 2.0.0-p353
 
+env:
+  global:
+    secure: "kDkAQ6qrtss0dbdBbQz0a0+rgmBL9LhVhFGdfzm5mM3wxlIOLX9CMLiFS4hPJWGQoLv4M6ZkRVWxyVpVtAYrFHMgCv2YrEtcoWnQj+lH43pMg8PFO/mMX+hPiMKT/GwDYrQerdGO2ThxXiswJR00k2cJKtkz8PHgiVdr1KfzliY="
+
 script: bundle exec rspec spec
 
 before_script:
