@@ -22,7 +22,12 @@ module Configuration
   end
 
   def cc_api_info
-    store[:cc_api_info] ||= JSON.parse(Net::HTTP.get(URI.parse("#{Settings.cc_api_uri}/info")))
+    return store[:cc_api_info] unless store[:cc_api_info].nil?
+
+    cc_client = CloudControllerHttpClient.new
+    response = cc_client.get('/info')
+
+    store[:cc_api_info] = response
   end
 
   def store

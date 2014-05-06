@@ -45,7 +45,7 @@ module Manage
     end
 
     def ensure_can_manage_instance
-      cc_client = CloudControllerHttpClient.new(Settings.cc_api_uri, @uaa_session.auth_header)
+      cc_client = CloudControllerHttpClient.new(@uaa_session.auth_header)
       unless ServiceInstanceAccessVerifier.can_manage_instance?(params[:id], cc_client)
         render 'errors/not_authorized'
         return false
