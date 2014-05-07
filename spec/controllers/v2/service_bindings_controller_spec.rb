@@ -31,7 +31,7 @@ describe V2::ServiceBindingsController do
 
     it_behaves_like 'a controller action that requires basic auth'
 
-    it_behaves_like 'a controller action that logs its request headers and body'
+    it_behaves_like 'a controller action that logs its request and response headers and body'
 
     it 'grants permission to access the given database' do
       expect(ServiceBinding.exists?(id: binding_id, service_instance_id: instance_id)).to eq(false)
@@ -76,7 +76,7 @@ describe V2::ServiceBindingsController do
       before { binding.save }
       after { binding.destroy }
 
-      it_behaves_like 'a controller action that logs its request headers and body'
+      it_behaves_like 'a controller action that logs its request and response headers and body'
 
       it 'destroys the binding' do
         expect(ServiceBinding.exists?(id: binding.id, service_instance_id: instance.id)).to eq(true)
@@ -95,7 +95,7 @@ describe V2::ServiceBindingsController do
     end
 
     context 'when the binding does not exist' do
-      it_behaves_like 'a controller action that logs its request headers and body'
+      it_behaves_like 'a controller action that logs its request and response headers and body'
 
       it 'returns a 410' do
         make_request

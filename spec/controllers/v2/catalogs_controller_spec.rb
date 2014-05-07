@@ -9,7 +9,7 @@ describe V2::CatalogsController do
     context 'when the basic-auth credentials are correct' do
       before { authenticate }
 
-      it_behaves_like 'a controller action that logs its request headers and body'
+      it_behaves_like 'a controller action that logs its request and response headers and body'
 
       it 'builds services from the values in Settings' do
         service_setting_1_stub = double(:service_setting_1_stub)
@@ -37,7 +37,7 @@ describe V2::CatalogsController do
           Settings.stub(:[]).with('services').and_return(nil)
         end
 
-        it_behaves_like 'a controller action that logs its request headers and body'
+        it_behaves_like 'a controller action that logs its request and response headers and body'
 
         context 'when there are no services' do
           it 'produces an empty catalog' do
