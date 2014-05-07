@@ -24,19 +24,25 @@ describe V2::ServiceBindingsController do
     let(:generated_username) { ServiceBinding.new(id: binding_id).username }
     let(:generated_password) { 'generatedpw' }
 
+    let(:make_request) { put :update, id: binding_id, service_instance_id: instance_id }
+
     before { SecureRandom.stub(:base64).and_return(generated_password, 'notthepassword') }
     after { ServiceBinding.new(id: binding_id, service_instance: instance).destroy }
+
+    it_behaves_like 'a controller action that requires basic auth'
+
+    it_behaves_like 'a controller action that logs its request headers and body'
 
     it 'grants permission to access the given database' do
       expect(ServiceBinding.exists?(id: binding_id, service_instance_id: instance_id)).to eq(false)
 
-      put :update, id: binding_id, service_instance_id: instance_id
+      make_request
 
       expect(ServiceBinding.exists?(id: binding_id, service_instance_id: instance_id)).to eq(true)
     end
 
     it 'responds with generated credentials' do
-      put :update, id: binding_id, service_instance_id: instance_id
+      make_request
 
       binding = JSON.parse(response.body)
       expect(binding['credentials']).to eq(
@@ -51,7 +57,7 @@ describe V2::ServiceBindingsController do
     end
 
     it 'returns a 201' do
-      put :update, id: binding_id, service_instance_id: instance_id
+      make_request
 
       expect(response.status).to eq(201)
     end
@@ -62,20 +68,26 @@ describe V2::ServiceBindingsController do
     let(:binding) { ServiceBinding.new(id: binding_id, service_instance: instance) }
     let(:username) { binding.username }
 
+    let(:make_request) { delete :destroy, service_instance_id: instance.id, id: binding.id }
+
+    it_behaves_like 'a controller action that requires basic auth'
+
     context 'when the binding exists' do
       before { binding.save }
       after { binding.destroy }
 
+      it_behaves_like 'a controller action that logs its request headers and body'
+
       it 'destroys the binding' do
         expect(ServiceBinding.exists?(id: binding.id, service_instance_id: instance.id)).to eq(true)
 
-        delete :destroy, service_instance_id: instance.id, id: binding.id
+        make_request
 
         expect(ServiceBinding.exists?(id: binding.id, service_instance_id: instance.id)).to eq(false)
       end
 
       it 'returns a 200' do
-        delete :destroy, service_instance_id: instance.id, id: binding.id
+        make_request
 
         expect(response.status).to eq(200)
         expect(response.body).to eq('{}')
@@ -83,8 +95,10 @@ describe V2::ServiceBindingsController do
     end
 
     context 'when the binding does not exist' do
+      it_behaves_like 'a controller action that logs its request headers and body'
+
       it 'returns a 410' do
-        delete :destroy, service_instance_id: instance.id, id: binding.id
+        make_request
 
         expect(response.status).to eq(410)
       end

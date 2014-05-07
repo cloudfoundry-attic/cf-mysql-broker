@@ -21,10 +21,16 @@ describe V2::ServiceInstancesController do
       ]
     end
 
+    let(:make_request) { put :update, id: instance_id }
+
     before do
       Settings.stub(:[]).with('services').and_return(services)
       Settings.stub(:[]).with('ssl_enabled').and_return(true)
     end
+
+    it_behaves_like 'a controller action that requires basic auth'
+
+    it_behaves_like 'a controller action that logs its request headers and body'
 
     context 'when ssl is set to false' do
       before do
@@ -32,7 +38,7 @@ describe V2::ServiceInstancesController do
       end
 
       it 'returns a dashboard URL without https' do
-        put :update, id: instance_id
+        make_request
 
         instance = JSON.parse(response.body)
         expect(instance).to eq({ 'dashboard_url' => "http://pmysql.vcap.me/manage/instances/#{instance_id}" })
@@ -40,7 +46,6 @@ describe V2::ServiceInstancesController do
     end
 
     context 'when below max_db_per_node quota' do
-
       before do
         ServiceInstance.stub(:get_number_of_existing_instances).and_return(3)
       end
@@ -48,14 +53,14 @@ describe V2::ServiceInstancesController do
       it 'creates the database and returns a 201' do
         expect(ServiceInstance.exists?(instance_id)).to eq(false)
 
-        put :update, id: instance_id
+        make_request
 
         expect(ServiceInstance.exists?(instance_id)).to eq(true)
         expect(response.status).to eq(201)
       end
 
       it 'returns the dashboard_url' do
-        put :update, id: instance_id
+        make_request
 
         instance = JSON.parse(response.body)
         expect(instance).to eq({ 'dashboard_url' => "https://pmysql.vcap.me/manage/instances/#{instance_id}" })
@@ -77,14 +82,14 @@ describe V2::ServiceInstancesController do
       it 'creates the database and returns a 201' do
         expect(ServiceInstance.exists?(instance_id)).to eq(false)
 
-        put :update, id: instance_id
+        make_request
 
         expect(ServiceInstance.exists?(instance_id)).to eq(true)
         expect(response.status).to eq(201)
       end
 
       it 'returns the dashboard_url' do
-        put :update, id: instance_id
+        make_request
 
         instance = JSON.parse(response.body)
         expect(instance).to eq({ 'dashboard_url' => "https://pmysql.vcap.me/manage/instances/#{instance_id}" })
@@ -93,6 +98,7 @@ describe V2::ServiceInstancesController do
 
     context 'when above max_db_per_node quota' do
       let(:extra_instance_id) { '88f6fa22-c8b7-4cdc-be3a-dc09ea7734da' }
+      let(:make_request) { put :update, id: extra_instance_id }
 
       before do
         ServiceInstance.new(id: instance_id).save
@@ -105,7 +111,7 @@ describe V2::ServiceInstancesController do
         expect(ServiceInstance.exists?(instance_id)).to eq(true)
         expect(ServiceInstance.exists?(extra_instance_id)).to eq(false)
 
-        put :update, id: extra_instance_id
+        make_request
 
         expect(ServiceInstance.exists?(instance_id)).to eq(true)
         expect(ServiceInstance.exists?(extra_instance_id)).to eq(false)
@@ -117,13 +123,19 @@ describe V2::ServiceInstancesController do
   end
 
   describe '#destroy' do
+    let(:make_request) { delete :destroy, id: instance_id }
+
+    it_behaves_like 'a controller action that requires basic auth'
+
+    it_behaves_like 'a controller action that logs its request headers and body'
+
     context 'when the database exists' do
       before { ServiceInstance.new(id: instance_id).save }
 
       it 'drops the database and returns a 200' do
         expect(ServiceInstance.exists?(instance_id)).to eq(true)
 
-        delete :destroy, id: instance_id
+        make_request
 
         expect(ServiceInstance.exists?(instance_id)).to eq(false)
         expect(response.status).to eq(200)
@@ -134,7 +146,7 @@ describe V2::ServiceInstancesController do
 
     context 'when the database does not exist' do
       it 'returns a 410' do
-        delete :destroy, id: instance_id
+        make_request
 
         expect(response.status).to eq(410)
       end
