@@ -6,6 +6,7 @@ describe Manage::InstancesController do
     render_views
 
     before do
+      allow(Settings).to receive(:ssl_enabled).and_return(false)
       allow(Settings).to receive(:cc_api_uri) { 'http://api.example.com' }
       allow(CF::UAA::TokenCoder).to receive(:decode).and_return('scope' => ['openid', 'cloud_controller.read'])
     end
@@ -37,6 +38,51 @@ describe Manage::InstancesController do
             get :show, id: 'abc-123'
             expect(response).to redirect_to('/manage/auth/cloudfoundry')
           end
+        end
+      end
+    end
+
+    describe 'the dashboard redirects depending on ssl_enabled setting' do
+
+      let(:instance) { ServiceInstance.new(id: 'abc-123') }
+      let(:uaa_session) { double(UaaSession, auth_header: 'bearer <token>') }
+
+      before do
+        instance.save
+
+        session[:uaa_user_id]       = 'some-user-id'
+        session[:uaa_access_token]  = '<access token>'
+        session[:uaa_refresh_token] = '<refresh token>'
+        session[:last_seen]         = Time.now
+
+        allow(UaaSession).to receive(:build).with('<access token>', '<refresh token>').and_return(uaa_session)
+
+        allow(uaa_session).to receive(:access_token).and_return('new_access_token')
+
+        allow(ServiceInstanceAccessVerifier).to receive(:can_manage_instance?)
+      end
+
+      after { instance.destroy }
+
+      context 'when ssl_enabled is false' do
+        before do
+          allow(Settings).to receive(:ssl_enabled).and_return(false)
+        end
+
+        it 'does not redirect to https' do
+          get :show, id: 'abc-123'
+          expect(response.status).to eq 200
+        end
+      end
+
+      context 'when ssl_enabled is true' do
+        before do
+          allow(Settings).to receive(:ssl_enabled).and_return(true)
+        end
+
+        it 'redirects to https' do
+          get :show, id: 'abc-123'
+          expect(response).to redirect_to("https://#{request.host}#{request.path_info}")
         end
       end
     end

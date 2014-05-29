@@ -1,6 +1,7 @@
 module Manage
   class InstancesController < ApplicationController
 
+    before_filter :redirect_ssl
     before_filter :require_login
     before_filter :build_uaa_session
     before_filter :ensure_all_necessary_scopes_are_approved
@@ -15,6 +16,11 @@ module Manage
     end
 
     private
+
+    def redirect_ssl
+      redirect_to :protocol => "https://" unless !Settings.ssl_enabled
+      return true
+    end
 
     def require_login
       session[:instance_id] = params[:id]
