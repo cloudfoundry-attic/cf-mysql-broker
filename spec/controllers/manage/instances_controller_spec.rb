@@ -69,7 +69,14 @@ describe Manage::InstancesController do
           allow(Settings).to receive(:ssl_enabled).and_return(false)
         end
 
-        it 'does not redirect to https' do
+        it 'does not redirect http requests to https' do
+          @request.env['HTTPS'] = nil
+          get :show, id: 'abc-123'
+          expect(response.status).to eq 200
+        end
+
+        it 'does not redirect https requests' do
+          @request.env['HTTPS'] = 'on'
           get :show, id: 'abc-123'
           expect(response.status).to eq 200
         end
@@ -80,9 +87,16 @@ describe Manage::InstancesController do
           allow(Settings).to receive(:ssl_enabled).and_return(true)
         end
 
-        it 'redirects to https' do
+        it 'redirects http requests to https' do
+          @request.env['HTTPS'] = nil
           get :show, id: 'abc-123'
           expect(response).to redirect_to("https://#{request.host}#{request.path_info}")
+        end
+
+        it 'does not redirect https requests' do
+          @request.env['HTTPS'] = 'on'
+          get :show, id: 'abc-123', ssl: true
+          expect(response.status).to eq 200
         end
       end
     end

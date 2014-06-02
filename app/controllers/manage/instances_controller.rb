@@ -18,7 +18,7 @@ module Manage
     private
 
     def redirect_ssl
-      redirect_to :protocol => "https://" unless !Settings.ssl_enabled
+      redirect_to :protocol => "https://" if Settings.ssl_enabled && request.protocol == 'http://'
       return true
     end
 
