@@ -99,7 +99,7 @@ describe Manage::InstancesController do
 
     context 'when the user is authenticated' do
       let(:query) { double(ServiceInstanceUsageQuery) }
-      let(:instance) { ServiceInstance.new(id: 'abc-123') }
+      let(:instance) { ServiceInstance.new(guid: 'abc-123') }
       let(:uaa_session) { double(UaaSession, auth_header: 'bearer <token>') }
 
       before do

@@ -7,7 +7,9 @@ require File.expand_path('../../config/environment', __FILE__)
 require 'rspec/rails'
 require 'rspec/autorun'
 require 'webmock/rspec'
+require 'database_cleaner'
 
+DatabaseCleaner.strategy = :truncation
 WebMock.disable_net_connect!(allow: 'codeclimate.com')
 
 # Requires supporting ruby files with custom matchers and macros, etc,
@@ -73,4 +75,7 @@ RSpec.configure do |config|
     TEXT
   end
 
+  config.after do
+    DatabaseCleaner.clean
+  end
 end

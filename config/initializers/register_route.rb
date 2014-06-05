@@ -1,4 +1,4 @@
-unless (Rails.env.test? || Rails.env.assets?)
+unless (Rails.env.test? || Rails.env.assets? || Rails.env.development?)
   max_fixnum = (2**(0.size * 8 -2) -1)
 
   register_thread = Thread.new do

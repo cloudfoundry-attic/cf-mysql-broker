@@ -2,22 +2,23 @@ require 'spec_helper'
 
 describe QuotaEnforcer do
   describe '.enforce!' do
-    let(:instance_id) { SecureRandom.uuid }
-    let(:instance) { ServiceInstance.new(id: instance_id) }
+    let(:plan_guid) { 'plan_guid' }
+    let(:max_storage_mb) { Settings.services[0].plans[0].max_storage_mb }
+
+    let(:instance_guid) { SecureRandom.uuid }
+    let(:instance) { ServiceInstance.find_by_guid(instance_guid) }
 
     let(:binding_id) { SecureRandom.uuid }
     let(:binding) { ServiceBinding.new(id: binding_id, service_instance: instance) }
 
-    let(:max_storage_mb) { Settings.services[0].plans[0].max_storage_mb.to_i }
-
     before do
-      instance.save
+      ServiceInstanceManager.create(guid: instance_guid, plan_guid: plan_guid )
       binding.save
     end
 
     after do
       binding.destroy
-      instance.destroy
+      ServiceInstanceManager.destroy(guid: instance_guid)
     end
 
     context 'for a database that has just moved over its quota' do
@@ -178,7 +179,7 @@ describe QuotaEnforcer do
       Mysql2::Client.new(
         :host     => binding.host,
         :port     => binding.port,
-        :database => binding.database,
+        :database => binding.database_name,
         :username => binding.username,
         :password => binding.password
       )
@@ -190,7 +191,7 @@ describe QuotaEnforcer do
       Mysql2::Client.new(
         :host     => binding.host,
         :port     => binding.port,
-        :database => binding.database,
+        :database => binding.database_name,
         :username => config.fetch('username'),
         :password => config.fetch('password')
       )
@@ -222,7 +223,7 @@ describe QuotaEnforcer do
     # enforcement decisions.
     def recalculate_usage
       # For some reason, ANALYZE TABLE doesn't update statistics in Travis' environment
-      ActiveRecord::Base.connection.execute("OPTIMIZE TABLE #{binding.database}.stuff")
+      ActiveRecord::Base.connection.execute("OPTIMIZE TABLE #{binding.database_name}.stuff")
     end
   end
 end

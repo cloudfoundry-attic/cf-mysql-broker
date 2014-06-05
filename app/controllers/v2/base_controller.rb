@@ -17,7 +17,7 @@ class V2::BaseController < ActionController::API
   private
 
   def log_request_headers_and_body
-    RequestResponseLogger.new('Request:', logger).log_headers_and_body(request.env, request.body.read)
+    RequestResponseLogger.new('Request:', logger).log_headers_and_body(request.env, request.raw_post)
   end
 
   def log_response_headers_and_body

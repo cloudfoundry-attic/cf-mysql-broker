@@ -7,7 +7,7 @@ module Manage
     before_filter :ensure_can_manage_instance
 
     def show
-      instance = ServiceInstance.find(params[:id])
+      instance = ServiceInstance.find_by_guid(params[:id])
 
       @used_data = ServiceInstanceUsageQuery.new(instance).execute
       @quota = QuotaEnforcer::QUOTA_IN_MB

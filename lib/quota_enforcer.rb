@@ -1,5 +1,5 @@
 require Rails.root.join('app/models/base_model')
-require Rails.root.join('app/models/service_instance')
+require Rails.root.join('lib/service_instance_manager')
 
 module QuotaEnforcer
   QUOTA_IN_MB = Settings.services[0].plans[0].max_storage_mb.to_i rescue nil
@@ -33,7 +33,7 @@ module QuotaEnforcer
         SELECT tables.table_schema as 'database'
         FROM   information_schema.tables tables
         JOIN   mysql.db dbs ON tables.table_schema = dbs.Db
-        WHERE  tables.table_schema LIKE '#{ServiceInstance::DATABASE_PREFIX}%' AND (dbs.Insert_priv = 'Y' OR dbs.Update_priv = 'Y' OR dbs.Create_priv = 'Y')
+        WHERE  tables.table_schema LIKE '#{ServiceInstanceManager::DATABASE_PREFIX}%' AND (dbs.Insert_priv = 'Y' OR dbs.Update_priv = 'Y' OR dbs.Create_priv = 'Y')
         GROUP  BY tables.table_schema
         HAVING ROUND(SUM(tables.data_length + tables.index_length) / 1024 / 1024, 1) >= #{QUOTA_IN_MB}
       SQL
@@ -56,7 +56,7 @@ module QuotaEnforcer
         SELECT tables.table_schema as 'database'
         FROM   information_schema.tables tables
         JOIN   mysql.db dbs ON tables.table_schema = dbs.Db
-        WHERE  tables.table_schema LIKE '#{ServiceInstance::DATABASE_PREFIX}%' AND (dbs.Insert_priv = 'N' OR dbs.Update_priv = 'N' OR dbs.Create_priv = 'N')
+        WHERE  tables.table_schema LIKE '#{ServiceInstanceManager::DATABASE_PREFIX}%' AND (dbs.Insert_priv = 'N' OR dbs.Update_priv = 'N' OR dbs.Create_priv = 'N')
         GROUP  BY tables.table_schema
         HAVING ROUND(SUM(tables.data_length + tables.index_length) / 1024 / 1024, 1) < #{QUOTA_IN_MB}
       SQL

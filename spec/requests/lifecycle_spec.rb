@@ -26,7 +26,7 @@ end
 
 describe 'the service lifecycle' do
   let(:instance_id) { 'instance-1' }
-  let(:dbname) { ServiceInstance.new(id: instance_id).database }
+  let(:dbname) { 'cf_instance_1' }
 
   let(:binding_id) { 'binding-1' }
   let(:password) { 'somepassword' }
@@ -47,7 +47,7 @@ describe 'the service lifecycle' do
     ##
     ## Provision the instance
     ##
-    put "/v2/service_instances/#{instance_id}", {service_plan_id: 'PLAN-1'}
+    put "/v2/service_instances/#{instance_id}", {plan_id: '2451fa22-df16-4c10-ba6e-1f682d3dcdc9'}.to_json
 
     expect(response.status).to eq(201)
     expect(response.body).to eq("{\"dashboard_url\":\"https://pmysql.vcap.me/manage/instances/#{instance_id}\"}")

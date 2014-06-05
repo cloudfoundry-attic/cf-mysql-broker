@@ -2,22 +2,22 @@ require 'spec_helper'
 
 describe ServiceInstanceUsageQuery do
   describe 'getting MB used' do
-    let(:instance_id) { SecureRandom.uuid }
-    let(:instance) { ServiceInstance.new(id: instance_id) }
+    let(:instance_guid) { SecureRandom.uuid }
+    let(:instance) { ServiceInstance.find_by_guid(instance_guid) }
     let(:binding_id) { SecureRandom.uuid }
     let(:binding) { ServiceBinding.new(id: binding_id, service_instance: instance) }
     let(:mbs_used) { 10 }
     let(:client) { create_mysql_client }
 
     before do
-      instance.save
+      ServiceInstanceManager.create(guid: instance_guid, plan_guid: 'plan_guid' )
       binding.save
       fill_db
     end
 
     after do
       binding.destroy
-      instance.destroy
+      ServiceInstanceManager.destroy(guid: instance_guid)
     end
 
     it 'returns the correct MB used' do
@@ -43,7 +43,7 @@ describe ServiceInstanceUsageQuery do
     Mysql2::Client.new(
       :host     => binding.host,
       :port     => binding.port,
-      :database => binding.database,
+      :database => binding.database_name,
       :username => binding.username,
       :password => binding.password
     )
