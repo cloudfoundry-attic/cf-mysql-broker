@@ -7,24 +7,27 @@ describe V2::ServiceBindingsController do
   let(:database_host) { db_settings.fetch('host') }
   let(:database_port) { db_settings.fetch('port') }
 
-  let(:instance_id) { 'instance-1' }
-  let(:instance) { ServiceInstance.new(id: instance_id) }
+  let(:instance_guid) { 'instance-1' }
+  let(:instance) { ServiceInstance.new(guid: instance_guid) }
+  let(:database) { ServiceInstanceManager.database_name_from_service_instance_guid(instance_guid) }
 
   before do
     authenticate
     instance.save
+
+    Database.stub(:exists?).with(database).and_return(true)
   end
 
   after { instance.destroy }
 
   describe '#update' do
     let(:binding_id) { '123' }
-    let(:generated_dbname) { ServiceInstance.new(id: instance_id).database }
+    let(:generated_dbname) { ServiceInstanceManager.database_name_from_service_instance_guid(instance_guid) }
 
     let(:generated_username) { ServiceBinding.new(id: binding_id).username }
     let(:generated_password) { 'generatedpw' }
 
-    let(:make_request) { put :update, id: binding_id, service_instance_id: instance_id }
+    let(:make_request) { put :update, id: binding_id, service_instance_id: instance_guid }
 
     before { SecureRandom.stub(:base64).and_return(generated_password, 'notthepassword') }
     after { ServiceBinding.new(id: binding_id, service_instance: instance).destroy }
@@ -34,11 +37,11 @@ describe V2::ServiceBindingsController do
     it_behaves_like 'a controller action that logs its request and response headers and body'
 
     it 'grants permission to access the given database' do
-      expect(ServiceBinding.exists?(id: binding_id, service_instance_id: instance_id)).to eq(false)
+      expect(ServiceBinding.exists?(id: binding_id, service_instance_guid: instance_guid)).to eq(false)
 
       make_request
 
-      expect(ServiceBinding.exists?(id: binding_id, service_instance_id: instance_id)).to eq(true)
+      expect(ServiceBinding.exists?(id: binding_id, service_instance_guid: instance_guid)).to eq(true)
     end
 
     it 'responds with generated credentials' do
@@ -79,11 +82,11 @@ describe V2::ServiceBindingsController do
       it_behaves_like 'a controller action that logs its request and response headers and body'
 
       it 'destroys the binding' do
-        expect(ServiceBinding.exists?(id: binding.id, service_instance_id: instance.id)).to eq(true)
+        expect(ServiceBinding.exists?(id: binding.id, service_instance_guid: instance.guid)).to eq(true)
 
         make_request
 
-        expect(ServiceBinding.exists?(id: binding.id, service_instance_id: instance.id)).to eq(false)
+        expect(ServiceBinding.exists?(id: binding.id, service_instance_guid: instance.guid)).to eq(false)
       end
 
       it 'returns a 200' do

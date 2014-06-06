@@ -6,7 +6,8 @@ describe 'Quota enforcement' do
   let(:max_storage_mb) { Settings.services[0].plans[0].max_storage_mb.to_i }
 
   before do
-    put "/v2/service_instances/#{instance_id}", {service_plan_id: 'PLAN-1'}
+    Catalog.stub(:has_plan?).with('PLAN-1') { true }
+    put "/v2/service_instances/#{instance_id}", {plan_id: 'PLAN-1'}
     put "/v2/service_instances/#{instance_id}/service_bindings/#{binding_id}"
   end
 
@@ -67,9 +68,10 @@ describe 'Quota enforcement' do
     # Mysql will do it automatically. With the wrong settings, you may need to ANALYZE or OPTIMIZE.
     # For the tests we will run OPTIMIZE to ensure the settings update immediately.
 
-    instance = ServiceInstance.new(id: instance_id)
+    instance = ServiceInstance.find_by_guid(instance_id)
+    db_name = ServiceInstanceManager.database_name_from_service_instance_guid(instance.guid)
     #ActiveRecord::Base.connection.execute("ANALYZE TABLE #{instance.database}.stuff")
-    ActiveRecord::Base.connection.execute("OPTIMIZE TABLE #{instance.database}.stuff")
+    ActiveRecord::Base.connection.execute("OPTIMIZE TABLE #{db_name}.stuff")
   end
 
   def enforce_quota

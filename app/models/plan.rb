@@ -1,5 +1,5 @@
 class Plan
-  attr_reader :id, :name, :description, :metadata
+  attr_reader :id, :name, :description, :metadata, :max_storage_mb
 
   def self.build(attrs)
     new(attrs)
@@ -10,6 +10,7 @@ class Plan
     @name        = attrs.fetch('name')
     @description = attrs.fetch('description')
     @metadata    = attrs.fetch('metadata', nil)
+    @max_storage_mb = attrs.fetch('max_storage_mb', nil)
   end
 
   def to_hash

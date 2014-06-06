@@ -6,7 +6,8 @@ class ServiceInstanceUsageQuery
   end
 
   def execute
-    escaped_database = ActiveRecord::Base.sanitize(instance.database)
+    db_name = ServiceInstanceManager.database_name_from_service_instance_guid(instance.guid)
+    escaped_database = ActiveRecord::Base.sanitize(db_name)
     query = <<-SQL
       SELECT SUM(ROUND(((data_length + index_length) / 1024 / 1024), 2))
       FROM information_schema.TABLES

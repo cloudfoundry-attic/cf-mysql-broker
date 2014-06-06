@@ -33,5 +33,4 @@ class Service
       'dashboard_client' => dashboard_client
     }
   end
-
 end

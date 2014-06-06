@@ -6,12 +6,13 @@ describe ServiceBinding do
   let(:password) { 'randompassword' }
   let(:binding) { ServiceBinding.new(id: id, service_instance: instance) }
 
-  let(:instance_id) { '88f6fa22-c8b7-4cdc-be3a-dc09ea7734db' }
-  let(:instance) { ServiceInstance.new(id: instance_id) }
-  let(:database) { instance.database }
+  let(:instance_guid) { '88f6fa22-c8b7-4cdc-be3a-dc09ea7734db' }
+  let(:instance) { ServiceInstance.new(guid: instance_guid) }
+  let(:database) { ServiceInstanceManager.database_name_from_service_instance_guid(instance_guid) }
 
   before do
     SecureRandom.stub(:base64).and_return(password, 'notthepassword')
+    Database.stub(:exists?).with(database).and_return(true)
   end
 
   after do
@@ -41,12 +42,12 @@ describe ServiceBinding do
     end
   end
 
-  describe '.find_by_id_and_service_instance_id' do
+  describe '.find_by_id_and_service_instance_guid' do
     context 'when the user exists and has all privileges' do
       before { connection.execute("GRANT ALL PRIVILEGES ON `#{database}`.* TO '#{username}'@'%' IDENTIFIED BY '#{password}'") }
 
       it 'returns the binding' do
-        binding = ServiceBinding.find_by_id_and_service_instance_id(id, instance_id)
+        binding = ServiceBinding.find_by_id_and_service_instance_guid(id, instance_guid)
         expect(binding).to be_a(ServiceBinding)
         expect(binding.id).to eq(id)
       end
@@ -56,14 +57,14 @@ describe ServiceBinding do
       before { connection.execute("CREATE USER '#{username}' IDENTIFIED BY '#{password}'") }
 
       it 'returns nil' do
-        binding = ServiceBinding.find_by_id_and_service_instance_id(id, instance_id)
+        binding = ServiceBinding.find_by_id_and_service_instance_guid(id, instance_guid)
         expect(binding).to be_nil
       end
     end
 
     context 'when the user does not exist' do
       it 'returns nil' do
-        binding = ServiceBinding.find_by_id_and_service_instance_id(id, instance_id)
+        binding = ServiceBinding.find_by_id_and_service_instance_guid(id, instance_guid)
         expect(binding).to be_nil
       end
     end
@@ -74,7 +75,7 @@ describe ServiceBinding do
       before { connection.execute("GRANT ALL PRIVILEGES ON `#{database}`.* TO '#{username}'@'%' IDENTIFIED BY '#{password}'") }
 
       it 'returns true' do
-        expect(ServiceBinding.exists?(id: id, service_instance_id: instance_id)).to eq(true)
+        expect(ServiceBinding.exists?(id: id, service_instance_guid: instance_guid)).to eq(true)
       end
     end
 
@@ -82,13 +83,13 @@ describe ServiceBinding do
       before { connection.execute("CREATE USER '#{username}' IDENTIFIED BY '#{password}'") }
 
       it 'returns false' do
-        expect(ServiceBinding.exists?(id: id, service_instance_id: instance_id)).to eq(false)
+        expect(ServiceBinding.exists?(id: id, service_instance_guid: instance_guid)).to eq(false)
       end
     end
 
     context 'when the user does not exist' do
       it 'returns false' do
-        expect(ServiceBinding.exists?(id: id, service_instance_id: instance_id)).to eq(false)
+        expect(ServiceBinding.exists?(id: id, service_instance_guid: instance_guid)).to eq(false)
       end
     end
   end
@@ -149,6 +150,14 @@ describe ServiceBinding do
 
       password_sql = "SELECT * FROM mysql.user WHERE user = '#{username}' AND password = PASSWORD('#{password}')"
       expect(connection.select(password_sql).count).to eq(1)
+    end
+
+    context 'when the database does not exist' do
+      before { Database.stub(:exists?).with(database).and_return(false) }
+
+      it 'raises an error' do
+        expect{binding.save}.to raise_error
+      end
     end
   end
 

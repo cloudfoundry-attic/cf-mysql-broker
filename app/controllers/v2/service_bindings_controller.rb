@@ -1,6 +1,6 @@
 class V2::ServiceBindingsController < V2::BaseController
   def update
-    instance = ServiceInstance.find(params.fetch(:service_instance_id))
+    instance = ServiceInstance.find_by_guid(params.fetch(:service_instance_id))
     binding = ServiceBinding.new(id: params.fetch(:id), service_instance: instance)
     binding.save
 

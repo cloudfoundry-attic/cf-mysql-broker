@@ -22,10 +22,10 @@ describe 'Provisioning a service' do
 
     it 'returns a meaningful error message when attempting to provision' do
       put "/v2/service_instances/#{service_instance_guid}", {
-        'plan_id' => plan_id,
-        'service_id' => service_id,
-        'organization_guid' => 'organization_guid',
-        'space_guid' => 'space_guid'
+        plan_id: plan_id,
+        service_id: service_id,
+        organization_guid: 'organization_guid',
+        space_guid: 'space_guid'
       }
 
       expect(response.status).to eq(507)
@@ -36,16 +36,17 @@ describe 'Provisioning a service' do
 
   def provision_service_instance
     guid = SecureRandom.uuid
-    put "/v2/service_instances/#{guid}",
-        'plan_id' => plan_id,
-        'service_id' => service_id,
-        'organization_guid' => 'organization_guid',
-        'space_guid' => 'space_guid'
+    put "/v2/service_instances/#{guid}", {
+        plan_id: plan_id,
+        service_id: service_id,
+        organization_guid: 'organization_guid',
+        space_guid: 'space_guid'
+    }
     guid
   end
 
   def cleanup_mysql_database(guid)
-    dbname = ServiceInstance.new(id: guid).database
+    dbname = ServiceInstanceManager.database_name_from_service_instance_guid(guid)
     ActiveRecord::Base.connection.execute("DROP DATABASE #{dbname}") rescue nil
   end
 end
