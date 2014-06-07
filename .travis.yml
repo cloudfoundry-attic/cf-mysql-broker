@@ -26,6 +26,8 @@ before_script:
 - mysql -u root -e "DELETE FROM mysql.user WHERE Host='localhost' AND User='';"
 - mysql -u root -e "SET GLOBAL innodb_stats_on_metadata=ON, innodb_stats_persistent=OFF;"
 - mysql -u root -e "SHOW VARIABLES;"
+- bundle exec rake db:create
+- bundle exec rake db:test:prepare
 env:
   global:
     secure: FGu6nGfgk7o5C37gdz+wluTyio5YIhqoUpK6OQsPCeooiduWlsgpwFoBdm+AnoNLfj2OntOTsXzmq7ibuXqy6ZhjV6/J4itRI2Vm1xLwirPD50ZpMDzqFjKvqQGg04LZOTaO/XdJbnzAQAfNK9Pw1NtORyogASoQYU0QgcEv7uc=
