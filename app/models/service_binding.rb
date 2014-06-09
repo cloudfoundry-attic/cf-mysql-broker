@@ -39,7 +39,7 @@ class ServiceBinding < BaseModel
       database_name = ServiceInstanceManager.database_name_from_service_instance_guid(instance_guid)
       # Can we do this more elegantly, i.e., without checking for a
       # particular raw GRANT statement?
-      if grants.include?("GRANT ALL PRIVILEGES ON `#{database_name}`.* TO #{connection.quote(binding.username)}@'%'")
+      if grants.include?("GRANT ALL PRIVILEGES ON #{connection.quote_table_name(database_name)}.* TO #{connection.quote(binding.username)}@'%'")
         binding
       end
     rescue ActiveRecord::StatementInvalid => e
