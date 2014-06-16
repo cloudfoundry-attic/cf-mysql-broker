@@ -8,6 +8,7 @@ describe V2::ServiceInstancesController do
   # this is actually the create
   describe '#update' do
     let(:max_db_per_node) { 5 }
+    let(:max_storage_mb) { 5 }
     let(:services) do
       [
           {
@@ -92,7 +93,7 @@ describe V2::ServiceInstancesController do
         expect(ServiceInstanceManager).to receive(:create).with({
           guid: instance_id,
           plan_guid: plan_id
-        }).and_return(ServiceInstance.new(guid: instance_id, plan_guid: plan_id))
+        }).and_return(ServiceInstance.new(guid: instance_id, plan_guid: plan_id, max_storage_mb: max_storage_mb))
 
         make_request
       end
@@ -121,7 +122,7 @@ describe V2::ServiceInstancesController do
         expect(ServiceInstanceManager).to receive(:create).with({
             guid: instance_id,
             plan_guid: plan_id
-        }).and_return(ServiceInstance.new(guid: instance_id, plan_guid: plan_id))
+        }).and_return(ServiceInstance.new(guid: instance_id, plan_guid: plan_id, max_storage_mb: max_storage_mb))
 
         make_request
       end

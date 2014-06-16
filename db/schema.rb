@@ -11,11 +11,15 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140529214059) do
+ActiveRecord::Schema.define(version: 20140616163621) do
 
   create_table "service_instances", force: true do |t|
-    t.string "guid"
-    t.string "plan_guid"
+    t.string  "guid"
+    t.string  "plan_guid"
+    t.integer "max_storage_mb", default: 0, null: false
   end
+
+  add_index "service_instances", ["guid"], name: "index_service_instances_on_guid", using: :btree
+  add_index "service_instances", ["plan_guid"], name: "index_service_instances_on_plan_guid", using: :btree
 
 end

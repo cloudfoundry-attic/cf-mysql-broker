@@ -7,13 +7,14 @@ class ServiceInstanceManager
   def self.create(opts)
     guid = opts[:guid]
     plan_guid = opts[:plan_guid]
+    max_storage_mb = Catalog.quota_for_plan_guid(plan_guid)
 
     if guid =~ /[^0-9,a-z,A-Z$-]+/
       raise 'Only GUIDs matching [0-9,a-z,A-Z$-]+ are allowed'
     end
 
     Database.create(database_name_from_service_instance_guid(guid))
-    ServiceInstance.create(guid: guid, plan_guid: plan_guid)
+    ServiceInstance.create(guid: guid, plan_guid: plan_guid, max_storage_mb: max_storage_mb)
   end
 
   def self.destroy(opts)

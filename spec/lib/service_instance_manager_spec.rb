@@ -4,6 +4,11 @@ describe ServiceInstanceManager do
   let(:instance_id) { '88f6fa22-c8b7-4cdc-be3a-dc09ea7734db' }
   let(:database_name) { 'cf_88f6fa22_c8b7_4cdc_be3a_dc09ea7734db' }
   let(:plan_id) { '8888-ffff' }
+  let(:max_storage_mb) { 300 }
+
+  before do
+    Catalog.stub(:quota_for_plan_guid).with(plan_id).and_return(max_storage_mb)
+  end
 
   describe '.create' do
     after {
@@ -15,6 +20,7 @@ describe ServiceInstanceManager do
           to change(ServiceInstance, :count).from(0).to(1)
       expect(ServiceInstance.last.guid).to eq(instance_id)
       expect(ServiceInstance.last.plan_guid).to eq(plan_id)
+      expect(ServiceInstance.last.max_storage_mb).to eq (max_storage_mb)
     end
 
     it 'creates a new MySQL database' do
@@ -66,7 +72,7 @@ describe ServiceInstanceManager do
   describe '.destroy' do
     context 'when there is an instance with the given guid' do
       before do
-        described_class.create(guid: instance_id, plan_guid: 'some-plan-guid')
+        described_class.create(guid: instance_id, plan_guid: plan_id)
       end
 
       it 'removes the ServiceInstance from the broker database' do
