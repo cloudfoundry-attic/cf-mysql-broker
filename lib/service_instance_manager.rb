@@ -13,8 +13,10 @@ class ServiceInstanceManager
       raise 'Only GUIDs matching [0-9,a-z,A-Z$-]+ are allowed'
     end
 
-    Database.create(database_name_from_service_instance_guid(guid))
-    ServiceInstance.create(guid: guid, plan_guid: plan_guid, max_storage_mb: max_storage_mb)
+    db_name = database_name_from_service_instance_guid(guid)
+
+    Database.create(db_name)
+    ServiceInstance.create(guid: guid, plan_guid: plan_guid, max_storage_mb: max_storage_mb, db_name: db_name)
   end
 
   def self.destroy(opts)
@@ -24,8 +26,6 @@ class ServiceInstanceManager
     instance.destroy
     Database.drop(database_name_from_service_instance_guid(guid))
   end
-
-  private
 
   def self.database_name_from_service_instance_guid(guid)
     "#{DATABASE_PREFIX}#{guid.gsub('-', '_')}"

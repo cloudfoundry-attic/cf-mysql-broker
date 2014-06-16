@@ -10,6 +10,12 @@ describe ServiceInstanceManager do
     Catalog.stub(:quota_for_plan_guid).with(plan_id).and_return(max_storage_mb)
   end
 
+  describe '.database_name_from_service_instance_guid' do
+    it 'converts instance_id to database_name' do
+      expect(ServiceInstanceManager.database_name_from_service_instance_guid(instance_id)).to eq(database_name)
+    end
+  end
+
   describe '.create' do
     after {
       Database.drop(database_name)
@@ -21,6 +27,7 @@ describe ServiceInstanceManager do
       expect(ServiceInstance.last.guid).to eq(instance_id)
       expect(ServiceInstance.last.plan_guid).to eq(plan_id)
       expect(ServiceInstance.last.max_storage_mb).to eq (max_storage_mb)
+      expect(ServiceInstance.last.db_name).to eq (database_name)
     end
 
     it 'creates a new MySQL database' do
