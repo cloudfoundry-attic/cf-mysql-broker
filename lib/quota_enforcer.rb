@@ -1,4 +1,5 @@
 require Rails.root.join('app/models/base_model')
+require Rails.root.join('app/models/catalog')
 
 module QuotaEnforcer
   class << self
