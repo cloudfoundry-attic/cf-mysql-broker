@@ -1,5 +1,5 @@
 require Rails.root.join('app/models/base_model')
-require Rails.root.join('lib/service_instance_manager')
+
 module QuotaEnforcer
   class << self
     def enforce!
@@ -29,7 +29,28 @@ module QuotaEnforcer
     end
 
     def update_service_instances_max_storage_mb
-      ServiceInstanceManager.update_quotas
+      broker_db = get_broker_db_name
+
+      sub_query = generate_sub_query_from_catalog
+
+      connection.execute(<<-SQL)
+        UPDATE #{broker_db}.service_instances AS instances,
+        (#{sub_query}) AS catalog
+        SET instances.max_storage_mb = catalog.max_storage_mb
+        WHERE instances.plan_guid = catalog.id
+      SQL
+    end
+
+    def generate_sub_query_from_catalog
+      sub_query = String.new
+      Catalog.plans.each_with_index do |plan, index|
+        if 0 == index
+          sub_query.concat("SELECT '#{plan.id}' AS id, #{plan.max_storage_mb} AS max_storage_mb")
+        else
+          sub_query.concat(" UNION SELECT '#{plan.id}', #{plan.max_storage_mb}")
+        end
+      end
+      sub_query
     end
 
     def revoke_privileges_from_violators

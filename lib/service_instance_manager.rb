@@ -27,13 +27,6 @@ class ServiceInstanceManager
     Database.drop(database_name_from_service_instance_guid(guid))
   end
 
-  def self.update_quotas
-    ServiceInstance.all.each do |instance|
-      instance.max_storage_mb = Catalog.quota_for_plan_guid(instance.plan_guid)
-      instance.save
-    end
-  end
-
   def self.database_name_from_service_instance_guid(guid)
     "#{DATABASE_PREFIX}#{guid.gsub('-', '_')}"
   end
