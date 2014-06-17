@@ -1,5 +1,5 @@
 require Rails.root.join('app/models/base_model')
-
+require Rails.root.join('lib/service_instance_manager')
 module QuotaEnforcer
   class << self
     def enforce!
@@ -13,6 +13,7 @@ module QuotaEnforcer
       #       GROUP  BY tables.table_schema
       #     SQL
 
+      update_service_instances_max_storage_mb
       revoke_privileges_from_violators
       grant_privileges_to_reformed
     end
@@ -25,6 +26,10 @@ module QuotaEnforcer
 
     def get_broker_db_name
       ActiveRecord::Base.connection_config['database']
+    end
+
+    def update_service_instances_max_storage_mb
+      ServiceInstanceManager.update_quotas
     end
 
     def revoke_privileges_from_violators

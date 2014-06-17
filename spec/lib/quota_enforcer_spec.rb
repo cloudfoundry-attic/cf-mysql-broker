@@ -23,9 +23,9 @@ describe QuotaEnforcer do
       'plans' => [plan1, plan2, plan3]
     )}
 
-    let(:max_storage_mb_for_plan_1) { 1 }
-    let(:max_storage_mb_for_plan_2) { 2 }
-    let(:max_storage_mb_for_plan_3) { 3 }
+    let(:max_storage_mb_for_plan_1) { 5 }
+    let(:max_storage_mb_for_plan_2) { 10 }
+    let(:max_storage_mb_for_plan_3) { 15 }
 
     let(:plan1) {{
       'id' => 'plan-1-guid',
@@ -277,6 +277,89 @@ describe QuotaEnforcer do
           }.to_not raise_error
         end
       end
+    end
+
+    context 'for a database with a plan that the quota has been changed' do
+      before do
+
+        client1 = create_mysql_client(binding1)
+        client2 = create_mysql_client(binding2)
+
+        overflow_database(client1, max_storage_mb_for_plan_1)
+        recalculate_usage(binding1)
+        overflow_database(client2, max_storage_mb_for_plan_2)
+        recalculate_usage(binding2)
+
+        QuotaEnforcer.enforce!
+
+        plan1 = {
+          'id' => 'plan-1-guid',
+          'name' => 'plan-1',
+          'description' => 'plan-1-desc',
+          'max_storage_mb' => max_storage_mb_for_plan_1 + 10
+        }
+
+        service = Service.build(
+          'id' => SecureRandom.uuid,
+          'name' => 'our service',
+          'description' => 'our service',
+          'plans' => [plan1, plan2, plan3]
+        )
+
+        Catalog.stub(:services) { [service] }
+      end
+
+      it 'grants insert, update, and create privileges to only the plan that was changed' do
+        QuotaEnforcer.enforce!
+
+        client1 = create_mysql_client(binding1)
+        expect {
+          client1.query("INSERT INTO stuff (id, data) VALUES (99999, 'This should succeed.')")
+        }.to_not raise_error
+
+        expect {
+          client1.query("UPDATE stuff SET data = 'This should also succeed.' WHERE id = 99999")
+        }.to_not raise_error
+
+        expect {
+          client1.query('CREATE TABLE more_stuff (id INT PRIMARY KEY)')
+        }.to_not raise_error
+
+        expect {
+          client1.query('SELECT COUNT(*) FROM stuff')
+        }.to_not raise_error
+
+        expect {
+          client1.query('DELETE FROM stuff WHERE id = 99999')
+        }.to_not raise_error
+
+
+        client2 = create_mysql_client(binding2)
+        expect {
+          client2.query("INSERT INTO stuff (id, data) VALUES (99999, 'This should fail.')")
+        }.to raise_error(Mysql2::Error, /INSERT command denied/)
+
+        expect {
+          client2.query("UPDATE stuff SET data = 'This should also fail.' WHERE id = 1")
+        }.to raise_error(Mysql2::Error, /UPDATE command denied/)
+
+        expect {
+          client2.query('CREATE TABLE more_stuff (id INT PRIMARY KEY)')
+        }.to raise_error(Mysql2::Error, /CREATE command denied/)
+
+        expect {
+          client2.query('SELECT COUNT(*) FROM stuff')
+        }.to_not raise_error
+
+        expect {
+          client2.query('DELETE FROM stuff WHERE id = 1')
+        }.to_not raise_error
+      end
+
+    end
+
+    context 'when a database has a plan that no longer exists' do
+
     end
 
     def create_mysql_client(binding)
