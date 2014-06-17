@@ -1,3 +1,5 @@
+# These requires are needed because the quota enforcer
+# is not running as a Rails application
 require Rails.root.join('app/models/base_model')
 require Rails.root.join('app/models/catalog')
 
