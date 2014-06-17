@@ -2,65 +2,121 @@ require 'spec_helper'
 
 describe QuotaEnforcer do
   describe '.enforce!' do
-    let(:plan_guid) { 'plan_guid' }
-    let(:max_storage_mb) { Settings.services[0].plans[0].max_storage_mb }
+    let(:instance1_guid) { SecureRandom.uuid }
+    let(:instance1) { ServiceInstance.find_by_guid(instance1_guid) }
 
-    let(:instance_guid) { SecureRandom.uuid }
-    let(:instance) { ServiceInstance.find_by_guid(instance_guid) }
+    let(:binding1_id) { SecureRandom.uuid }
+    let(:binding1) { ServiceBinding.new(id: binding1_id, service_instance: instance1) }
 
-    let(:binding_id) { SecureRandom.uuid }
-    let(:binding) { ServiceBinding.new(id: binding_id, service_instance: instance) }
+    let(:instance2_guid) { SecureRandom.uuid }
+    let(:instance2) { ServiceInstance.find_by_guid(instance2_guid) }
+
+    let(:binding2_id) { SecureRandom.uuid }
+    let(:binding2) { ServiceBinding.new(id: binding2_id, service_instance: instance2) }
+
+    let(:bindings) { [binding1, binding2] }
+
+    let(:service) { Service.build(
+      'id' => SecureRandom.uuid,
+      'name' => 'our service',
+      'description' => 'our service',
+      'plans' => [plan1, plan2, plan3]
+    )}
+
+    let(:max_storage_mb_for_plan_1) { 1 }
+    let(:max_storage_mb_for_plan_2) { 2 }
+    let(:max_storage_mb_for_plan_3) { 3 }
+
+    let(:plan1) {{
+      'id' => 'plan-1-guid',
+      'name' => 'plan-1',
+      'description' => 'plan-1-desc',
+      'max_storage_mb' => max_storage_mb_for_plan_1
+    }}
+
+    let(:plan2) {{
+      'id' => 'plan-2-guid',
+      'name' => 'plan-2',
+      'description' => 'plan-2-desc',
+      'max_storage_mb' => max_storage_mb_for_plan_2
+    }}
+
+    let(:plan3) {{
+      'id' => 'plan-3-guid',
+      'name' => 'plan-3',
+      'description' => 'plan-3-desc',
+      'max_storage_mb' => max_storage_mb_for_plan_3
+    }}
 
     before do
-      ServiceInstanceManager.create(guid: instance_guid, plan_guid: plan_guid )
-      binding.save
+      Catalog.stub(:services) { [service] }
+
+      ServiceInstanceManager.create(guid: instance1_guid, plan_guid: 'plan-1-guid' )
+      ServiceInstanceManager.create(guid: instance2_guid, plan_guid: 'plan-2-guid' )
+      binding1.save
+      binding2.save
+
+      # No instance / binding for plan 3 to test enforcer works for plans with no instance
     end
 
     after do
-      binding.destroy
-      ServiceInstanceManager.destroy(guid: instance_guid)
+      bindings.each { |binding| binding.destroy }
+      ServiceInstanceManager.destroy(guid: instance1_guid)
+      ServiceInstanceManager.destroy(guid: instance2_guid)
     end
 
     context 'for a database that has just moved over its quota' do
       before do
-        client = create_mysql_client
-        overflow_database(client)
+        client1 = create_mysql_client(binding1)
+        client2 = create_mysql_client(binding2)
+
+        overflow_database(client1, max_storage_mb_for_plan_1)
+        recalculate_usage(binding1)
+        overflow_database(client2, max_storage_mb_for_plan_2)
+        recalculate_usage(binding2)
       end
 
       it 'revokes insert, update, and create privileges' do
         QuotaEnforcer.enforce!
 
-        client = create_mysql_client
-        expect {
-          client.query("INSERT INTO stuff (id, data) VALUES (99999, 'This should fail.')")
-        }.to raise_error(Mysql2::Error, /INSERT command denied/)
+        bindings.each do |binding|
+          client = create_mysql_client(binding)
+          expect {
+            client.query("INSERT INTO stuff (id, data) VALUES (99999, 'This should fail.')")
+          }.to raise_error(Mysql2::Error, /INSERT command denied/)
 
-        expect {
-          client.query("UPDATE stuff SET data = 'This should also fail.' WHERE id = 1")
-        }.to raise_error(Mysql2::Error, /UPDATE command denied/)
+          expect {
+            client.query("UPDATE stuff SET data = 'This should also fail.' WHERE id = 1")
+          }.to raise_error(Mysql2::Error, /UPDATE command denied/)
 
-        expect {
-          client.query('CREATE TABLE more_stuff (id INT PRIMARY KEY)')
-        }.to raise_error(Mysql2::Error, /CREATE command denied/)
+          expect {
+            client.query('CREATE TABLE more_stuff (id INT PRIMARY KEY)')
+          }.to raise_error(Mysql2::Error, /CREATE command denied/)
 
-        expect {
-          client.query('SELECT COUNT(*) FROM stuff')
-        }.to_not raise_error
+          expect {
+            client.query('SELECT COUNT(*) FROM stuff')
+          }.to_not raise_error
 
-        expect {
-          client.query('DELETE FROM stuff WHERE id = 1')
-        }.to_not raise_error
+          expect {
+            client.query('DELETE FROM stuff WHERE id = 1')
+          }.to_not raise_error
+        end
       end
 
       it 'kills existing connections' do
-        client = create_mysql_client
-        client.query('SELECT 1')
+        clients = bindings.map do |binding|
+          create_mysql_client(binding)
+        end
+
+        clients.each { |client| client.query('SELECT 1') }
 
         QuotaEnforcer.enforce!
 
-        expect {
-          client.query('SELECT 1')
-        }.to raise_error(Mysql2::Error, /server has gone away/)
+        clients.each do |client|
+          expect {
+            client.query('SELECT 1')
+          }.to raise_error(Mysql2::Error, /server has gone away/)
+        end
       end
 
       it 'does not kill root connections' do
@@ -77,67 +133,97 @@ describe QuotaEnforcer do
 
     context 'for a database that has already moved over its quota' do
       before do
-        client = create_mysql_client
-        overflow_database(client)
+        client1 = create_mysql_client(binding1)
+        client2 = create_mysql_client(binding2)
+
+        overflow_database(client1, max_storage_mb_for_plan_1)
+        recalculate_usage(binding1)
+        overflow_database(client2, max_storage_mb_for_plan_2)
+        recalculate_usage(binding2)
+
         QuotaEnforcer.enforce!
       end
 
       it 'does not kill existing connections' do
-        client = create_mysql_client
-        client.query('SELECT 1')
+        clients = bindings.map do |binding|
+          create_mysql_client(binding)
+        end
+
+        clients.each { |client| client.query('SELECT 1') }
 
         QuotaEnforcer.enforce!
 
-        expect {
-          client.query('SELECT 1')
-        }.to_not raise_error
+        clients.each do |client|
+          expect {
+            client.query('SELECT 1')
+          }.to_not raise_error
+        end
       end
     end
 
     context 'for a database that has just moved under its quota' do
       before do
-        client = create_mysql_client
-        overflow_database(client)
+        client1 = create_mysql_client(binding1)
+        client2 = create_mysql_client(binding2)
+
+        overflow_database(client1, max_storage_mb_for_plan_1)
+        recalculate_usage(binding1)
+        overflow_database(client2, max_storage_mb_for_plan_2)
+        recalculate_usage(binding2)
+
         QuotaEnforcer.enforce!
 
-        client = create_mysql_client
-        prune_database(client)
+        client1 = create_mysql_client(binding1)
+        client2 = create_mysql_client(binding2)
+        prune_database(client1)
+        prune_database(client2)
+        recalculate_usage(binding1)
+        recalculate_usage(binding2)
       end
 
       it 'grants insert, update, and create privileges' do
         QuotaEnforcer.enforce!
 
-        client = create_mysql_client
-        expect {
-          client.query("INSERT INTO stuff (id, data) VALUES (99999, 'This should succeed.')")
-        }.to_not raise_error
+        bindings.each do |binding|
+          client = create_mysql_client(binding)
+          expect {
+            client.query("INSERT INTO stuff (id, data) VALUES (99999, 'This should succeed.')")
+          }.to_not raise_error
 
-        expect {
-          client.query("UPDATE stuff SET data = 'This should also succeed.' WHERE id = 99999")
-        }.to_not raise_error
+          expect {
+            client.query("UPDATE stuff SET data = 'This should also succeed.' WHERE id = 99999")
+          }.to_not raise_error
 
-        expect {
-          client.query('CREATE TABLE more_stuff (id INT PRIMARY KEY)')
-        }.to_not raise_error
+          expect {
+            client.query('CREATE TABLE more_stuff (id INT PRIMARY KEY)')
+          }.to_not raise_error
 
-        expect {
-          client.query('SELECT COUNT(*) FROM stuff')
-        }.to_not raise_error
+          expect {
+            client.query('SELECT COUNT(*) FROM stuff')
+          }.to_not raise_error
 
-        expect {
-          client.query('DELETE FROM stuff WHERE id = 99999')
-        }.to_not raise_error
+          expect {
+            client.query('DELETE FROM stuff WHERE id = 99999')
+          }.to_not raise_error
+        end
       end
 
       it 'kills existing connections' do
-        client = create_mysql_client
-        client.query('SELECT 1')
+        clients = bindings.map do |binding|
+          create_mysql_client(binding)
+        end
+
+        clients.each do |client|
+          client.query('SELECT 1')
+        end
 
         QuotaEnforcer.enforce!
 
-        expect {
-          client.query('SELECT 1')
-        }.to raise_error(Mysql2::Error, /server has gone away/)
+        clients.each do |client|
+          expect {
+            client.query('SELECT 1')
+          }.to raise_error(Mysql2::Error, /server has gone away/)
+        end
       end
 
       it 'does not kill root connections' do
@@ -154,28 +240,46 @@ describe QuotaEnforcer do
 
     context 'for a database that has already moved under its quota' do
       before do
-        client = create_mysql_client
-        overflow_database(client)
+        client1 = create_mysql_client(binding1)
+        client2 = create_mysql_client(binding2)
+
+        overflow_database(client1, max_storage_mb_for_plan_1)
+        recalculate_usage(binding1)
+        overflow_database(client2, max_storage_mb_for_plan_2)
+        recalculate_usage(binding2)
+
         QuotaEnforcer.enforce!
 
-        client = create_mysql_client
-        prune_database(client)
+        client1 = create_mysql_client(binding1)
+        client2 = create_mysql_client(binding2)
+        prune_database(client1)
+        prune_database(client2)
+        recalculate_usage(binding1)
+        recalculate_usage(binding2)
+
         QuotaEnforcer.enforce!
       end
 
       it 'does not kill existing connections' do
-        client = create_mysql_client
-        client.query('SELECT 1')
+        clients = bindings.map do |binding|
+          create_mysql_client(binding)
+        end
+
+        clients.each do |client|
+          client.query('SELECT 1')
+        end
 
         QuotaEnforcer.enforce!
 
-        expect {
-          client.query('SELECT 1')
-        }.to_not raise_error
+        clients.each do |client|
+          expect {
+            client.query('SELECT 1')
+          }.to_not raise_error
+        end
       end
     end
 
-    def create_mysql_client
+    def create_mysql_client(binding)
       Mysql2::Client.new(
         :host     => binding.host,
         :port     => binding.port,
@@ -189,31 +293,30 @@ describe QuotaEnforcer do
       config = Rails.configuration.database_configuration[Rails.env]
 
       Mysql2::Client.new(
-        :host     => binding.host,
-        :port     => binding.port,
-        :database => binding.database_name,
+        :host     => binding1.host,
+        :port     => binding1.port,
+        :database => binding1.database_name,
         :username => config.fetch('username'),
         :password => config.fetch('password')
       )
     end
 
-    def overflow_database(client)
+    def overflow_database(client, max_mb)
       client.query('CREATE TABLE stuff (id INT PRIMARY KEY, data LONGTEXT) ENGINE=InnoDB')
+      client.query('CREATE TABLE stuff2 (id INT PRIMARY KEY, data LONGTEXT) ENGINE=InnoDB')
 
-      data = '1' * (1024 * 1024) # 1 MB
+      data = '1' * (1024 * 512) # 0.5 MB
       data = client.escape(data)
 
-      max_storage_mb.times do |n|
+      max_mb.times do |n|
         client.query("INSERT INTO stuff (id, data) VALUES (#{n}, '#{data}')")
+        client.query("INSERT INTO stuff2 (id, data) VALUES (#{n}, '#{data}')")
       end
-
-      recalculate_usage
     end
 
     def prune_database(client)
       client.query('DELETE FROM stuff')
-
-      recalculate_usage
+      client.query('DELETE FROM stuff2')
     end
 
     # Force MySQL to immediately recalculate table usage. Normally
@@ -221,9 +324,10 @@ describe QuotaEnforcer do
     # allows us to immediately test the quota enforcer, as this will
     # ensure it has the latest usage stats with which to make its
     # enforcement decisions.
-    def recalculate_usage
+    def recalculate_usage(binding)
       # For some reason, ANALYZE TABLE doesn't update statistics in Travis' environment
       ActiveRecord::Base.connection.execute("OPTIMIZE TABLE #{binding.database_name}.stuff")
+      ActiveRecord::Base.connection.execute("OPTIMIZE TABLE #{binding.database_name}.stuff2")
     end
   end
 end
