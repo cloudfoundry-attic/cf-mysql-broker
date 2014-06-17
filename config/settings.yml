@@ -49,6 +49,20 @@ defaults: &defaults
           - Shared MySQL server
           - 5 MB storage
           - 40 concurrent connections
+    - name: 10mb
+      id: f488f238-f364-4712-808d-cacfc49db053
+      description: Free Trial - 10MB
+      max_storage_mb: 10
+      metadata:
+        costs:
+        - amount:
+            usd: 0.0
+          unit: MONTHLY
+
+        bullets:
+          - Shared MySQL server
+          - 10 MB storage
+          - 40 concurrent connections
 
   cc_api_uri: 'https://api.10.244.0.34.xip.io'
 

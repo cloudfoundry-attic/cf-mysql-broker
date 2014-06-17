@@ -1,38 +1,64 @@
 require 'spec_helper'
+require Rails.root.join('app/queries/service_instance_usage_query')
 
 describe 'Quota enforcement' do
-  let(:instance_id) { SecureRandom.uuid }
-  let(:binding_id) { SecureRandom.uuid }
-  let(:max_storage_mb) { Settings.services[0].plans[0].max_storage_mb.to_i }
+  let(:instance_id_0) { SecureRandom.uuid }
+  let(:binding_id_0) { SecureRandom.uuid }
+  let(:max_storage_mb_0) { Settings.services[0].plans[0].max_storage_mb.to_i }
 
-  before do
-    Catalog.stub(:has_plan?).with('PLAN-1') { true }
-    put "/v2/service_instances/#{instance_id}", {plan_id: 'PLAN-1'}
-    put "/v2/service_instances/#{instance_id}/service_bindings/#{binding_id}"
-  end
+  let(:instance_id_1) { SecureRandom.uuid }
+  let(:binding_id_1) { SecureRandom.uuid }
+  let(:max_storage_mb_1) { Settings.services[0].plans[1].max_storage_mb.to_i }
 
   after do
-    delete "/v2/service_instances/#{instance_id}/service_bindings/#{binding_id}"
-    delete "/v2/service_instances/#{instance_id}"
+    delete "/v2/service_instances/#{instance_id_0}/service_bindings/#{binding_id_0}"
+    delete "/v2/service_instances/#{instance_id_0}"
+
+    delete "/v2/service_instances/#{instance_id_1}/service_bindings/#{binding_id_1}"
+    delete "/v2/service_instances/#{instance_id_1}"
   end
 
   specify 'User violates and recovers from quota limit' do
-    binding = JSON.parse(response.body)
-    credentials = binding.fetch('credentials')
+    put "/v2/service_instances/#{instance_id_0}", {plan_id: Settings.services[0].plans[0].id}
+    put "/v2/service_instances/#{instance_id_0}/service_bindings/#{binding_id_0}"
+    binding_0 = JSON.parse(response.body)
+    credentials_0 = binding_0.fetch('credentials')
 
-    client1 = create_mysql_client(credentials)
-    overflow_database(client1)
+    put "/v2/service_instances/#{instance_id_1}", {plan_id: Settings.services[0].plans[1].id}
+    put "/v2/service_instances/#{instance_id_1}/service_bindings/#{binding_id_1}"
+    binding_1 = JSON.parse(response.body)
+    credentials_1 = binding_1.fetch('credentials')
+
+    client_0 = create_mysql_client(credentials_0)
+    client_1 = create_mysql_client(credentials_1)
+    overflow_database(client_0, max_storage_mb_0)
+    overflow_database(client_1, max_storage_mb_1)
+    recalculate_usage(instance_id_0)
+    recalculate_usage(instance_id_1)
+
     enforce_quota
-    verify_connection_terminated(client1)
 
-    client2 = create_mysql_client(credentials)
-    verify_write_privileges_revoked(client2)
-    prune_database(client2)
+    verify_connection_terminated(client_0)
+    verify_connection_terminated(client_1)
+
+    client_0 = create_mysql_client(credentials_0)
+    client_1 = create_mysql_client(credentials_1)
+    verify_write_privileges_revoked(client_0)
+    verify_write_privileges_revoked(client_1)
+    prune_database(client_0)
+    prune_database(client_1)
+    recalculate_usage(instance_id_0)
+    recalculate_usage(instance_id_1)
+
     enforce_quota
-    verify_connection_terminated(client2)
 
-    client3 = create_mysql_client(credentials)
-    verify_write_privileges_restored(client3)
+    verify_connection_terminated(client_0)
+    verify_connection_terminated(client_1)
+
+    client_0 = create_mysql_client(credentials_0)
+    client_1 = create_mysql_client(credentials_1)
+    verify_write_privileges_restored(client_0)
+    verify_write_privileges_restored(client_1)
   end
 
   def create_mysql_client(config)
@@ -45,7 +71,7 @@ describe 'Quota enforcement' do
     )
   end
 
-  def overflow_database(client)
+  def overflow_database(client, max_storage_mb)
     client.query('CREATE TABLE stuff (id INT PRIMARY KEY, data LONGTEXT) ENGINE=InnoDB')
 
     data = '1' * (1024 * 1024) # 1 MB
@@ -53,29 +79,24 @@ describe 'Quota enforcement' do
     max_storage_mb.times do |n|
       client.query("INSERT INTO stuff (id, data) VALUES (#{n}, '#{data}')")
     end
-
-    recalculate_usage
   end
 
   def prune_database(client)
     client.query('DELETE FROM stuff LIMIT 2')
-
-    recalculate_usage
   end
 
-  def recalculate_usage
+  def recalculate_usage(instance_id)
     # Getting Mysql to update statistics is a little tricky. With the right configuration settings,
     # Mysql will do it automatically. With the wrong settings, you may need to ANALYZE or OPTIMIZE.
     # For the tests we will run OPTIMIZE to ensure the settings update immediately.
 
-    instance = ServiceInstance.find_by_guid(instance_id)
-    db_name = ServiceInstanceManager.database_name_from_service_instance_guid(instance.guid)
+    db_name = ServiceInstanceManager.database_name_from_service_instance_guid(instance_id)
     #ActiveRecord::Base.connection.execute("ANALYZE TABLE #{instance.database}.stuff")
     ActiveRecord::Base.connection.execute("OPTIMIZE TABLE #{db_name}.stuff")
   end
 
   def enforce_quota
-    `rake quota:enforce`
+    puts `rake quota:enforce`
   end
 
   def verify_connection_terminated(client)

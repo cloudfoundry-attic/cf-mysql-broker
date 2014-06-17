@@ -18,10 +18,16 @@ describe 'GET /v2/catalog' do
     expect(service.fetch('metadata')).to eq(service_settings.fetch('metadata'))
 
     plans = service.fetch('plans')
-    expect(plans).to have(1).plan
+    expect(plans).to have(2).plan
 
     plan = plans.first
     plan_settings = service_settings.fetch('plans').first
+    expect(plan.fetch('name')).to eq(plan_settings.fetch('name'))
+    expect(plan.fetch('description')).to eq(plan_settings.fetch('description'))
+    expect(plan.fetch('metadata')).to eq(plan_settings.fetch('metadata'))
+
+    plan = plans[1]
+    plan_settings = service_settings.fetch('plans')[1]
     expect(plan.fetch('name')).to eq(plan_settings.fetch('name'))
     expect(plan.fetch('description')).to eq(plan_settings.fetch('description'))
     expect(plan.fetch('metadata')).to eq(plan_settings.fetch('metadata'))
