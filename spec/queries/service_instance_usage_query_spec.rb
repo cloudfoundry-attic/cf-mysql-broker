@@ -8,9 +8,12 @@ describe ServiceInstanceUsageQuery do
     let(:binding) { ServiceBinding.new(id: binding_id, service_instance: instance) }
     let(:mbs_used) { 10 }
     let(:client) { create_mysql_client }
+    let(:max_storage_mb) { 15 }
+    let(:plan_guid) {'plan_guid'}
 
     before do
-      ServiceInstanceManager.create(guid: instance_guid, plan_guid: 'plan_guid' )
+      Catalog.stub(:quota_for_plan_guid).with(plan_guid).and_return(max_storage_mb)
+      ServiceInstanceManager.create(guid: instance_guid, plan_guid: plan_guid )
       binding.save
       fill_db
     end

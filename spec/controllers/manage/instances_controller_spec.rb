@@ -203,7 +203,7 @@ describe Manage::InstancesController do
         end
 
         it 'displays the usage information for the given instance' do
-          quota = Settings.services[0].plans[0].max_storage_mb.to_i
+          quota = instance.max_storage_mb
 
           get :show, id: 'abc-123'
 

@@ -11,7 +11,7 @@ module Manage
       instance = ServiceInstance.find_by_guid(params[:id])
 
       @used_data = ServiceInstanceUsageQuery.new(instance).execute
-      @quota = QuotaEnforcer::QUOTA_IN_MB
+      @quota = instance.max_storage_mb
       @over_quota = @used_data > @quota
     end
 
