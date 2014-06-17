@@ -23,9 +23,9 @@ describe QuotaEnforcer do
       'plans' => [plan1, plan2, plan3]
     )}
 
-    let(:max_storage_mb_for_plan_1) { 5 }
-    let(:max_storage_mb_for_plan_2) { 10 }
-    let(:max_storage_mb_for_plan_3) { 15 }
+    let(:max_storage_mb_for_plan_1) { 2 }
+    let(:max_storage_mb_for_plan_2) { 4 }
+    let(:max_storage_mb_for_plan_3) { 6 }
 
     let(:plan1) {{
       'id' => 'plan-1-guid',
@@ -141,7 +141,7 @@ describe QuotaEnforcer do
             'id' => 'plan-1-guid',
             'name' => 'plan-1',
             'description' => 'plan-1-desc',
-            'max_storage_mb' => max_storage_mb_for_plan_1 + 10
+            'max_storage_mb' => max_storage_mb_for_plan_1 + 4
           }
 
           service = Service.build(
@@ -189,20 +189,69 @@ describe QuotaEnforcer do
         QuotaEnforcer.enforce!
       end
 
-      it 'does not kill existing connections' do
-        clients = bindings.map do |binding|
-          create_mysql_client(binding)
+      context 'and the catalog has not changed' do
+        it 'does not kill existing connections' do
+          clients = generate_clients_and_connections_for_all_bindings
+
+          QuotaEnforcer.enforce!
+
+          clients.each do |client|
+            verify_connection_not_killed(client)
+          end
+        end
+      end
+
+      context 'and the catalog has a plan that has been removed' do
+        before do
+          service = Service.build(
+            'id' => SecureRandom.uuid,
+            'name' => 'our service',
+            'description' => 'our service',
+            'plans' => [plan1, plan3]
+          )
+
+          Catalog.stub(:services) { [service] }
         end
 
-        clients.each { |client| client.query('SELECT 1') }
+        it 'does not kill existing connections' do
+          clients = generate_clients_and_connections_for_all_bindings
 
-        QuotaEnforcer.enforce!
+          QuotaEnforcer.enforce!
 
-        clients.each do |client|
-          expect {
-            client.query('SELECT 1')
-          }.to_not raise_error
+          clients.each do |client|
+            verify_connection_not_killed(client)
+          end
         end
+      end
+
+      context 'and the catalog has a plan where the quota has been changed' do
+        before do
+          plan1 = {
+            'id' => 'plan-1-guid',
+            'name' => 'plan-1',
+            'description' => 'plan-1-desc',
+            'max_storage_mb' => max_storage_mb_for_plan_1 + 4
+          }
+
+          service = Service.build(
+            'id' => SecureRandom.uuid,
+            'name' => 'our service',
+            'description' => 'our service',
+            'plans' => [plan1, plan2, plan3]
+          )
+
+          Catalog.stub(:services) { [service] }
+        end
+
+        it 'kills existing connections for only the plan that was changed' do
+          clients = generate_clients_and_connections_for_all_bindings
+
+          QuotaEnforcer.enforce!
+
+          verify_connection_killed(clients[0])
+          verify_connection_not_killed(clients[1])
+        end
+
       end
     end
 
@@ -226,60 +275,103 @@ describe QuotaEnforcer do
         recalculate_usage(binding2)
       end
 
-      it 'grants insert, update, and create privileges' do
-        QuotaEnforcer.enforce!
+      context 'and the catalog has not changed' do
+        it 'grants insert, update, and create privileges' do
+          QuotaEnforcer.enforce!
 
-        bindings.each do |binding|
-          client = create_mysql_client(binding)
-          expect {
-            client.query("INSERT INTO stuff (id, data) VALUES (99999, 'This should succeed.')")
-          }.to_not raise_error
+          bindings.each do |binding|
+            verify_write_privileges_allowed(binding)
+          end
+        end
 
-          expect {
-            client.query("UPDATE stuff SET data = 'This should also succeed.' WHERE id = 99999")
-          }.to_not raise_error
+        it 'kills existing connections' do
+          clients = generate_clients_and_connections_for_all_bindings
 
-          expect {
-            client.query('CREATE TABLE more_stuff (id INT PRIMARY KEY)')
-          }.to_not raise_error
+          QuotaEnforcer.enforce!
 
-          expect {
-            client.query('SELECT COUNT(*) FROM stuff')
-          }.to_not raise_error
+          clients.each do |client|
+            verify_connection_killed(client)
+          end
+        end
 
-          expect {
-            client.query('DELETE FROM stuff WHERE id = 99999')
-          }.to_not raise_error
+        it 'does not kill root connections' do
+          verify_root_connections_are_not_killed
         end
       end
 
-      it 'kills existing connections' do
-        clients = bindings.map do |binding|
-          create_mysql_client(binding)
+      context 'and the catalog has a plan that has been removed' do
+        before do
+          service = Service.build(
+            'id' => SecureRandom.uuid,
+            'name' => 'our service',
+            'description' => 'our service',
+            'plans' => [plan1, plan3]
+          )
+
+          Catalog.stub(:services) { [service] }
         end
 
-        clients.each do |client|
-          client.query('SELECT 1')
+        it 'grants insert, update, and create privileges' do
+          QuotaEnforcer.enforce!
+
+          bindings.each do |binding|
+            verify_write_privileges_allowed(binding)
+          end
         end
 
-        QuotaEnforcer.enforce!
+        it 'kills existing connections' do
+          clients = generate_clients_and_connections_for_all_bindings
 
-        clients.each do |client|
-          expect {
-            client.query('SELECT 1')
-          }.to raise_error(Mysql2::Error, /server has gone away/)
+          QuotaEnforcer.enforce!
+
+          clients.each do |client|
+            verify_connection_killed(client)
+          end
+        end
+
+        it 'does not kill root connections' do
+          verify_root_connections_are_not_killed
         end
       end
 
-      it 'does not kill root connections' do
-        client = create_root_mysql_client
-        client.query('SELECT 1')
+      context 'and the catalog has a plan where the quota has been changed' do
+        before do
+          plan1 = {
+            'id' => 'plan-1-guid',
+            'name' => 'plan-1',
+            'description' => 'plan-1-desc',
+            'max_storage_mb' => -5
+          }
 
-        QuotaEnforcer.enforce!
+          service = Service.build(
+            'id' => SecureRandom.uuid,
+            'name' => 'our service',
+            'description' => 'our service',
+            'plans' => [plan1, plan2, plan3]
+          )
 
-        expect {
-          client.query('SELECT 1')
-        }.to_not raise_error
+          Catalog.stub(:services) { [service] }
+        end
+
+        it 'grants insert, update, and create privileges to only the plan that was not changed' do
+          QuotaEnforcer.enforce!
+
+          verify_write_privileges_revoked_select_and_delete_allowed(bindings[0])
+          verify_write_privileges_allowed(bindings[1])
+        end
+
+        it 'kills existing connections for only the plan that was not changed' do
+          clients = generate_clients_and_connections_for_all_bindings
+
+          QuotaEnforcer.enforce!
+
+          verify_connection_not_killed(clients[0])
+          verify_connection_killed(clients[1])
+        end
+
+        it 'does not kill root connections' do
+          verify_root_connections_are_not_killed
+        end
       end
     end
 
@@ -305,21 +397,67 @@ describe QuotaEnforcer do
         QuotaEnforcer.enforce!
       end
 
-      it 'does not kill existing connections' do
-        clients = bindings.map do |binding|
-          create_mysql_client(binding)
+      context 'and the catalog has not changed' do
+        it 'does not kill existing connections' do
+          clients = generate_clients_and_connections_for_all_bindings
+
+          QuotaEnforcer.enforce!
+
+          clients.each do |client|
+            verify_connection_not_killed(client)
+          end
+        end
+      end
+
+      context 'and the catalog has a plan that has been removed' do
+        before do
+          service = Service.build(
+            'id' => SecureRandom.uuid,
+            'name' => 'our service',
+            'description' => 'our service',
+            'plans' => [plan1, plan3]
+          )
+
+          Catalog.stub(:services) { [service] }
         end
 
-        clients.each do |client|
-          client.query('SELECT 1')
+        it 'does not kill existing connections' do
+          clients = generate_clients_and_connections_for_all_bindings
+
+          QuotaEnforcer.enforce!
+
+          clients.each do |client|
+            verify_connection_not_killed(client)
+          end
+        end
+      end
+
+      context 'and the catalog has a plan where the quota has been changed' do
+        before do
+          plan1 = {
+            'id' => 'plan-1-guid',
+            'name' => 'plan-1',
+            'description' => 'plan-1-desc',
+            'max_storage_mb' => -5
+          }
+
+          service = Service.build(
+            'id' => SecureRandom.uuid,
+            'name' => 'our service',
+            'description' => 'our service',
+            'plans' => [plan1, plan2, plan3]
+          )
+
+          Catalog.stub(:services) { [service] }
         end
 
-        QuotaEnforcer.enforce!
+        it 'kills existing connections for only the plan that was changed' do
+          clients = generate_clients_and_connections_for_all_bindings
 
-        clients.each do |client|
-          expect {
-            client.query('SELECT 1')
-          }.to_not raise_error
+          QuotaEnforcer.enforce!
+
+          verify_connection_killed(clients[0])
+          verify_connection_not_killed(clients[1])
         end
       end
     end
