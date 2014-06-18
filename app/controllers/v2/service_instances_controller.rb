@@ -2,10 +2,7 @@ class V2::ServiceInstancesController < V2::BaseController
 
   # This is actually the create
   def update
-    quota = Settings['services'][0]['max_db_per_node']
-    existing_instances = ServiceInstance.count
-
-    if !quota or existing_instances < quota
+    if ServiceCapacity.allow_creation_of_additional_db?
       plan_guid = params.fetch(:plan_id)
 
       unless Catalog.has_plan?(plan_guid)
@@ -17,7 +14,7 @@ class V2::ServiceInstancesController < V2::BaseController
 
       render status: 201, json: { dashboard_url: build_dashboard_url(instance) }
     else
-      render status: 507, json: {'description' => 'Service plan capacity has been reached'}
+      render status: 507, json: {'description' => 'Service capacity has been reached'}
     end
   end
 

@@ -7,7 +7,6 @@ describe V2::ServiceInstancesController do
 
   # this is actually the create
   describe '#update' do
-    let(:max_db_per_node) { 5 }
     let(:max_storage_mb) { 5 }
     let(:db_name) { ServiceInstanceManager.database_name_from_service_instance_guid(instance_id) }
     let(:services) do
@@ -25,12 +24,9 @@ describe V2::ServiceInstancesController do
                       'max_storage_mb' => 5,
                   }
               ]
-          }.merge(extra_service_attributes)
+          }
       ]
     end
-    let(:extra_service_attributes) { {
-        'max_db_per_node' => max_db_per_node
-    } }
     let(:plan_id) { 'plan_id' }
     let(:make_request) do
       put :update, {
@@ -78,11 +74,9 @@ describe V2::ServiceInstancesController do
       end
     end
 
-    context 'when below max_db_per_node quota' do
+    context 'when creating additional instances is allowed' do
       before do
-        (max_db_per_node - 1).times do |index|
-          ServiceInstance.create(guid: "instance-guid-#{index}", plan_guid: plan_id)
-        end
+        ServiceCapacity.stub(:allow_creation_of_additional_db?) { true }
       end
 
       it 'returns a 201' do
@@ -107,40 +101,9 @@ describe V2::ServiceInstancesController do
       end
     end
 
-    context 'no max_db_per_node set' do
-      let(:extra_service_attributes) { {} }
-
+    context 'when creating additional instances is not allowed' do
       before do
-        ServiceInstance.create(guid: "instance-guid-0", plan_guid: plan_id)
-      end
-
-      it 'returns a 201' do
-        make_request
-        expect(response.status).to eq(201)
-      end
-
-      it 'tells the ServiceInstanceManager to create an instance with the correct attributes' do
-        expect(ServiceInstanceManager).to receive(:create).with({
-            guid: instance_id,
-            plan_guid: plan_id
-        }).and_return(ServiceInstance.new(guid: instance_id, plan_guid: plan_id, max_storage_mb: max_storage_mb, db_name: db_name))
-
-        make_request
-      end
-
-      it 'returns the dashboard_url' do
-        make_request
-
-        instance = JSON.parse(response.body)
-        expect(instance).to eq({'dashboard_url' => "https://pmysql.vcap.me/manage/instances/#{instance_id}"})
-      end
-    end
-
-    context 'when above max_db_per_node quota' do
-      before do
-        max_db_per_node.times do |index|
-          ServiceInstance.create(guid: "instance-guid-#{index}", plan_guid: plan_id)
-        end
+        ServiceCapacity.stub(:allow_creation_of_additional_db?) { false }
       end
 
       it 'returns a 507' do
@@ -148,7 +111,7 @@ describe V2::ServiceInstancesController do
 
         expect(response.status).to eq(507)
         response_json = JSON.parse(response.body)
-        expect(response_json['description']).to eq('Service plan capacity has been reached')
+        expect(response_json['description']).to eq('Service capacity has been reached')
       end
 
       it 'does not attempt to create a service instance' do
