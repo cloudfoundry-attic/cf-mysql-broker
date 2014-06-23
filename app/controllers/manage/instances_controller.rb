@@ -70,7 +70,7 @@ module Manage
     end
 
     def has_necessary_scopes?(token_hash)
-      %w(openid cloud_controller.read).all? { |scope| token_hash['scope'].include?(scope) }
+      %w(openid cloud_controller_service_permissions.read).all? { |scope| token_hash['scope'].include?(scope) }
     end
 
     def need_to_retry?

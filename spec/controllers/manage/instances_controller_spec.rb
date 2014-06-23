@@ -8,7 +8,7 @@ describe Manage::InstancesController do
     before do
       allow(Settings).to receive(:ssl_enabled).and_return(false)
       allow(Settings).to receive(:cc_api_uri) { 'http://api.example.com' }
-      allow(CF::UAA::TokenCoder).to receive(:decode).and_return('scope' => ['openid', 'cloud_controller.read'])
+      allow(CF::UAA::TokenCoder).to receive(:decode).and_return('scope' => ['openid', 'cloud_controller_service_permissions.read'])
     end
 
     describe 'redirecting a user that is not logged in' do
@@ -103,7 +103,7 @@ describe Manage::InstancesController do
 
     describe 'verifying that the user has approved the necessary scopes' do
       let(:uaa_session) { double(UaaSession, auth_header: 'bearer <token>') }
-      let(:all_scopes) { ['openid', 'cloud_controller.read'] }
+      let(:all_scopes) { ['openid', 'cloud_controller_service_permissions.read'] }
       let(:missing_scopes) { ['openid'] }
 
       before do

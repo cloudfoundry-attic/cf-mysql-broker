@@ -9,7 +9,7 @@ unless Rails.env.assets?
       provider :cloudfoundry, client.id, client.secret, {
         auth_server_url: Configuration.auth_server_url,
         token_server_url: Configuration.token_server_url,
-        scope: %w(cloud_controller.read openid)
+        scope: %w(cloud_controller_service_permissions.read openid)
       }
     end
   end

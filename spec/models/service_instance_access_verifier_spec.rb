@@ -10,7 +10,7 @@ describe ServiceInstanceAccessVerifier do
       expect(http_client).to have_received(:get).with("/v2/service_instances/#{instance_guid}/permissions")
     end
 
-    context 'when the user does not approve cloud_controller.read' do
+    context 'when the user does not approve cloud_controller_service_permissions.read' do
       before do
         allow(http_client).to receive(:get).and_return(nil)
       end
