@@ -4,9 +4,12 @@ describe ServiceInstanceManager do
   let(:instance_id) { '88f6fa22-c8b7-4cdc-be3a-dc09ea7734db' }
   let(:database_name) { 'cf_88f6fa22_c8b7_4cdc_be3a_dc09ea7734db' }
   let(:plan_id) { '8888-ffff' }
+  let(:non_existent_plan_id) { 'non-existent-guid' }
   let(:max_storage_mb) { 300 }
 
   before do
+    Catalog.stub(:has_plan?).with(plan_id).and_return(true)
+    Catalog.stub(:has_plan?).with(non_existent_plan_id).and_return(false)
     Catalog.stub(:quota_for_plan_guid).with(plan_id).and_return(max_storage_mb)
   end
 
@@ -47,6 +50,32 @@ describe ServiceInstanceManager do
           rescue ActiveRecord::ActiveRecordError
           end
         }.not_to change(ServiceInstance, :count)
+      end
+    end
+
+    context 'when the plan guid is not in the catalog' do
+
+      it 'raises an error' do
+        expect {
+          described_class.create(guid: instance_id, plan_guid: non_existent_plan_id)
+        }. to raise_error(RuntimeError, "Plan #{non_existent_plan_id} was not found in the catalog.")
+      end
+
+      it 'does not save a ServiceInstance in the broker database' do
+        expect {
+          begin
+            described_class.create(guid: instance_id, plan_guid: non_existent_plan_id)
+          rescue RuntimeError
+          end
+        }.not_to change(ServiceInstance, :count)
+      end
+
+      it 'does not try to create a database' do
+        expect(Database).not_to receive(:create)
+        begin
+          described_class.create(guid: instance_id, plan_guid: non_existent_plan_id)
+        rescue RuntimeError
+        end
       end
     end
 

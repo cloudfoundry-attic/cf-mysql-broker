@@ -12,6 +12,7 @@ describe ServiceInstanceUsageQuery do
     let(:plan_guid) {'plan_guid'}
 
     before do
+      Catalog.stub(:has_plan?).with(plan_guid).and_return(true)
       Catalog.stub(:quota_for_plan_guid).with(plan_guid).and_return(max_storage_mb)
       ServiceInstanceManager.create(guid: instance_guid, plan_guid: plan_guid )
       binding.save

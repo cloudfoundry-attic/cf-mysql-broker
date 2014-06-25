@@ -7,6 +7,11 @@ class ServiceInstanceManager
   def self.create(opts)
     guid = opts[:guid]
     plan_guid = opts[:plan_guid]
+
+    unless Catalog.has_plan?(plan_guid)
+      raise "Plan #{plan_guid} was not found in the catalog."
+    end
+
     max_storage_mb = Catalog.quota_for_plan_guid(plan_guid)
 
     if guid =~ /[^0-9,a-z,A-Z$-]+/
