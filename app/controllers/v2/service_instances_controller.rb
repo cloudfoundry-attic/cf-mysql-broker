@@ -2,13 +2,15 @@ class V2::ServiceInstancesController < V2::BaseController
 
   # This is actually the create
   def update
-    if ServiceCapacity.allow_creation_of_additional_db?
-      plan_guid = params.fetch(:plan_id)
+    plan_guid = params.fetch(:plan_id)
 
-      unless Catalog.has_plan?(plan_guid)
-        return render status: 422, json: {'description' => "Cannot create a service instance. Plan #{plan_guid} was not found in the catalog."}
-      end
+    unless Catalog.has_plan?(plan_guid)
+      return render status: 422, json: {'description' => "Cannot create a service instance. Plan #{plan_guid} was not found in the catalog."}
+    end
 
+    plan_max_storage_mb = Catalog.quota_for_plan_guid(plan_guid)
+
+    if ServiceCapacity.can_allocate?(plan_max_storage_mb)
       instance_guid = params.fetch(:id)
       instance = ServiceInstanceManager.create(guid: instance_guid, plan_guid: plan_guid)
 

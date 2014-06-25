@@ -14,6 +14,7 @@ defaults: &defaults
   external_ip: 127.0.0.1
   ssl_enabled: true
   skip_ssl_validation: false
+  storage_capacity_mb: 80000
 
   services:
   - name: p-mysql-local

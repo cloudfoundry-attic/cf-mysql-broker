@@ -37,6 +37,7 @@ describe V2::ServiceInstancesController do
 
     before do
       Settings.stub(:[]).with('services').and_return(services)
+      Settings.stub(:[]).with('storage_capacity_mb').and_return(80000)
       Settings.stub(:[]).with('ssl_enabled').and_return(true)
     end
 
@@ -76,7 +77,7 @@ describe V2::ServiceInstancesController do
 
     context 'when creating additional instances is allowed' do
       before do
-        ServiceCapacity.stub(:allow_creation_of_additional_db?) { true }
+        ServiceCapacity.stub(:can_allocate?).with(max_storage_mb) { true }
       end
 
       it 'returns a 201' do
@@ -103,7 +104,7 @@ describe V2::ServiceInstancesController do
 
     context 'when creating additional instances is not allowed' do
       before do
-        ServiceCapacity.stub(:allow_creation_of_additional_db?) { false }
+        ServiceCapacity.stub(:can_allocate?).with(max_storage_mb) { false }
       end
 
       it 'returns a 507' do
