@@ -122,6 +122,58 @@ describe V2::ServiceInstancesController do
     end
   end
 
+  describe '#change_plan' do
+    let(:make_request) { patch :set_plan, id: instance_id }
+
+    before do
+      request_body = {
+          plan_id: 'new-plan-guid'
+      }.to_json
+      request.env['RAW_POST_DATA'] = request_body
+    end
+
+    it_behaves_like 'a controller action that requires basic auth'
+
+    it_behaves_like 'a controller action that logs its request and response headers and body'
+
+    context 'when the service instance exists' do
+      before do
+        ServiceInstanceManager.stub(:set_plan)
+        ServiceInstance.create(guid: instance_id, plan_guid: 'some-plan-guid')
+      end
+
+      it 'returns a 200' do
+        make_request
+
+        expect(response.status).to eq(200)
+        body = JSON.parse(response.body)
+        expect(body).to eq({})
+      end
+
+      it 'tells the service instance manager to change the plan of the instance' do
+        expect(ServiceInstanceManager).to receive(:set_plan).with({
+            guid: instance_id,
+            plan_guid: 'new-plan-guid'
+        })
+
+        make_request
+      end
+    end
+
+    context 'when the service instance does not exist' do
+      it 'returns a 404' do
+        expect(ServiceInstanceManager).to receive(:set_plan).with({
+            guid: instance_id,
+            plan_guid: 'new-plan-guid'
+        }).and_raise(ServiceInstanceManager::ServiceInstanceNotFound)
+
+        make_request
+
+        expect(response.status).to eq(404)
+      end
+    end
+  end
+
   describe '#destroy' do
     let(:make_request) { delete :destroy, id: instance_id }
 

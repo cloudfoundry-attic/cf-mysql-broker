@@ -40,6 +40,11 @@ module FeatureHelpers
     super(*args)
   end
 
+  def patch(*args)
+    args[2] ||= env
+    super(*args)
+  end
+
   def delete(*args)
     args[2] ||= env
     super(*args)

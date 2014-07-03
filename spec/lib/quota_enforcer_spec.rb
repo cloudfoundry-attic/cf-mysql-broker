@@ -70,9 +70,9 @@ describe QuotaEnforcer do
         client1 = create_mysql_client(binding1)
         client2 = create_mysql_client(binding2)
 
-        overflow_database(client1, max_storage_mb_for_plan_1)
+        create_table_and_write_data(client1, max_storage_mb_for_plan_1)
         recalculate_usage(binding1)
-        overflow_database(client2, max_storage_mb_for_plan_2)
+        create_table_and_write_data(client2, max_storage_mb_for_plan_2)
         recalculate_usage(binding2)
       end
 
@@ -181,9 +181,9 @@ describe QuotaEnforcer do
         client1 = create_mysql_client(binding1)
         client2 = create_mysql_client(binding2)
 
-        overflow_database(client1, max_storage_mb_for_plan_1)
+        create_table_and_write_data(client1, max_storage_mb_for_plan_1)
         recalculate_usage(binding1)
-        overflow_database(client2, max_storage_mb_for_plan_2)
+        create_table_and_write_data(client2, max_storage_mb_for_plan_2)
         recalculate_usage(binding2)
 
         QuotaEnforcer.enforce!
@@ -260,9 +260,9 @@ describe QuotaEnforcer do
         client1 = create_mysql_client(binding1)
         client2 = create_mysql_client(binding2)
 
-        overflow_database(client1, max_storage_mb_for_plan_1)
+        create_table_and_write_data(client1, max_storage_mb_for_plan_1)
         recalculate_usage(binding1)
-        overflow_database(client2, max_storage_mb_for_plan_2)
+        create_table_and_write_data(client2, max_storage_mb_for_plan_2)
         recalculate_usage(binding2)
 
         QuotaEnforcer.enforce!
@@ -380,9 +380,9 @@ describe QuotaEnforcer do
         client1 = create_mysql_client(binding1)
         client2 = create_mysql_client(binding2)
 
-        overflow_database(client1, max_storage_mb_for_plan_1)
+        create_table_and_write_data(client1, max_storage_mb_for_plan_1)
         recalculate_usage(binding1)
-        overflow_database(client2, max_storage_mb_for_plan_2)
+        create_table_and_write_data(client2, max_storage_mb_for_plan_2)
         recalculate_usage(binding2)
 
         QuotaEnforcer.enforce!
@@ -484,7 +484,7 @@ describe QuotaEnforcer do
       )
     end
 
-    def overflow_database(client, max_mb)
+    def create_table_and_write_data(client, max_mb)
       client.query('CREATE TABLE stuff (id INT PRIMARY KEY, data LONGTEXT) ENGINE=InnoDB')
       client.query('CREATE TABLE stuff2 (id INT PRIMARY KEY, data LONGTEXT) ENGINE=InnoDB')
 

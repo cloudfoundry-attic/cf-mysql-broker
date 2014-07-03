@@ -6,6 +6,7 @@ CfMysqlBroker::Application.routes.draw do
     resources :service_instances, only: [:update, :destroy] do
       resources :service_bindings, only: [:update, :destroy]
     end
+    patch 'service_instances' => 'service_instances#set_plan'
   end
 
   namespace :manage do

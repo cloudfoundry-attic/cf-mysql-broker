@@ -105,6 +105,21 @@ describe ServiceInstanceManager do
     end
   end
 
+  describe '.set_plan' do
+    context 'when there is an instance with the given guid' do
+      let(:new_plan_id) { 'new-plan-id' }
+
+      before do
+        @service_instance = described_class.create(guid: instance_id, plan_guid: plan_id)
+      end
+
+      it 'changes the plan_guid' do
+        expect { described_class.set_plan(guid: instance_id, plan_guid: new_plan_id) }.
+            to change{@service_instance.plan_guid}.to(new_plan_id)
+      end
+    end
+  end
+
   describe '.destroy' do
     context 'when there is an instance with the given guid' do
       before do
