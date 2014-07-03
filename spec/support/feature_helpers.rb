@@ -1,12 +1,7 @@
 # Inspired by rspec-rails' request example group.
 module FeatureHelpers
   extend ActiveSupport::Concern
-  include RSpec::Rails::RailsExampleGroup
   include ActionDispatch::Integration::Runner
-  include ActionDispatch::Assertions
-  include RSpec::Rails::Matchers::RedirectTo
-  include RSpec::Rails::Matchers::RenderTemplate
-  include ActionController::TemplateAssertions
 
   included do
     metadata[:type] = :feature
