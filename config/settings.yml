@@ -14,7 +14,9 @@ defaults: &defaults
   external_ip: 127.0.0.1
   ssl_enabled: true
   skip_ssl_validation: false
-  storage_capacity_mb: 80000
+  persistent_disk: 10000
+  gcache_size: 50
+  ib_log_file_size: 100
 
   services:
   - name: p-mysql-local

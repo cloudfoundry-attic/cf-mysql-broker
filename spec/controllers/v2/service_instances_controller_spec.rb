@@ -37,8 +37,8 @@ describe V2::ServiceInstancesController do
 
     before do
       Settings.stub(:[]).with('services').and_return(services)
-      Settings.stub(:[]).with('storage_capacity_mb').and_return(80000)
       Settings.stub(:[]).with('ssl_enabled').and_return(true)
+      ServiceCapacity.stub(:can_allocate?).with(max_storage_mb).and_return(true)
     end
 
     it_behaves_like 'a controller action that requires basic auth'
