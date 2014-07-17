@@ -20,7 +20,7 @@ describe ServiceCapacity do
     end
 
     it 'returns false when the allocated space + requested space is > the storage capacity' do
-      expect(described_class.can_allocate?(16)).to eq false
+      expect(described_class.can_allocate?(15.948)).to eq false
     end
   end
 end
