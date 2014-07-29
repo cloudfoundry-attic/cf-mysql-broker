@@ -8,7 +8,8 @@ class V2::ServiceBindingsController < V2::BaseController
   end
 
   def destroy
-    if binding = ServiceBinding.find_by_id(params.fetch(:id))
+    binding = ServiceBinding.find_by_id(params.fetch(:id))
+    if binding
       binding.destroy
       status = 200
     else
