@@ -20,6 +20,7 @@ end
 
 group :development do
   gem 'guard-rails'
+  gem 'roodi'
 end
 
 group :test do
