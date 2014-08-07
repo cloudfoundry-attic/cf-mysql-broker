@@ -42,7 +42,7 @@ class UaaSession
   end
 
   def access_token
-    token_info.info[:access_token]
+    token_info.info[:access_token] || token_info.info["access_token"]
   end
 
   private
