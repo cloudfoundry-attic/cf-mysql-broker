@@ -14,8 +14,12 @@ class Catalog
     end.flatten
   end
 
-  def self.quota_for_plan_guid(plan_guid)
+  def self.storage_quota_for_plan_guid(plan_guid)
     find_plan_by_guid(plan_guid).try(:max_storage_mb)
+  end
+
+  def self.connection_quota_for_plan_guid(plan_guid)
+    find_plan_by_guid(plan_guid).try(:max_user_connections)
   end
 
   private

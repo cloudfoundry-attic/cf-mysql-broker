@@ -89,7 +89,11 @@ class ServiceBinding < BaseModel
     raise "Service instance '#{service_instance.guid}' database does not exist" unless Database.exists?(database_name)
 
     connection.execute("CREATE USER #{connection.quote(username)} IDENTIFIED BY #{connection.quote(password)}")
-    connection.execute("GRANT ALL PRIVILEGES ON #{connection.quote_table_name(database_name)}.* TO #{connection.quote(username)}@'%'")
+
+    max_user_connections = Catalog.connection_quota_for_plan_guid(service_instance.plan_guid)
+    grant_sql = "GRANT ALL PRIVILEGES ON #{connection.quote_table_name(database_name)}.* TO #{connection.quote(username)}@'%'"
+    grant_sql = grant_sql +  " WITH MAX_USER_CONNECTIONS #{max_user_connections}" if max_user_connections
+    connection.execute(grant_sql)
     # Some MySQL installations, e.g., Travis, seem to need privileges
     # to be flushed even when using the appropriate account management
     # statements, despite what the MySQL documentation says:

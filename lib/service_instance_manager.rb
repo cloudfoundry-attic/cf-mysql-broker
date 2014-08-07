@@ -12,7 +12,7 @@ class ServiceInstanceManager
       raise "Plan #{plan_guid} was not found in the catalog."
     end
 
-    max_storage_mb = Catalog.quota_for_plan_guid(plan_guid)
+    max_storage_mb = Catalog.storage_quota_for_plan_guid(plan_guid)
 
     if guid =~ /[^0-9,a-z,A-Z$-]+/
       raise 'Only GUIDs matching [0-9,a-z,A-Z$-]+ are allowed'

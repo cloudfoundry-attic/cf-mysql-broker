@@ -36,6 +36,7 @@ describe Catalog do
         'name' => 'plan_name_1',
         'description' => 'desc1',
         'max_storage_mb' => 5,
+        'max_user_connections' => 7,
     }
   }
   let(:plan_2_attrib) {
@@ -44,6 +45,7 @@ describe Catalog do
         'name' => 'plan_name_2',
         'description' => 'desc2',
         'max_storage_mb' => 100,
+        'max_user_connections' => 40,
     }
   }
   let(:plan_3_attrib) {
@@ -52,6 +54,7 @@ describe Catalog do
         'name' => 'plan_name_3',
         'description' => 'desc3',
         'max_storage_mb' => 101,
+        'max_user_connections' => 41,
     }
   }
 
@@ -72,14 +75,26 @@ describe Catalog do
     end
   end
 
-  describe '.quota_for_plan_guid' do
+  describe '.storage_quota_for_plan_guid' do
     it 'returns max_storage_mb for the plan with the specified guid' do
-      expect(Catalog.quota_for_plan_guid('plan_id_2')).to eq(100)
+      expect(Catalog.storage_quota_for_plan_guid('plan_id_2')).to eq(100)
     end
 
     context 'when the plan with the guid is not found' do
       it 'returns nil' do
-        expect(Catalog.quota_for_plan_guid('non-existent-plan')).to be_nil
+        expect(Catalog.storage_quota_for_plan_guid('non-existent-plan')).to be_nil
+      end
+    end
+  end
+
+  describe '.connection_quota_for_plan_guid' do
+    it 'returns max_user_connections for the plan with the specified guid' do
+      expect(Catalog.connection_quota_for_plan_guid('plan_id_2')).to eq(40)
+    end
+
+    context 'when the plan with the guid is not found' do
+      it 'returns nil' do
+        expect(Catalog.connection_quota_for_plan_guid('non-existent-plan')).to be_nil
       end
     end
   end

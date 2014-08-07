@@ -8,7 +8,7 @@ class V2::ServiceInstancesController < V2::BaseController
       return render status: 422, json: {'description' => "Cannot create a service instance. Plan #{plan_guid} was not found in the catalog."}
     end
 
-    plan_max_storage_mb = Catalog.quota_for_plan_guid(plan_guid)
+    plan_max_storage_mb = Catalog.storage_quota_for_plan_guid(plan_guid)
 
     if ServiceCapacity.can_allocate?(plan_max_storage_mb)
       instance_guid = params.fetch(:id)

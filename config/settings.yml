@@ -40,6 +40,7 @@ defaults: &defaults
       id: 2451fa22-df16-4c10-ba6e-1f682d3dcdc9
       description: Free Trial
       max_storage_mb: 5
+      max_user_connections: 5
       metadata:
         costs:
         - amount:
@@ -54,6 +55,7 @@ defaults: &defaults
       id: f488f238-f364-4712-808d-cacfc49db053
       description: Free Trial - 10MB
       max_storage_mb: 10
+      max_user_connections: 10
       metadata:
         costs:
         - amount:

@@ -13,8 +13,8 @@ describe ServiceInstance do
     Catalog.stub(:has_plan?).with(plan_guid_1).and_return(true)
     Catalog.stub(:has_plan?).with(plan_guid_2).and_return(true)
 
-    Catalog.stub(:quota_for_plan_guid).with(plan_guid_1).and_return(max_storage_mb_1)
-    Catalog.stub(:quota_for_plan_guid).with(plan_guid_2).and_return(max_storage_mb_2)
+    Catalog.stub(:storage_quota_for_plan_guid).with(plan_guid_1).and_return(max_storage_mb_1)
+    Catalog.stub(:storage_quota_for_plan_guid).with(plan_guid_2).and_return(max_storage_mb_2)
   end
 
   describe '.reserved_space_in_mb' do

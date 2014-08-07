@@ -10,7 +10,7 @@ describe ServiceInstanceManager do
   before do
     Catalog.stub(:has_plan?).with(plan_id).and_return(true)
     Catalog.stub(:has_plan?).with(non_existent_plan_id).and_return(false)
-    Catalog.stub(:quota_for_plan_guid).with(plan_id).and_return(max_storage_mb)
+    Catalog.stub(:storage_quota_for_plan_guid).with(plan_id).and_return(max_storage_mb)
   end
 
   describe '.database_name_from_service_instance_guid' do

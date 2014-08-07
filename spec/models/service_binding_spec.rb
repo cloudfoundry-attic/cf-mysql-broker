@@ -7,12 +7,15 @@ describe ServiceBinding do
   let(:binding) { ServiceBinding.new(id: id, service_instance: instance) }
 
   let(:instance_guid) { '88f6fa22-c8b7-4cdc-be3a-dc09ea7734db' }
-  let(:instance) { ServiceInstance.new(guid: instance_guid) }
+  let(:plan_guid) { 'plan-guid' }
+  let(:instance) { ServiceInstance.new(guid: instance_guid, plan_guid: plan_guid) }
   let(:database) { ServiceInstanceManager.database_name_from_service_instance_guid(instance_guid) }
+  let(:connection_quota) { 12 }
 
   before do
     SecureRandom.stub(:base64).and_return(password, 'notthepassword')
     Database.stub(:exists?).with(database).and_return(true)
+    Catalog.stub(:connection_quota_for_plan_guid).with(plan_guid).and_return(connection_quota)
   end
 
   after do
@@ -139,6 +142,13 @@ describe ServiceBinding do
 
       grant_sql = "GRANT ALL PRIVILEGES ON `#{database}`.* TO '#{username}'@'%'"
       expect(connection.select_values("SHOW GRANTS FOR #{username}")).to include(grant_sql)
+    end
+
+    it 'sets the max connections to the value specified by the plan' do
+      binding.save
+
+      max_user_connection_sql = "WITH MAX_USER_CONNECTIONS #{connection_quota}"
+      expect(connection.select_values("SHOW GRANTS FOR #{username}")[0]).to include(max_user_connection_sql)
     end
 
     it 'raises an error when creating the same user twice' do
