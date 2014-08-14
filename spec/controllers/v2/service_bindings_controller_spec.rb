@@ -8,7 +8,7 @@ describe V2::ServiceBindingsController do
   let(:database_port) { db_settings.fetch('port') }
 
   let(:instance_guid) { 'instance-1' }
-  let(:instance) { ServiceInstance.new(guid: instance_guid) }
+  let(:instance) { ServiceInstance.new(guid: instance_guid, db_name: database) }
   let(:database) { ServiceInstanceManager.database_name_from_service_instance_guid(instance_guid) }
 
   before do

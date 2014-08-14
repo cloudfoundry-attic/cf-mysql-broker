@@ -1,10 +1,17 @@
 # These requires are needed because the quota enforcer
 # is not running as a Rails application
 require Rails.root.join('app/models/base_model')
+require Rails.root.join('app/models/service_instance')
+require Rails.root.join('app/models/service_binding')
 require Rails.root.join('app/models/catalog')
 
 module QuotaEnforcer
   class << self
+    def update_quotas
+      update_service_instances_max_storage_mb
+      update_max_user_connection_quota
+    end
+
     def enforce!
 
       # When debugging, the following code will show you the list of databases and their usage:
@@ -16,7 +23,6 @@ module QuotaEnforcer
       #       GROUP  BY tables.table_schema
       #     SQL
 
-      update_service_instances_max_storage_mb
       revoke_privileges_from_violators
       grant_privileges_to_reformed
     end
@@ -29,6 +35,33 @@ module QuotaEnforcer
 
     def get_broker_db_name
       ActiveRecord::Base.connection_config['database']
+    end
+
+    def update_max_user_connection_quota
+      all_users.each do |username|
+        begin
+          grants = connection.execute("SHOW GRANTS FOR #{connection.quote(username)}")
+          grants.each do |grant_list|
+            grant = grant_list[0]
+            if grant.start_with?('GRANT ALL PRIVILEGES ON `cf_')
+              database_name = grant.split('`')[1]
+              service_instance = ServiceInstance.find_by_db_name(database_name)
+              ServiceBinding.update_connection_quota_for_user(username, service_instance)
+            end
+          end
+        rescue ActiveRecord::StatementInvalid => e
+          Rails.logger.info(e) unless e.message =~ /no such grant/
+        end
+      end
+    end
+
+    def all_users
+      users = connection.execute("SELECT DISTINCT(USER) FROM mysql.user")
+      users_array = []
+      users.each do |u|
+        users_array << u[0]
+      end
+      users_array
     end
 
     def update_service_instances_max_storage_mb

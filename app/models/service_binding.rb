@@ -90,8 +90,12 @@ class ServiceBinding < BaseModel
 
     connection.execute("CREATE USER #{connection.quote(username)} IDENTIFIED BY #{connection.quote(password)}")
 
+    ServiceBinding.update_connection_quota_for_user(username, service_instance)
+  end
+
+  def self.update_connection_quota_for_user(username, service_instance)
     max_user_connections = Catalog.connection_quota_for_plan_guid(service_instance.plan_guid)
-    grant_sql = "GRANT ALL PRIVILEGES ON #{connection.quote_table_name(database_name)}.* TO #{connection.quote(username)}@'%'"
+    grant_sql = "GRANT ALL PRIVILEGES ON #{connection.quote_table_name(service_instance.db_name)}.* TO #{connection.quote(username)}@'%'"
     grant_sql = grant_sql +  " WITH MAX_USER_CONNECTIONS #{max_user_connections}" if max_user_connections
     connection.execute(grant_sql)
     # Some MySQL installations, e.g., Travis, seem to need privileges

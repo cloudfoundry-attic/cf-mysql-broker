@@ -8,7 +8,11 @@ describe ServiceBinding do
 
   let(:instance_guid) { '88f6fa22-c8b7-4cdc-be3a-dc09ea7734db' }
   let(:plan_guid) { 'plan-guid' }
-  let(:instance) { ServiceInstance.new(guid: instance_guid, plan_guid: plan_guid) }
+  let(:instance) { ServiceInstance.new(
+      guid: instance_guid,
+      plan_guid: plan_guid,
+      db_name: database)
+  }
   let(:database) { ServiceInstanceManager.database_name_from_service_instance_guid(instance_guid) }
   let(:connection_quota) { 12 }
 

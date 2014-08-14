@@ -7,6 +7,7 @@ dbconfig = YAML.load(File.read(Settings.database_config_path))
 ActiveRecord::Base.establish_connection dbconfig[Rails.env]
 
 Rails.logger = Logger.new(STDOUT)
+QuotaEnforcer.update_quotas
 
 loop do
   QuotaEnforcer.enforce!
