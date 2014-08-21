@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require File.expand_path('../../config/application', __FILE__)
+require File.expand_path('../../config/environment', __FILE__)
 require 'quota_enforcer'
 
 dbconfig = YAML.load(File.read(Settings.database_config_path))

@@ -1,10 +1,3 @@
-# These requires are needed because the quota enforcer
-# is not running as a Rails application
-require Rails.root.join('app/models/base_model')
-require Rails.root.join('app/models/service_instance')
-require Rails.root.join('app/models/service_binding')
-require Rails.root.join('app/models/catalog')
-
 module QuotaEnforcer
   class << self
     def update_quotas
