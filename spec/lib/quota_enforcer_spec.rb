@@ -16,6 +16,9 @@ describe QuotaEnforcer do
   let(:binding2_id) { SecureRandom.uuid }
   let(:binding2) { ServiceBinding.new(id: binding2_id, service_instance: instance2) }
 
+  let(:binding3_id) { SecureRandom.uuid }
+  let(:binding3) { ServiceBinding.new(id: binding3_id, service_instance: instance1) }
+
   let(:bindings) { [binding1, binding2] }
 
   let(:service) { Service.build(
@@ -60,12 +63,14 @@ describe QuotaEnforcer do
     ServiceInstanceManager.create(guid: instance2_guid, plan_guid: 'plan-2-guid' )
     binding1.save
     binding2.save
+    binding3.save
 
     # No instance / binding for plan 3 to test enforcer works for plans with no instance
   end
 
   after do
     bindings.each { |binding| binding.destroy }
+    binding3.destroy
     ServiceInstanceManager.destroy(guid: instance1_guid)
     ServiceInstanceManager.destroy(guid: instance2_guid)
   end
