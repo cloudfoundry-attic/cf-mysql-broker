@@ -20,6 +20,20 @@ class V2::ServiceInstancesController < V2::BaseController
     end
   end
 
+  def set_plan
+    instance_guid = params.fetch(:id)
+    plan_guid = params.fetch(:plan_id)
+
+    begin
+      ServiceInstanceManager.set_plan(guid: instance_guid, plan_guid: plan_guid)
+      status = 200
+    rescue ServiceInstanceManager::ServiceInstanceNotFound
+      status = 404
+    end
+
+    render status: status, json: {}
+  end
+
   def destroy
     instance_guid = params.fetch(:id)
     begin

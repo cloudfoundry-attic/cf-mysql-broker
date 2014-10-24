@@ -3,7 +3,7 @@
 require Rails.root.join('app/models/plan')
 
 class Service
-  attr_reader :id, :name, :description, :tags, :metadata, :plans, :dashboard_client
+  attr_reader :id, :name, :description, :tags, :metadata, :plans, :dashboard_client, :plan_updateable
 
   def self.build(attrs)
     plan_attrs = attrs['plans'] || []
@@ -15,6 +15,7 @@ class Service
     @id          = attrs.fetch('id')
     @name        = attrs.fetch('name')
     @description = attrs.fetch('description')
+    @plan_updateable = attrs.fetch('plan_updateable', false)
     @tags        = attrs.fetch('tags', [])
     @metadata    = attrs.fetch('metadata', nil)
     @plans       = attrs.fetch('plans', [])
@@ -32,6 +33,7 @@ class Service
       'description'      => description,
       'tags'             => tags,
       'metadata'         => metadata,
+      'plan_updateable'  => plan_updateable,
       'plans'            => plans.map(&:to_hash),
       'bindable'         => bindable?,
       'dashboard_client' => dashboard_client

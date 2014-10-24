@@ -24,6 +24,22 @@ class ServiceInstanceManager
     ServiceInstance.create(guid: guid, plan_guid: plan_guid, max_storage_mb: max_storage_mb, db_name: db_name)
   end
 
+  def self.set_plan(opts)
+    guid = opts[:guid]
+    plan_guid = opts[:plan_guid]
+
+    unless Catalog.has_plan?(plan_guid)
+      raise "Plan #{plan_guid} was not found in the catalog."
+    end
+
+    instance = ServiceInstance.find_by_guid(guid)
+    raise ServiceInstanceNotFound if instance.nil?
+
+    instance.plan_guid = plan_guid
+    instance.max_storage_mb = Catalog.storage_quota_for_plan_guid(plan_guid)
+    instance.save
+  end
+
   def self.destroy(opts)
     guid = opts[:guid]
     instance = ServiceInstance.find_by_guid(guid)
