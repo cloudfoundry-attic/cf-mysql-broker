@@ -119,8 +119,22 @@ describe ServiceInstanceManager do
       end
 
       it 'changes the plan_guid' do
-        expect { described_class.set_plan(guid: instance_id, plan_guid: new_plan_id) }.
-          to change{@service_instance.reload.plan_guid}.to(new_plan_id)
+        described_class.set_plan(guid: instance_id, plan_guid: new_plan_id)
+        @service_instance.reload
+        expect(@service_instance.plan_guid).to eq new_plan_id
+        expect(@service_instance.max_storage_mb).to eq 12
+      end
+    end
+
+    context 'when there is no plan with the given guid' do
+      it 'raises a ServiceInstanceManager::ServicePlanNotFound error' do
+        expect { described_class.set_plan(guid: instance_id, plan_guid: non_existent_plan_id) }.to raise_error(ServiceInstanceManager::ServicePlanNotFound)
+      end
+    end
+
+    context 'when there is no instance with the given guid' do
+      it 'raises a ServiceInstanceManager::ServiceInstanceNotFound error' do
+        expect { described_class.set_plan(guid: instance_id, plan_guid: new_plan_id) }.to raise_error(ServiceInstanceManager::ServiceInstanceNotFound)
       end
     end
   end

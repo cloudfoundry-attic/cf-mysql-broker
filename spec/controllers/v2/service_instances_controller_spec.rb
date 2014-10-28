@@ -128,7 +128,7 @@ describe V2::ServiceInstancesController do
     end
   end
 
-  describe '#change_plan' do
+  describe '#set_plan' do
     let(:plan_id) { 'new-plan-guid' }
     let(:make_request) { patch :set_plan, id: instance_id, plan_id: plan_id }
 
@@ -176,6 +176,21 @@ describe V2::ServiceInstancesController do
         make_request
 
         expect(response.status).to eq(404)
+        expect(response.body).to eq '{"description":"Service instance not found"}'
+      end
+    end
+
+    context 'when the service plan does not exist' do
+      it 'returns a 404' do
+        expect(ServiceInstanceManager).to receive(:set_plan).with({
+          guid: instance_id,
+          plan_guid: 'new-plan-guid'
+        }).and_raise(ServiceInstanceManager::ServicePlanNotFound)
+
+        make_request
+
+        expect(response.status).to eq(404)
+        expect(response.body).to eq '{"description":"Service plan not found"}'
       end
     end
   end

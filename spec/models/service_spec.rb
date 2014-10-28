@@ -6,7 +6,7 @@ describe Service do
       allow(Plan).to receive(:build)
     end
 
-    it 'sets fields correct' do
+    it 'sets fields correctly' do
       service = Service.build(
         'id'          => 'my-id',
         'name'        => 'my-name',
@@ -18,7 +18,8 @@ describe Service do
           'id'           => 'sso-client',
           'secret'       => 'something-secret',
           'redirect_uri' => 'example.com'
-        }
+        },
+        'plan_updateable' => true
       )
       expect(service.id).to eq('my-id')
       expect(service.name).to eq('my-name')
@@ -30,6 +31,7 @@ describe Service do
         'secret'       => 'something-secret',
         'redirect_uri' => 'example.com'
       })
+      expect(service.plan_updateable).to eq true
     end
 
     it 'is bindable' do
@@ -112,6 +114,22 @@ describe Service do
         expect(service.dashboard_client).to eql({})
       end
     end
+
+    context 'when the plan_updateable attr is missing' do
+      let(:service) do
+        Service.build(
+          'id'          => 'my-id',
+          'name'        => 'my-name',
+          'description' => 'my description',
+          'metadata'    => { 'stuff' => 'goes here' },
+          'plans'       => [],
+        )
+      end
+
+      it 'sets the field to false' do
+        expect(service.plan_updateable).to eql(false)
+      end
+    end
   end
 
   describe '#to_hash' do
@@ -127,7 +145,8 @@ describe Service do
           'id'           => 'sso-client',
           'secret'       => 'something-secret',
           'redirect_uri' => 'example.com'
-        }
+        },
+        'plan_updateable' => true
       )
 
       expect(service.to_hash.fetch('id')).to eq('my-id')
@@ -142,6 +161,7 @@ describe Service do
         'secret'       => 'something-secret',
         'redirect_uri' => 'example.com'
       })
+      expect(service.to_hash.fetch('plan_updateable')).to eq true
     end
 
     it 'includes the #to_hash for each plan' do

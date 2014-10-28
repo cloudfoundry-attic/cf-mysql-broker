@@ -1,6 +1,6 @@
 class ServiceInstanceManager
-  class ServiceInstanceNotFound < StandardError
-  end
+  class ServiceInstanceNotFound < StandardError; end
+  class ServicePlanNotFound < StandardError; end
 
   DATABASE_PREFIX = 'cf_'.freeze
 
@@ -29,7 +29,7 @@ class ServiceInstanceManager
     plan_guid = opts[:plan_guid]
 
     unless Catalog.has_plan?(plan_guid)
-      raise "Plan #{plan_guid} was not found in the catalog."
+      raise ServicePlanNotFound.new("Plan #{plan_guid} was not found in the catalog.")
     end
 
     instance = ServiceInstance.find_by_guid(guid)

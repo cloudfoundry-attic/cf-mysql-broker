@@ -27,11 +27,16 @@ class V2::ServiceInstancesController < V2::BaseController
     begin
       ServiceInstanceManager.set_plan(guid: instance_guid, plan_guid: plan_guid)
       status = 200
+      body = {}
     rescue ServiceInstanceManager::ServiceInstanceNotFound
       status = 404
+      body = { description: 'Service instance not found' }
+    rescue ServiceInstanceManager::ServicePlanNotFound
+      status = 404
+      body = { description: 'Service plan not found' }
     end
 
-    render status: status, json: {}
+    render status: status, json: body
   end
 
   def destroy
