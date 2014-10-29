@@ -167,12 +167,14 @@ describe V2::ServiceInstancesController do
     end
 
     context 'when the service instance does not exist' do
-      it 'returns a 404' do
-        expect(ServiceInstanceManager).to receive(:set_plan).with({
-              guid: instance_id,
-            plan_guid: 'new-plan-guid'
+      before do
+        allow(ServiceInstanceManager).to receive(:set_plan).with({
+          guid: instance_id,
+          plan_guid: 'new-plan-guid'
         }).and_raise(ServiceInstanceManager::ServiceInstanceNotFound)
+      end
 
+      it 'returns a 404' do
         make_request
 
         expect(response.status).to eq(404)
@@ -181,16 +183,31 @@ describe V2::ServiceInstancesController do
     end
 
     context 'when the service plan does not exist' do
-      it 'returns a 404' do
-        expect(ServiceInstanceManager).to receive(:set_plan).with({
+      before do
+        allow(ServiceInstanceManager).to receive(:set_plan).with({
           guid: instance_id,
           plan_guid: 'new-plan-guid'
         }).and_raise(ServiceInstanceManager::ServicePlanNotFound)
+      end
 
+      it 'returns a 404' do
         make_request
 
         expect(response.status).to eq(404)
         expect(response.body).to eq '{"description":"Service plan not found"}'
+      end
+    end
+
+    context 'when the service plan cannot be updated' do
+      before do
+        allow(ServiceInstanceManager).to receive(:set_plan).and_raise(ServiceInstanceManager::InvalidServicePlanUpdate.new('cannot downgrade'))
+      end
+
+      it 'returns a 422 and forwards the error message' do
+        make_request
+
+        expect(response.status).to eq 422
+        expect(response.body).to eq '{"description":"cannot downgrade"}'
       end
     end
   end

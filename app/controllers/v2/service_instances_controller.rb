@@ -34,6 +34,9 @@ class V2::ServiceInstancesController < V2::BaseController
     rescue ServiceInstanceManager::ServicePlanNotFound
       status = 404
       body = { description: 'Service plan not found' }
+    rescue ServiceInstanceManager::InvalidServicePlanUpdate => e
+      status = 422
+      body = { description: e.message }
     end
 
     render status: status, json: body

@@ -107,23 +107,18 @@ describe ServiceInstanceManager do
 
   describe '.set_plan' do
     let(:new_plan_id) { 'new-plan-id' }
+    let!(:service_instance) { described_class.create(guid: instance_id, plan_guid: plan_id) }
 
     before do
       Catalog.stub(:has_plan?).with(new_plan_id).and_return(true)
       Catalog.stub(:storage_quota_for_plan_guid).with(new_plan_id).and_return(12)
     end
 
-    context 'when there is an instance with the given guid' do
-      before do
-        @service_instance = described_class.create(guid: instance_id, plan_guid: plan_id)
-      end
-
-      it 'changes the plan_guid' do
-        described_class.set_plan(guid: instance_id, plan_guid: new_plan_id)
-        @service_instance.reload
-        expect(@service_instance.plan_guid).to eq new_plan_id
-        expect(@service_instance.max_storage_mb).to eq 12
-      end
+    it 'changes the plan_guid' do
+      described_class.set_plan(guid: instance_id, plan_guid: new_plan_id)
+      service_instance.reload
+      expect(service_instance.plan_guid).to eq new_plan_id
+      expect(service_instance.max_storage_mb).to eq 12
     end
 
     context 'when there is no plan with the given guid' do
@@ -133,8 +128,20 @@ describe ServiceInstanceManager do
     end
 
     context 'when there is no instance with the given guid' do
+      let!(:service_instance) { nil }
       it 'raises a ServiceInstanceManager::ServiceInstanceNotFound error' do
         expect { described_class.set_plan(guid: instance_id, plan_guid: new_plan_id) }.to raise_error(ServiceInstanceManager::ServiceInstanceNotFound)
+      end
+    end
+
+    context 'when downgrading would put the databases over the quota limit of its new plan' do
+      before do
+        db_name = ServiceInstanceManager.database_name_from_service_instance_guid(instance_id)
+        allow(Database).to receive(:usage).with(db_name).and_return 30
+      end
+
+      it 'raises an InvalidServicePlanUpdate error' do
+        expect{ServiceInstanceManager.set_plan(guid: instance_id, plan_guid: new_plan_id)}.to raise_error(ServiceInstanceManager::InvalidServicePlanUpdate)
       end
     end
   end

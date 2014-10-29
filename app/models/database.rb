@@ -12,6 +12,16 @@ class Database
     1 == connection.select("SELECT COUNT(*) FROM information_schema.SCHEMATA WHERE schema_name=#{connection.quote(database_name)}").rows.first.first
   end
 
+  def self.usage(database_name)
+    res = connection.select(<<-SQL)
+        SELECT ROUND(SUM(data_length + index_length) / 1024 / 1024, 1)
+        FROM   information_schema.tables AS tables
+        WHERE tables.table_schema = '#{database_name}'
+    SQL
+
+    res.rows.first.first.to_i
+  end
+
   private
 
   def self.connection
