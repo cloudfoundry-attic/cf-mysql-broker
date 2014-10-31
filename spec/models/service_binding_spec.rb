@@ -213,7 +213,7 @@ describe ServiceBinding do
     let(:host) { connection_config.fetch('host') }
     let(:port) { connection_config.fetch('port') }
     let(:uri) { "mysql://#{username}:#{password}@#{host}:#{port}/#{database}?reconnect=true" }
-    let(:jdbc_url) { "jdbc:mysql://#{username}:#{password}@#{host}:#{port}/#{database}" }
+    let(:jdbc_url) { "jdbc:mysql://#{host}:#{port}/#{database}?user=#{username}&password=#{password}" }
 
     before { binding.save }
 
