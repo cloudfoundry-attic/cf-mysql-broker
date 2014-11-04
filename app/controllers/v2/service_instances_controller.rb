@@ -32,7 +32,7 @@ class V2::ServiceInstancesController < V2::BaseController
       status = 404
       body = { description: 'Service instance not found' }
     rescue ServiceInstanceManager::ServicePlanNotFound
-      status = 404
+      status = 400
       body = { description: 'Service plan not found' }
     rescue ServiceInstanceManager::InvalidServicePlanUpdate => e
       status = 422

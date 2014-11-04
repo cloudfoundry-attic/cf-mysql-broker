@@ -64,7 +64,7 @@ describe 'Plan Upgrade' do
 
     # Fill db past limit of plan 0
     client_0 = create_mysql_client(credentials_0)
-    create_table_and_write_data(client_0, max_storage_mb_0)
+    create_table_and_write_data(client_0, max_storage_mb_0 + 1)
     recalculate_usage(instance_id_0)
     enforce_quota
 

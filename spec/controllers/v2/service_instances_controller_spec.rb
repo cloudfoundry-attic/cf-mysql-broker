@@ -190,10 +190,10 @@ describe V2::ServiceInstancesController do
         }).and_raise(ServiceInstanceManager::ServicePlanNotFound)
       end
 
-      it 'returns a 404' do
+      it 'returns a 400' do
         make_request
 
-        expect(response.status).to eq(404)
+        expect(response.status).to eq(400)
         expect(response.body).to eq '{"description":"Service plan not found"}'
       end
     end
