@@ -5,7 +5,6 @@ gem 'rails-api'
 gem 'settingslogic'
 gem 'mysql2'
 gem 'omniauth-uaa-oauth2', github: 'cloudfoundry/omniauth-uaa-oauth2'
-gem 'cf-registrar', git: 'https://github.com/cloudfoundry/cf-registrar'
 gem 'nats'
 gem 'sass-rails'
 
