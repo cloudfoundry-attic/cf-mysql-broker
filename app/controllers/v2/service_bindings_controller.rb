@@ -1,6 +1,10 @@
 class V2::ServiceBindingsController < V2::BaseController
   def update
     instance = ServiceInstance.find_by_guid(params.fetch(:service_instance_id))
+    if instance.nil?
+      render status: 404, json: {}
+      return
+    end
     binding = ServiceBinding.new(id: params.fetch(:id), service_instance: instance)
     binding.save
 

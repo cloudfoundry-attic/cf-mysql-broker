@@ -36,33 +36,45 @@ describe V2::ServiceBindingsController do
 
     it_behaves_like 'a controller action that logs its request and response headers and body'
 
-    it 'grants permission to access the given database' do
-      expect(ServiceBinding.exists?(id: binding_id, service_instance_guid: instance_guid)).to eq(false)
+    context 'when the service instance exists' do
+      it 'grants permission to access the given database' do
+        expect(ServiceBinding.exists?(id: binding_id, service_instance_guid: instance_guid)).to eq(false)
 
-      make_request
+        make_request
 
-      expect(ServiceBinding.exists?(id: binding_id, service_instance_guid: instance_guid)).to eq(true)
+        expect(ServiceBinding.exists?(id: binding_id, service_instance_guid: instance_guid)).to eq(true)
+      end
+
+      it 'responds with generated credentials' do
+        make_request
+
+        binding = JSON.parse(response.body)
+        expect(binding['credentials']).to eq(
+          'hostname' => database_host,
+          'name' => generated_dbname,
+          'username' => generated_username,
+          'password' => generated_password,
+          'port' => database_port,
+          'jdbcUrl' => "jdbc:mysql://#{generated_username}:#{generated_password}@#{database_host}:#{database_port}/#{generated_dbname}",
+          'uri' => "mysql://#{generated_username}:#{generated_password}@#{database_host}:#{database_port}/#{generated_dbname}?reconnect=true",
+        )
+      end
+
+      it 'returns a 201' do
+        make_request
+
+        expect(response.status).to eq(201)
+      end
     end
 
-    it 'responds with generated credentials' do
-      make_request
+    context 'when the service instance does not exist' do
+      let(:make_request) { put :update, id: binding_id, service_instance_id: 'non-existent-guid' }
 
-      binding = JSON.parse(response.body)
-      expect(binding['credentials']).to eq(
-        'hostname' => database_host,
-        'name' => generated_dbname,
-        'username' => generated_username,
-        'password' => generated_password,
-        'port' => database_port,
-        'jdbcUrl' => "jdbc:mysql://#{generated_username}:#{generated_password}@#{database_host}:#{database_port}/#{generated_dbname}",
-        'uri' => "mysql://#{generated_username}:#{generated_password}@#{database_host}:#{database_port}/#{generated_dbname}?reconnect=true",
-      )
-    end
+      it 'returns a 404' do
+        make_request
 
-    it 'returns a 201' do
-      make_request
-
-      expect(response.status).to eq(201)
+        expect(response.status).to eq(404)
+      end
     end
   end
 
