@@ -1,6 +1,7 @@
 class ServiceInstanceManager
   class ServiceInstanceNotFound < StandardError; end
   class ServicePlanNotFound < StandardError; end
+  class InvalidServicePlanUpdate < StandardError; end
 
   DATABASE_PREFIX = 'cf_'.freeze
 
@@ -34,6 +35,10 @@ class ServiceInstanceManager
 
     instance = ServiceInstance.find_by_guid(guid)
     raise ServiceInstanceNotFound if instance.nil?
+
+    if Database.usage(database_name_from_service_instance_guid(guid)) > Catalog.storage_quota_for_plan_guid(plan_guid)
+      raise InvalidServicePlanUpdate.new('Downgrading this service instance will violate the quota of the new plan')
+    end
 
     instance.plan_guid = plan_guid
     instance.max_storage_mb = Catalog.storage_quota_for_plan_guid(plan_guid)
