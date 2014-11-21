@@ -71,7 +71,7 @@ describe Database do
     after { Database.drop(db_name) }
 
     it 'returns the data usage of the db in megabytes' do
-      connection.execute("CREATE TABLE #{db_name}.myTable (id MEDIUMINT, data LONGTEXT)")
+      connection.execute("CREATE TABLE #{db_name}.mytable (id MEDIUMINT, data LONGTEXT)")
       connection.execute("INSERT INTO #{db_name}.mytable (id, data) VALUES (1, '#{mb_string}')")
       connection.execute("INSERT INTO #{db_name}.mytable (id, data) VALUES (2, '#{mb_string}')")
       connection.execute("INSERT INTO #{db_name}.mytable (id, data) VALUES (3, '#{mb_string}')")
