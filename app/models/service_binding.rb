@@ -144,6 +144,6 @@ class ServiceBinding < BaseModel
   end
 
   def jdbc_url
-    "jdbc:mysql://#{username}:#{password}@#{host}:#{port}/#{database_name}"
+    "jdbc:mysql://#{host}:#{port}/#{database_name}?user=#{username}&password=#{password}"
   end
 end

@@ -45,6 +45,12 @@ describe V2::ServiceBindingsController do
         expect(ServiceBinding.exists?(id: binding_id, service_instance_guid: instance_guid)).to eq(true)
       end
 
+      it 'returns a 201' do
+        make_request
+
+        expect(response.status).to eq(201)
+      end
+
       it 'responds with generated credentials' do
         make_request
 
@@ -55,15 +61,9 @@ describe V2::ServiceBindingsController do
           'username' => generated_username,
           'password' => generated_password,
           'port' => database_port,
-          'jdbcUrl' => "jdbc:mysql://#{generated_username}:#{generated_password}@#{database_host}:#{database_port}/#{generated_dbname}",
+          'jdbcUrl' => "jdbc:mysql://#{database_host}:#{database_port}/#{generated_dbname}?user=#{generated_username}&password=#{generated_password}",
           'uri' => "mysql://#{generated_username}:#{generated_password}@#{database_host}:#{database_port}/#{generated_dbname}?reconnect=true",
         )
-      end
-
-      it 'returns a 201' do
-        make_request
-
-        expect(response.status).to eq(201)
       end
     end
 
