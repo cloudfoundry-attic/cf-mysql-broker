@@ -1,6 +1,6 @@
 namespace :quota do
   desc 'Enforce quotas'
   task :enforce => :environment do
-    QuotaEnforcer.enforce!
+    Quota::Enforcer.enforce!
   end
 end

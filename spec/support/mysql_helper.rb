@@ -122,7 +122,7 @@ module MysqlHelpers
     client = create_root_mysql_client
     client.query('SELECT 1')
 
-    QuotaEnforcer.enforce!
+    Quota::Enforcer.enforce!
 
     expect {
       client.query('SELECT 1')

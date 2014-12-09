@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'support/mysql_helper'
 
-describe QuotaEnforcer do
+describe Quota::Enforcer do
   include MysqlHelpers
 
   let(:instance1_guid) { SecureRandom.uuid }
@@ -98,7 +98,7 @@ describe QuotaEnforcer do
         )
       Catalog.stub(:services) { [updated_service] }
 
-      QuotaEnforcer.update_quotas
+      Quota::Enforcer.update_quotas
 
       expect(instance1.reload.max_storage_mb).to eq(new_max_storage_mb)
       expect(max_user_connection_quota(binding1)).to eq(new_max_user_connections)
@@ -115,12 +115,12 @@ describe QuotaEnforcer do
         recalculate_usage(binding1)
         overflow_database(client2, max_storage_mb_for_plan_2)
         recalculate_usage(binding2)
-        QuotaEnforcer.update_quotas
+        Quota::Enforcer.update_quotas
       end
 
       context 'and the catalog has not changed' do
         it 'revokes insert, update, and create privileges' do
-          QuotaEnforcer.enforce!
+          Quota::Enforcer.enforce!
 
           bindings.each do |binding|
             verify_write_privileges_revoked_select_and_delete_allowed(binding)
@@ -130,7 +130,7 @@ describe QuotaEnforcer do
         it 'kills existing connections' do
           clients = generate_clients_and_connections_for_all_bindings
 
-          QuotaEnforcer.enforce!
+          Quota::Enforcer.enforce!
 
           clients.each do |client|
             verify_connection_killed(client)
@@ -152,11 +152,11 @@ describe QuotaEnforcer do
           )
 
           Catalog.stub(:services) { [service] }
-          QuotaEnforcer.update_quotas
+          Quota::Enforcer.update_quotas
         end
 
         it 'revokes insert, update, and create privileges' do
-          QuotaEnforcer.enforce!
+          Quota::Enforcer.enforce!
 
           bindings.each do |binding|
             verify_write_privileges_revoked_select_and_delete_allowed(binding)
@@ -166,7 +166,7 @@ describe QuotaEnforcer do
         it 'kills existing connections' do
           clients = generate_clients_and_connections_for_all_bindings
 
-          QuotaEnforcer.enforce!
+          Quota::Enforcer.enforce!
 
           clients.each do |client|
             verify_connection_killed(client)
@@ -195,11 +195,11 @@ describe QuotaEnforcer do
           )
 
           Catalog.stub(:services) { [service] }
-          QuotaEnforcer.update_quotas
+          Quota::Enforcer.update_quotas
         end
 
         it 'grants insert, update, and create privileges to only the plan that was changed' do
-          QuotaEnforcer.enforce!
+          Quota::Enforcer.enforce!
 
           verify_write_privileges_allowed(binding1)
           verify_write_privileges_revoked_select_and_delete_allowed(binding2)
@@ -208,7 +208,7 @@ describe QuotaEnforcer do
         it 'kills existing connections for only the plan that was not changed' do
           clients = generate_clients_and_connections_for_all_bindings
 
-          QuotaEnforcer.enforce!
+          Quota::Enforcer.enforce!
 
           verify_connection_not_killed(clients[0])
           verify_connection_killed(clients[1])
@@ -230,14 +230,14 @@ describe QuotaEnforcer do
         overflow_database(client2, max_storage_mb_for_plan_2)
         recalculate_usage(binding2)
 
-        QuotaEnforcer.enforce!
+        Quota::Enforcer.enforce!
       end
 
       context 'and the catalog has not changed' do
         it 'does not kill existing connections' do
           clients = generate_clients_and_connections_for_all_bindings
 
-          QuotaEnforcer.enforce!
+          Quota::Enforcer.enforce!
 
           clients.each do |client|
             verify_connection_not_killed(client)
@@ -255,13 +255,13 @@ describe QuotaEnforcer do
           )
 
           Catalog.stub(:services) { [service] }
-          QuotaEnforcer.update_quotas
+          Quota::Enforcer.update_quotas
         end
 
         it 'does not kill existing connections' do
           clients = generate_clients_and_connections_for_all_bindings
 
-          QuotaEnforcer.enforce!
+          Quota::Enforcer.enforce!
 
           clients.each do |client|
             verify_connection_not_killed(client)
@@ -286,13 +286,13 @@ describe QuotaEnforcer do
           )
 
           Catalog.stub(:services) { [service] }
-          QuotaEnforcer.update_quotas
+          Quota::Enforcer.update_quotas
         end
 
         it 'kills existing connections for only the plan that was changed' do
           clients = generate_clients_and_connections_for_all_bindings
 
-          QuotaEnforcer.enforce!
+          Quota::Enforcer.enforce!
 
           verify_connection_killed(clients[0])
           verify_connection_not_killed(clients[1])
@@ -311,7 +311,7 @@ describe QuotaEnforcer do
         overflow_database(client2, max_storage_mb_for_plan_2)
         recalculate_usage(binding2)
 
-        QuotaEnforcer.enforce!
+        Quota::Enforcer.enforce!
 
         client1 = create_mysql_client(binding1)
         client2 = create_mysql_client(binding2)
@@ -323,7 +323,7 @@ describe QuotaEnforcer do
 
       context 'and the catalog has not changed' do
         it 'grants insert, update, and create privileges' do
-          QuotaEnforcer.enforce!
+          Quota::Enforcer.enforce!
 
           bindings.each do |binding|
             verify_write_privileges_allowed(binding)
@@ -333,7 +333,7 @@ describe QuotaEnforcer do
         it 'kills existing connections' do
           clients = generate_clients_and_connections_for_all_bindings
 
-          QuotaEnforcer.enforce!
+          Quota::Enforcer.enforce!
 
           clients.each do |client|
             verify_connection_killed(client)
@@ -355,11 +355,11 @@ describe QuotaEnforcer do
           )
 
           Catalog.stub(:services) { [service] }
-          QuotaEnforcer.update_quotas
+          Quota::Enforcer.update_quotas
         end
 
         it 'grants insert, update, and create privileges' do
-          QuotaEnforcer.enforce!
+          Quota::Enforcer.enforce!
 
           bindings.each do |binding|
             verify_write_privileges_allowed(binding)
@@ -369,7 +369,7 @@ describe QuotaEnforcer do
         it 'kills existing connections' do
           clients = generate_clients_and_connections_for_all_bindings
 
-          QuotaEnforcer.enforce!
+          Quota::Enforcer.enforce!
 
           clients.each do |client|
             verify_connection_killed(client)
@@ -398,11 +398,11 @@ describe QuotaEnforcer do
           )
 
           Catalog.stub(:services) { [service] }
-          QuotaEnforcer.update_quotas
+          Quota::Enforcer.update_quotas
         end
 
         it 'grants insert, update, and create privileges to only the plan that was not changed' do
-          QuotaEnforcer.enforce!
+          Quota::Enforcer.enforce!
 
           verify_write_privileges_revoked_select_and_delete_allowed(bindings[0])
           verify_write_privileges_allowed(bindings[1])
@@ -411,7 +411,7 @@ describe QuotaEnforcer do
         it 'kills existing connections for only the plan that was not changed' do
           clients = generate_clients_and_connections_for_all_bindings
 
-          QuotaEnforcer.enforce!
+          Quota::Enforcer.enforce!
 
           verify_connection_not_killed(clients[0])
           verify_connection_killed(clients[1])
@@ -433,7 +433,7 @@ describe QuotaEnforcer do
         overflow_database(client2, max_storage_mb_for_plan_2)
         recalculate_usage(binding2)
 
-        QuotaEnforcer.enforce!
+        Quota::Enforcer.enforce!
 
         client1 = create_mysql_client(binding1)
         client2 = create_mysql_client(binding2)
@@ -442,14 +442,14 @@ describe QuotaEnforcer do
         recalculate_usage(binding1)
         recalculate_usage(binding2)
 
-        QuotaEnforcer.enforce!
+        Quota::Enforcer.enforce!
       end
 
       context 'and the catalog has not changed' do
         it 'does not kill existing connections' do
           clients = generate_clients_and_connections_for_all_bindings
 
-          QuotaEnforcer.enforce!
+          Quota::Enforcer.enforce!
 
           clients.each do |client|
             verify_connection_not_killed(client)
@@ -467,13 +467,13 @@ describe QuotaEnforcer do
           )
 
           Catalog.stub(:services) { [service] }
-          QuotaEnforcer.update_quotas
+          Quota::Enforcer.update_quotas
         end
 
         it 'does not kill existing connections' do
           clients = generate_clients_and_connections_for_all_bindings
 
-          QuotaEnforcer.enforce!
+          Quota::Enforcer.enforce!
 
           clients.each do |client|
             verify_connection_not_killed(client)
@@ -498,13 +498,13 @@ describe QuotaEnforcer do
           )
 
           Catalog.stub(:services) { [service] }
-          QuotaEnforcer.update_quotas
+          Quota::Enforcer.update_quotas
         end
 
         it 'kills existing connections for only the plan that was changed' do
           clients = generate_clients_and_connections_for_all_bindings
 
-          QuotaEnforcer.enforce!
+          Quota::Enforcer.enforce!
 
           verify_connection_killed(clients[0])
           verify_connection_not_killed(clients[1])
