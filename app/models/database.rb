@@ -9,9 +9,8 @@ module Database
     connection.execute("DROP DATABASE IF EXISTS #{connection.quote_table_name(database_name)}")
   end
 
-  # why not "SHOW DATABASES LIKE '#{id}'" ??
   def exists?(database_name)
-    1 == connection.select("SELECT COUNT(*) FROM information_schema.SCHEMATA WHERE schema_name=#{connection.quote(database_name)}").rows.first.first
+    connection.select("SHOW DATABASES LIKE '#{database_name}'").count > 0
   end
 
   def usage(database_name)
