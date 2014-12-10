@@ -10,6 +10,8 @@ module Quota
 
         allow(Enforcer).to receive(:update_quotas)
         allow(Enforcer).to receive(:enforce!)
+
+        allow(Database).to receive(:with_reconnect).and_yield
       end
 
       it 'establishes the initial database connection' do
@@ -26,6 +28,13 @@ module Quota
 
         Daemon.start
         expect(ActiveRecord::Base).to have_received(:establish_connection).with(test_db_config)
+      end
+
+      it 'reconnects if the connection is lost' do
+        allow(Kernel).to receive(:loop).and_yield
+        allow(Database).to receive(:with_reconnect)
+        Daemon.start
+        expect(Enforcer).not_to have_received(:enforce!)
       end
 
       it 'updates quotas' do

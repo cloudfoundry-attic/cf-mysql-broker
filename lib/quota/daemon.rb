@@ -7,8 +7,10 @@ module Quota
       Enforcer.update_quotas
 
       Kernel.loop do
-        Enforcer.enforce!
-        Kernel.sleep(1)
+        Database.with_reconnect do
+          Enforcer.enforce!
+        end
+        Kernel.sleep(1.second)
       end
     end
   end

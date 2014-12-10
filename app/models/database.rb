@@ -23,6 +23,25 @@ module Database
     res.rows.first.first.to_i
   end
 
+  def with_reconnect
+    yield
+  rescue ActiveRecord::ActiveRecordError => e
+    Rails.logger.warn(e)
+    if ActiveRecord::Base.connection.active?
+      raise e
+    else
+      until ActiveRecord::Base.connection.active?
+        begin
+          Rails.logger.warn("No database connection, attempting to reconnect")
+          ActiveRecord::Base.connection.reconnect!
+        rescue Mysql2::Error => e
+          Rails.logger.warn("Reconnect failed: #{e}")
+          Kernel.sleep(3.seconds)
+        end
+      end
+    end
+  end
+
   private
 
   def connection
