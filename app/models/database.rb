@@ -30,19 +30,28 @@ module Database
     if ActiveRecord::Base.connection.active?
       raise e
     else
+      reconnect_attempts = 0
       until ActiveRecord::Base.connection.active?
-        begin
-          Rails.logger.warn("No database connection, attempting to reconnect")
-          ActiveRecord::Base.connection.reconnect!
-        rescue Mysql2::Error => e
-          Rails.logger.warn("Reconnect failed: #{e}")
-          Kernel.sleep(3.seconds)
-        end
+        reconnect_attempts += 1
+        attempt_reconnect(reconnect_attempts)
       end
     end
   end
 
   private
+
+  def attempt_reconnect(reconnect_attempts)
+    Rails.logger.warn('No database connection, attempting to reconnect')
+    ActiveRecord::Base.connection.reconnect!
+  rescue Mysql2::Error => e
+    Rails.logger.warn("Reconnect failed: #{e}")
+
+    if reconnect_attempts < 20
+      Kernel.sleep(3.seconds)
+    else
+      raise e
+    end
+  end
 
   def connection
     ActiveRecord::Base.connection

@@ -94,35 +94,44 @@ describe Database do
           allow(ActiveRecord::Base.connection).to receive(:active?).and_return(true)
         end
       end
+
+      @foo = double('bob')
+      allow(@foo).to receive(:bar).and_raise(ActiveRecord::ActiveRecordError)
     end
 
     it 'attempts to reconnect every 3 seconds if the connection becomes inactive' do
       allow(ActiveRecord::Base.connection).to receive(:active?).and_return(false)
 
-      foo = double('bob')
-      allow(foo).to receive(:bar).and_raise(ActiveRecord::ActiveRecordError)
       Database.with_reconnect do
-        foo.bar
+        @foo.bar
       end
 
-      expect(foo).to have_received(:bar)
+      expect(@foo).to have_received(:bar)
       expect(ActiveRecord::Base.connection).to have_received(:reconnect!).twice
       expect(Kernel).to have_received(:sleep).with(3.seconds)
+    end
+
+    it 'stops trying to reconnect eventually, in case there is an unrecoverable error' do
+      allow(ActiveRecord::Base.connection).to receive(:active?).and_return(false)
+      allow(ActiveRecord::Base.connection).to receive(:reconnect!).and_raise(Mysql2::Error.new("fake"))
+
+      expect {
+        Database.with_reconnect do
+          @foo.bar
+        end
+      }.to raise_error(Mysql2::Error)
     end
 
     it 'does not reconnect if there was an error but the connection is active' do
       allow(ActiveRecord::Base.connection).to receive(:active?).and_return(true)
 
-      foo = double('bob')
-      allow(foo).to receive(:bar).and_raise(ActiveRecord::ActiveRecordError)
-
       expect {
         Database.with_reconnect do
-          foo.bar
+          @foo.bar
         end
       }.to raise_error(ActiveRecord::ActiveRecordError)
 
-      expect(foo).to have_received(:bar)
+      expect(@foo).to have_received(:bar)
     end
   end
 end
