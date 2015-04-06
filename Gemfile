@@ -17,11 +17,6 @@ group :development, :test do
   gem 'database_cleaner'
 end
 
-group :development do
-  gem 'guard-rails'
-  gem 'roodi'
-end
-
 group :test do
   gem 'codeclimate-test-reporter', require: nil
   gem 'webmock'
