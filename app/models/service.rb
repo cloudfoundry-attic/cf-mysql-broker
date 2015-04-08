@@ -1,7 +1,3 @@
-# This require is needed because the quota enforcer
-# is not running as a Rails application
-require Rails.root.join('app/models/plan')
-
 class Service
   attr_reader :id, :name, :description, :tags, :metadata, :plans, :dashboard_client, :plan_updateable
 

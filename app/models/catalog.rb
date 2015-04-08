@@ -1,8 +1,3 @@
-# These requires are needed because the quota enforcer
-# is not running as a Rails application
-require Rails.root.join('lib/settings')
-require Rails.root.join('app/models/service')
-
 class Catalog
   def self.has_plan?(plan_guid)
     find_plan_by_guid(plan_guid).present?

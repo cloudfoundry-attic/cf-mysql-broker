@@ -14,7 +14,7 @@ describe 'Plan Upgrade' do
     delete "/v2/service_instances/#{instance_id_0}"
   end
 
-  specify 'User violates and recovers from quota limit' do
+  specify 'User updates to a plan with a larger quota' do
     put "/v2/service_instances/#{instance_id_0}", {plan_id: plan_0.id}
     put "/v2/service_instances/#{instance_id_0}/service_bindings/#{binding_id_0}"
     binding_0 = JSON.parse(response.body)
@@ -24,35 +24,13 @@ describe 'Plan Upgrade' do
     client_0 = create_mysql_client(credentials_0)
     create_table_and_write_data(client_0, max_storage_mb_0)
 
-    recalculate_usage(instance_id_0)
-    enforce_quota
-    verify_connection_terminated(client_0)
-
-    # Verify that we cannot write
-    client_0 = create_mysql_client(credentials_0)
-    verify_write_privileges_revoked(client_0)
-
     # Change instance to plan 1
     patch "/v2/service_instances/#{instance_id_0}", { plan_id: plan_1.id, previous_values: {} }
-
-    recalculate_usage(instance_id_0)
-    enforce_quota
-    verify_connection_terminated(client_0)
+    expect(response.status).to eq 200
 
     # Verify that we can write
     client_0 = create_mysql_client(credentials_0)
-    verify_write_privileges_restored(client_0)
-
-    # Fill db past the limit of plan 1
-    create_table_and_write_data(client_0, max_storage_mb_1)
-
-    recalculate_usage(instance_id_0)
-    enforce_quota
-    verify_connection_terminated(client_0)
-
-    # Verify that we cannot write
-    client_0 = create_mysql_client(credentials_0)
-    verify_write_privileges_revoked(client_0)
+    verify_client_can_write(client_0)
   end
 
   specify 'User tries to downgrade to a plan with a smaller quota than he is currently using' do
@@ -65,12 +43,6 @@ describe 'Plan Upgrade' do
     # Fill db past limit of plan 0
     client_0 = create_mysql_client(credentials_0)
     create_table_and_write_data(client_0, max_storage_mb_0 + 1)
-    recalculate_usage(instance_id_0)
-    enforce_quota
-
-    # Verify that we can write
-    client_0 = create_mysql_client(credentials_0)
-    verify_write_privileges_restored(client_0)
 
     # Attempt to change instance to plan 0
     patch "/v2/service_instances/#{instance_id_0}", { plan_id: plan_0.id, previous_values: {} }
