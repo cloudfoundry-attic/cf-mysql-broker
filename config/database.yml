@@ -46,5 +46,6 @@ travis_test:
   database: test
   pool: 5
   username: root
+  password:
   host: localhost
   port: 3306
