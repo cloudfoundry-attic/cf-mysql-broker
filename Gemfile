@@ -1,10 +1,12 @@
 source 'https://rubygems.org'
 
-gem 'rails'
+gem 'rails', '~> 4.2.1'
 gem 'rails-api'
 gem 'settingslogic'
 gem 'mysql2'
 gem 'omniauth-uaa-oauth2', github: 'cloudfoundry/omniauth-uaa-oauth2'
+# nats was pulling an old version of eventmachine which would not compile
+gem 'eventmachine', '~> 1.0.3'
 gem 'nats'
 gem 'sass-rails'
 
