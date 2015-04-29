@@ -36,7 +36,16 @@ test:
   database: test
   pool: 5
   username: root
-  # These are required by the tests, even though they have default values
+  password: password
+  host: localhost
+  port: 3306
+
+travis_test:
+  adapter: mysql2
+  encoding: utf8
+  database: test
+  pool: 5
+  username: root
   password:
   host: localhost
   port: 3306

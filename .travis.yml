@@ -1,33 +1,12 @@
 language: ruby
 bundler_args: --deployment --without development
 rvm:
-- 2.0.0
-script: bundle exec rspec spec
+- 2.2.2
 before_script:
-# Travis says that the way to get MySQL 5.6 is to install it yourself with this gist:
-# https://gist.github.com/drogus/6718448
-#
-# We have modified this to leave the 5.5 client intact because the mysql2 gem has
-# already been installed at this point, compiled against the 5.5 library.
-# uninstall MySQL 5.5
-- sudo apt-get remove mysql-server-5.5 mysql-server-core-5.5
-- sudo apt-get autoremove
-# install MySQL 5.6
-- sudo apt-get install libaio1
-- wget -O mysql-5.6.17.deb http://dev.mysql.com/get/Downloads/MySQL-5.6/mysql-5.6.17-debian6.0-x86_64.deb/from/http://cdn.mysql.com/
-- sudo dpkg -i mysql-5.6.17.deb
-- sudo cp /opt/mysql/server-5.6/support-files/mysql.server /etc/init.d/mysql.server
-- sudo ln -sf /opt/mysql/server-5.6/bin/* /usr/bin/
-# update configuration for switch from 5.5 to 5.6
-- sudo sed -i'' 's/table_cache/table_open_cache/' /etc/mysql/my.cnf
-- sudo sed -i'' 's/log_slow_queries/slow_query_log/' /etc/mysql/my.cnf
-- sudo sed -i'' 's/basedir[^=]\+=.*$/basedir = \/opt\/mysql\/server-5.6/' /etc/mysql/my.cnf
-- sudo /etc/init.d/mysql.server start
-- mysql -u root -e "DELETE FROM mysql.user WHERE Host='localhost' AND User='';"
-- mysql -u root -e "SET GLOBAL innodb_stats_on_metadata=ON, innodb_stats_persistent=OFF;"
-- mysql -u root -e "SHOW VARIABLES;"
+- export RAILS_ENV=travis_test
 - bundle exec rake db:create
 - bundle exec rake db:test:prepare
+script: bundle exec rspec spec
 env:
   global:
     secure: FGu6nGfgk7o5C37gdz+wluTyio5YIhqoUpK6OQsPCeooiduWlsgpwFoBdm+AnoNLfj2OntOTsXzmq7ibuXqy6ZhjV6/J4itRI2Vm1xLwirPD50ZpMDzqFjKvqQGg04LZOTaO/XdJbnzAQAfNK9Pw1NtORyogASoQYU0QgcEv7uc=
