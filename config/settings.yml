@@ -80,3 +80,7 @@ development:
 test:
   auth_password: 'secret'
   <<: *defaults
+
+travis_test:
+  auth_password: 'secret'
+  <<: *defaults
