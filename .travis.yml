@@ -5,6 +5,7 @@ rvm:
 before_script:
 - bundle exec rake db:create
 - bundle exec rake db:migrate
+- bundle exec rake brakeman:run
 script: bundle exec rspec spec
 env:
   global:

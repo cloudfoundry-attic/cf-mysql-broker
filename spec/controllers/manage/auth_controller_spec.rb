@@ -93,5 +93,10 @@ describe Manage::AuthController do
       get :failure
       expect(response.status).to eql(403)
     end
+
+    it 'echos the passed message param as the failure message' do
+      get :failure, message: 'something broke'
+      expect(response.body).to eq 'something broke'
+    end
   end
 end

@@ -24,8 +24,13 @@ module Manage
     end
 
     def failure
-      render text: params[:message], status: 403
+      render text: message_param[:message], status: 403
     end
 
+    private
+
+    def message_param
+      params.permit(:message)
+    end
   end
 end
