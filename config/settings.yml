@@ -21,6 +21,7 @@ defaults: &defaults
   - name: p-mysql-local
     id: 3101b971-1044-4816-a7ac-9ded2e028079
     description: MySQL service for application development and testing
+    plan_updateable: true
     tags:
       - mysql
       - relational
@@ -41,6 +42,7 @@ defaults: &defaults
       description: Free Trial
       max_storage_mb: 5
       max_user_connections: 5
+      displayName: 5MB
       metadata:
         costs:
         - amount:
@@ -56,6 +58,7 @@ defaults: &defaults
       description: Free Trial - 10MB
       max_storage_mb: 10
       max_user_connections: 10
+      displayName: 10MB
       metadata:
         costs:
         - amount:
