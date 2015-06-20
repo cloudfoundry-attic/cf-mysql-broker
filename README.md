@@ -2,7 +2,7 @@
 
 # CF MySQL Broker
 
-CF MySQL Broker provides MySQL databases as a Cloud Foundry service.  This broker demonstrates the v2 services API between cloud controllers and service brokers. This API is not to be confused with the cloud controller API; for more info see [http://docs.cloudfoundry.org/services/api.html].
+CF MySQL Broker provides MySQL databases as a Cloud Foundry service.  This broker demonstrates the v2 services API between cloud controllers and service brokers. This API is not to be confused with the cloud controller API; for more info see [Service Broker API](http://docs.cloudfoundry.org/services/api.html).
 
 The broker does not include a MySQL server.  Instead, it is meant to be deployed alongside a MySQL server, which it manages, as part of [cf-mysql-release](https://github.com/cloudfoundry/cf-mysql-release). Deploying this as a standalone application to cloud foundry (e.g. via `cf push`) is not supported.  The MySQL management tasks that the broker performs are as follows:
 
