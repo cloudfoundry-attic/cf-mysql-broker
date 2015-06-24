@@ -51,8 +51,12 @@ describe UaaSession do
         expect(handler.auth_header).to eql('bearer new_access_token')
       end
 
-      it 'updates the tokens' do
+      it 'updates the access token' do
         expect(handler.access_token).to eql('new_access_token')
+      end
+
+      it 'updates the refresh token' do
+        expect(handler.refresh_token).to eql('new_refresh_token')
       end
     end
 

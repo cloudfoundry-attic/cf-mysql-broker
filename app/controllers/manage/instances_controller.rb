@@ -33,6 +33,7 @@ module Manage
     def build_uaa_session
       @uaa_session = UaaSession.build(session[:uaa_access_token], session[:uaa_refresh_token])
       session[:uaa_access_token]  = @uaa_session.access_token
+      session[:uaa_refresh_token] = @uaa_session.refresh_token
     end
 
     def ensure_all_necessary_scopes_are_approved

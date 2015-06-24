@@ -176,6 +176,8 @@ describe Manage::InstancesController do
 
         allow(uaa_session).to receive(:access_token).and_return('new_access_token')
 
+        allow(uaa_session).to receive(:refresh_token).and_return('new_refresh_token')
+
         allow(ServiceInstanceAccessVerifier).to receive(:can_manage_instance?)
       end
 
@@ -196,10 +198,16 @@ describe Manage::InstancesController do
                                                     and_return(true)
         end
 
-        it 'updates the session tokens' do
+        it 'updates the uaa access token' do
           get :show, id: 'abc-123'
 
           expect(session[:uaa_access_token]).to eql('new_access_token')
+        end
+
+        it 'updates the uaa refresh token' do
+          get :show, id: 'abc-123'
+
+          expect(session[:uaa_refresh_token]).to eql('new_refresh_token')
         end
 
         it 'displays the usage information for the given instance' do

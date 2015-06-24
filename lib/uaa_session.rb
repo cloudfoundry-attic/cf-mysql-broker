@@ -45,6 +45,10 @@ class UaaSession
     token_info.info[:access_token] || token_info.info["access_token"]
   end
 
+  def refresh_token
+    token_info.info[:refresh_token] || token_info.info["refresh_token"]
+  end
+
   private
 
   attr_reader :token_info
