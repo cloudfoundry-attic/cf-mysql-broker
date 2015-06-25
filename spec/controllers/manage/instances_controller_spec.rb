@@ -45,7 +45,7 @@ describe Manage::InstancesController do
     describe 'the dashboard redirects depending on ssl_enabled setting' do
 
       let(:instance) { ServiceInstance.new(id: 'abc-123') }
-      let(:uaa_session) { double(UaaSession, auth_header: 'bearer <token>') }
+      let(:uaa_session) { double(UaaSession, auth_header: 'bearer <token>', refresh_token: 'new_refresh_token') }
 
       before do
         instance.save
@@ -102,7 +102,7 @@ describe Manage::InstancesController do
     end
 
     describe 'verifying that the user has approved the necessary scopes' do
-      let(:uaa_session) { double(UaaSession, auth_header: 'bearer <token>') }
+      let(:uaa_session) { double(UaaSession, auth_header: 'bearer <token>', refresh_token: 'new_refresh_token') }
       let(:all_scopes) { ['openid', 'cloud_controller_service_permissions.read'] }
       let(:missing_scopes) { ['openid'] }
 
@@ -175,7 +175,6 @@ describe Manage::InstancesController do
         allow(UaaSession).to receive(:build).with('<access token>', '<refresh token>').and_return(uaa_session)
 
         allow(uaa_session).to receive(:access_token).and_return('new_access_token')
-
         allow(uaa_session).to receive(:refresh_token).and_return('new_refresh_token')
 
         allow(ServiceInstanceAccessVerifier).to receive(:can_manage_instance?)

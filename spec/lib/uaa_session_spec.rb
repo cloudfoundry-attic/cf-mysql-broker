@@ -5,7 +5,6 @@ describe UaaSession do
   let(:refresh_token) { 'my_refresh_token' }
 
   describe '.build' do
-    let(:handler) { UaaSession.build(access_token, refresh_token) }
     let(:login_url) { 'http://login.example.com' }
     let(:uaa_url) { 'http://uaa.example.com' }
     let(:dashboard_client_id) { '<client id>' }
@@ -21,17 +20,23 @@ describe UaaSession do
       )
     end
 
+    subject { UaaSession.build(access_token, refresh_token) }
+
     context 'when the access token is not expired' do
       before do
         allow(CF::UAA::TokenCoder).to receive(:decode).and_return('exp' => 1.minute.from_now.to_i)
       end
 
-      it 'sets access token to the given token' do
-        expect(handler.access_token).to eq(access_token)
+      it 'sets the access token member' do
+        expect(subject.access_token).to eq(access_token)
+      end
+
+      it 'sets the refresh token member' do
+        expect(subject.refresh_token).to eq(refresh_token)
       end
 
       it 'returns a token that is encoded and can be used in a header' do
-        expect(handler.auth_header).to eql('bearer my_access_token')
+        expect(subject.auth_header).to eql('bearer my_access_token')
       end
     end
 
@@ -48,15 +53,15 @@ describe UaaSession do
       end
 
       it 'uses the refresh token to get a new access token' do
-        expect(handler.auth_header).to eql('bearer new_access_token')
+        expect(subject.auth_header).to eql('bearer new_access_token')
       end
 
       it 'updates the access token' do
-        expect(handler.access_token).to eql('new_access_token')
+        expect(subject.access_token).to eql('new_access_token')
       end
 
       it 'updates the refresh token' do
-        expect(handler.refresh_token).to eql('new_refresh_token')
+        expect(subject.refresh_token).to eql('new_refresh_token')
       end
     end
 
@@ -73,11 +78,11 @@ describe UaaSession do
       end
 
       it 'uses the refresh token to get a new access token' do
-        expect(handler.auth_header).to eql('bearer new_access_token')
+        expect(subject.auth_header).to eql('bearer new_access_token')
       end
 
-      it 'updates the tokens' do
-        expect(handler.access_token).to eql('new_access_token')
+      it 'updates the access token' do
+        expect(subject.access_token).to eql('new_access_token')
       end
     end
   end

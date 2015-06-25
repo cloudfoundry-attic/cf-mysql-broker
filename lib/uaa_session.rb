@@ -1,7 +1,7 @@
 class UaaSession
   class << self
     def build(access_token, refresh_token)
-      token_info = existing_token_info(access_token)
+      token_info = existing_token_info(access_token, refresh_token)
       if token_expired?(token_info)
         token_info = refreshed_token_info(refresh_token)
       end
@@ -17,8 +17,10 @@ class UaaSession
       expiry.is_a?(Integer) && expiry <= Time.now.to_i
     end
 
-    def existing_token_info(access_token)
-      CF::UAA::TokenInfo.new(access_token: access_token, token_type: 'bearer')
+    def existing_token_info(access_token, refresh_token)
+      CF::UAA::TokenInfo.new(access_token: access_token,
+                             refresh_token: refresh_token,
+                             token_type: 'bearer')
     end
 
     def refreshed_token_info(refresh_token)
