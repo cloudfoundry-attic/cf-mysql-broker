@@ -180,4 +180,31 @@ describe ServiceInstanceManager do
       end
     end
   end
+
+  describe '.sync_service_instances' do
+    context 'when the plan db size has changed' do
+      it 'updates service instance plan sizes' do
+        # create an instance of default size
+        instance = described_class.create(guid: instance_id, plan_guid: plan_id)
+        expect(instance.max_storage_mb).to eq max_storage_mb
+
+        # increase plan size in Catalog
+        new_plan_size = max_storage_mb + 100
+        Catalog.stub(:plans).and_return([
+            Plan.build('id' => plan_id,
+                       'name' => 'plan_name',
+                       'description' => 'plan description',
+                       'max_storage_mb' => new_plan_size)
+          ])
+
+        # call sync_service_instances
+        described_class.sync_service_instances
+
+        # expect instance to have same guid but new plan size
+        updated_instance = ServiceInstance.find_by(id: instance.id)
+        expect(updated_instance.plan_guid).to eq instance.plan_guid
+        expect(updated_instance.max_storage_mb).to eq new_plan_size
+      end
+    end
+  end
 end

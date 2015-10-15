@@ -56,4 +56,11 @@ class ServiceInstanceManager
   def self.database_name_from_service_instance_guid(guid)
     "#{DATABASE_PREFIX}#{guid.gsub('-', '_')}"
   end
+
+  def self.sync_service_instances
+    Catalog.plans.each do |plan|
+      service_instances = ServiceInstance.where(plan_guid: plan.id)
+      service_instances.update_all(max_storage_mb: plan.max_storage_mb)
+    end
+  end
 end
