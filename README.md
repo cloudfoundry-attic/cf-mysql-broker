@@ -1,4 +1,3 @@
-[![Build Status](https://travis-ci.org/cloudfoundry/cf-mysql-broker.png?branch=master)](https://travis-ci.org/cloudfoundry/cf-mysql-broker)
 
 # CF MySQL Broker
 
