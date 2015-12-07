@@ -133,7 +133,30 @@ class ServiceBinding < BaseModel
     }.to_json
   end
 
+  def self.update_all_max_user_connections
+    Catalog.plans.each do |plan|
+      connection.execute(update_max_user_connection(plan))
+    end
+    connection.execute('FLUSH PRIVILEGES')
+  end
+
   private
+
+  def self.update_max_user_connection(plan)
+<<-SQL
+UPDATE mysql.user
+SET max_user_connections=#{plan.max_user_connections}
+WHERE user NOT LIKE 'root'
+AND user
+IN (SELECT * FROM
+(SELECT mysql.user.user
+FROM service_instances
+JOIN mysql.db ON service_instances.db_name=mysql.db.Db
+JOIN mysql.user ON mysql.user.User=mysql.db.User
+WHERE plan_guid='#{plan.id}')
+AS existing_users)
+SQL
+  end
 
   def connection_config
     Rails.configuration.database_configuration[Rails.env]
