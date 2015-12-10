@@ -79,6 +79,7 @@ describe ServiceBinding do
   end
 
   describe '.update_all_max_user_connections' do
+    let(:users) { ["fake-user"] }
     let(:plan) do
       Plan.new(
         {
@@ -96,22 +97,24 @@ describe ServiceBinding do
 
     it 'updates max user connections for all plans' do
       expect(Catalog).to receive(:plans)
-      expect(connection).to receive(:execute).
-          with(
+      expect(connection).to receive(:select_values).
+        with(
 <<-SQL
-UPDATE mysql.user
-SET max_user_connections=#{plan.max_user_connections}
-WHERE user NOT LIKE 'root'
-AND user
-IN (SELECT * FROM
-(SELECT mysql.user.user
+SELECT mysql.user.user
 FROM service_instances
 JOIN mysql.db ON service_instances.db_name=mysql.db.Db
 JOIN mysql.user ON mysql.user.User=mysql.db.User
-WHERE plan_guid='#{plan.id}')
-AS existing_users)
+WHERE plan_guid='#{plan.id}' AND mysql.user.user NOT LIKE 'root'
 SQL
-)
+      ).and_return(users)
+
+      expect(connection).to receive(:execute).
+          with(
+<<-SQL
+GRANT USAGE ON *.* TO '#{users[0]}'@'%'
+WITH MAX_USER_CONNECTIONS #{plan.max_user_connections}
+SQL
+      )
       expect(connection).to receive(:execute).with("FLUSH PRIVILEGES")
 
       ServiceBinding.update_all_max_user_connections
