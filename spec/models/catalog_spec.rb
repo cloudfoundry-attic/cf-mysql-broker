@@ -82,7 +82,7 @@ describe Catalog do
 
     context 'when the plan with the guid is not found' do
       it 'returns nil' do
-        expect(Catalog.storage_quota_for_plan_guid('non-existent-plan')).to be_nil
+        expect(Catalog.storage_quota_for_plan_guid('non-existent-plan')).to be nil
       end
     end
   end
@@ -94,25 +94,25 @@ describe Catalog do
 
     context 'when the plan with the guid is not found' do
       it 'returns nil' do
-        expect(Catalog.connection_quota_for_plan_guid('non-existent-plan')).to be_nil
+        expect(Catalog.connection_quota_for_plan_guid('non-existent-plan')).to be nil
       end
     end
   end
 
   describe '.has_plan?' do
     it 'returns true if plan_id exists in the catalog' do
-      expect(Catalog.has_plan?('plan_id_2')).to be_true
+      expect(Catalog.has_plan?('plan_id_2')).to be true
     end
 
     it 'returns false if plan_id does not exist in the catalog' do
-      expect(Catalog.has_plan?('plan_id_banana')).to be_false
+      expect(Catalog.has_plan?('plan_id_banana')).to be false
     end
 
     context 'when there are no services' do
       let(:services) { [] }
 
       it 'returns false' do
-        expect(Catalog.has_plan?('any-plan')).to be_false
+        expect(Catalog.has_plan?('any-plan')).to be false
       end
     end
   end

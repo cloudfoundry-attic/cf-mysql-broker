@@ -30,7 +30,7 @@ class CreateServiceInstances < ActiveRecord::Migration
       t.string :plan_guid
     end
 
-    schema_names = connection.select("SELECT SCHEMA_NAME FROM information_schema.SCHEMATA WHERE schema_name LIKE 'cf\\_%'").rows.flatten
+    schema_names = connection.select_values("SELECT SCHEMA_NAME FROM information_schema.SCHEMATA WHERE schema_name LIKE 'cf\\_%'")
     schema_names.each do |name|
       guid = DatabaseNameToServiceInstanceGuidConverter.guid_from_database_name(name)
       ServiceInstance.create(guid: guid, plan_guid: plan_guid)

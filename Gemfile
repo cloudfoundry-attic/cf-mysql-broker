@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 
 ruby '2.3.1'
 
-gem 'rails', '4.0.13'
+gem 'rails', '4.2.7.1'
 gem 'rails-api'
 gem 'settingslogic'
 gem 'mysql2'
@@ -17,7 +17,7 @@ end
 
 group :development, :test do
   gem 'test-unit'
-  gem 'rspec-rails', '2.14.2'
+  gem 'rspec-rails'
   gem 'database_cleaner'
   gem 'brakeman'
 end

@@ -177,7 +177,7 @@ SQL
         binding.save
       }.to change {
         password_sql = "SELECT * FROM mysql.user WHERE user = '#{username}' AND password = PASSWORD('#{password}')"
-        connection.select(password_sql).count
+        connection.select_values(password_sql).count
       }.from(0).to(1)
     end
 
@@ -207,7 +207,7 @@ SQL
       }.to raise_error
 
       password_sql = "SELECT * FROM mysql.user WHERE user = '#{username}' AND password = PASSWORD('#{password}')"
-      expect(connection.select(password_sql).count).to eq(1)
+      expect(connection.select_values(password_sql).count).to eq(1)
     end
 
     context 'when the database does not exist' do

@@ -1,6 +1,7 @@
 # Inspired by rspec-rails' request example group.
 module FeatureHelpers
   extend ActiveSupport::Concern
+  include ActionController::TemplateAssertions
   include ActionDispatch::Integration::Runner
 
   included do

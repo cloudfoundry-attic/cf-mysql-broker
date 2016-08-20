@@ -13,11 +13,11 @@
 
 ActiveRecord::Schema.define(version: 20140918004518) do
 
-  create_table "service_instances", force: true do |t|
-    t.string  "guid"
-    t.string  "plan_guid"
-    t.integer "max_storage_mb", default: 0, null: false
-    t.string  "db_name"
+  create_table "service_instances", force: :cascade do |t|
+    t.string  "guid",           limit: 255
+    t.string  "plan_guid",      limit: 255
+    t.integer "max_storage_mb", limit: 4,   default: 0, null: false
+    t.string  "db_name",        limit: 255
   end
 
   add_index "service_instances", ["db_name"], name: "index_service_instances_on_db_name", using: :btree

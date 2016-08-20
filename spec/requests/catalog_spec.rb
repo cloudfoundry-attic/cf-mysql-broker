@@ -9,16 +9,16 @@ describe 'GET /v2/catalog' do
     service_settings = YAML.load_file(Rails.root + 'config/settings.yml').fetch('test').fetch('services').first
 
     services = catalog.fetch('services')
-    expect(services).to have(1).service
+    expect(services.size).to eq 1
 
     service = services.first
     expect(service.fetch('name')).to eq(service_settings.fetch('name'))
     expect(service.fetch('description')).to eq(service_settings.fetch('description'))
-    expect(service.fetch('bindable')).to be_true
+    expect(service.fetch('bindable')).to be true
     expect(service.fetch('metadata')).to eq(service_settings.fetch('metadata'))
 
     plans = service.fetch('plans')
-    expect(plans).to have(2).plan
+    expect(plans.size).to eq 2
 
     plan = plans.first
     plan_settings = service_settings.fetch('plans').first

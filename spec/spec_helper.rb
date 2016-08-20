@@ -42,6 +42,8 @@ RSpec.configure do |config|
   # rspec-rails.
   config.infer_base_class_for_anonymous_controllers = true
 
+  config.infer_spec_type_from_file_location!
+
   # Run specs in random order to surface order dependencies. If you find an
   # order dependency and want to debug it, you can fix the order by providing
   # the seed, which is printed after each run.
@@ -58,9 +60,9 @@ RSpec.configure do |config|
       raise %Q{You must delete the Host='localhost' User='' record from the mysql.users table.\nRun this command:\nmysql -u root -e "DELETE FROM mysql.user WHERE Host='localhost' AND User=''"}
     end
 
-    variable_records = ActiveRecord::Base.connection.select("show variables like 'innodb_stats_%'")
+    variable_records = ActiveRecord::Base.connection.select_rows("show variables like 'innodb_stats_%'")
     variables = Hash[
-      variable_records.map { |record| [record['Variable_name'], record['Value']] }
+      ActiveRecord::Base.connection.select_rows("show variables like 'innodb_stats_%'")
     ]
 
     raise <<-TEXT.strip_heredoc unless variables['innodb_stats_on_metadata'] == 'ON'

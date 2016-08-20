@@ -10,17 +10,17 @@ module Database
   end
 
   def exists?(database_name)
-    connection.select("SHOW DATABASES LIKE '#{database_name}'").count > 0
+    connection.select_values("SHOW DATABASES LIKE '#{database_name}'").count > 0
   end
 
   def usage(database_name)
-    res = connection.select(<<-SQL)
+    res = connection.select_value(<<-SQL)
         SELECT ROUND(SUM(data_length + index_length) / 1024 / 1024, 1)
         FROM   information_schema.tables AS tables
         WHERE tables.table_schema = '#{database_name}'
     SQL
 
-    res.rows.first.first.to_i
+    res.to_i
   end
 
   def with_reconnect

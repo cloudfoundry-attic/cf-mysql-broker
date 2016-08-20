@@ -47,7 +47,7 @@ describe V2::CatalogsController do
             catalog = JSON.parse(response.body)
 
             services = catalog.fetch('services')
-            expect(services).to have(0).services
+            expect(services).to be_empty
           end
         end
       end

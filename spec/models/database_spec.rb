@@ -8,7 +8,7 @@ describe Database do
 
     it 'creates a new database' do
       Database.create(db_name)
-      expect(connection.select("SELECT COUNT(*) FROM information_schema.SCHEMATA WHERE schema_name='#{db_name}'").rows.first.first).to eq(1)
+      expect(connection.select_value("SELECT COUNT(*) FROM information_schema.SCHEMATA WHERE schema_name='#{db_name}'")).to eq(1)
     end
 
     context 'when the database already exists' do
@@ -20,7 +20,7 @@ describe Database do
         expect {
           Database.create(db_name)
         }.to_not change {
-          connection.select("SHOW DATABASES LIKE '#{db_name}'").count
+          connection.select_values("SHOW DATABASES LIKE '#{db_name}'").count
         }.from(1)
       end
     end
@@ -34,7 +34,7 @@ describe Database do
         expect {
           Database.drop(db_name)
         }.to change {
-          connection.select("SHOW DATABASES LIKE '#{db_name}'").count
+          connection.select_values("SHOW DATABASES LIKE '#{db_name}'").count
         }.from(1).to(0)
       end
     end
