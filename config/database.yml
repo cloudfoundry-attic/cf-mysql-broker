@@ -40,7 +40,7 @@ test:
   host: localhost
   port: 3306
 
-travis_test:
+ci_test:
   adapter: mysql2
   encoding: utf8
   database: test

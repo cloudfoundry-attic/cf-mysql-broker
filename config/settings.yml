@@ -84,6 +84,6 @@ test:
   auth_password: 'secret'
   <<: *defaults
 
-travis_test:
+ci_test:
   auth_password: 'secret'
   <<: *defaults
