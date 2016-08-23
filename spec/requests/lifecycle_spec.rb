@@ -50,7 +50,7 @@ describe 'the service lifecycle' do
     put "/v2/service_instances/#{instance_id}", {plan_id: '2451fa22-df16-4c10-ba6e-1f682d3dcdc9'}
 
     expect(response.status).to eq(201)
-    expect(response.body).to eq("{\"dashboard_url\":\"https://pmysql.vcap.me/manage/instances/#{instance_id}\"}")
+    expect(response.body).to eq("{\"dashboard_url\":\"http://p-mysql.bosh-lite.com/manage/instances/#{instance_id}\"}")
 
     ##
     ## Bind

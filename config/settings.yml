@@ -9,10 +9,10 @@ defaults: &defaults
   session_expiry: 86400
   message_bus_servers:
     - nats://127.0.0.1:4222
-  external_host: pmysql.vcap.me
+  external_host: p-mysql.bosh-lite.com
   external_ip: 127.0.0.1
-  ssl_enabled: true
-  skip_ssl_validation: false
+  ssl_enabled: false
+  skip_ssl_validation: true
   persistent_disk: 10000
   gcache_size: 50
   ib_log_file_size: 100
@@ -33,8 +33,8 @@ defaults: &defaults
       documentationUrl: "http://docs.run.pivotal.io"
       supportUrl: "http://support.run.pivotal.io/home"
     dashboard_client:
-      id: 'p-mysql-client'
-      secret: 'p-mysql-secret'
+      id: 'p-mysql'
+      secret: 'p-mysql'
       redirect_uri: 'http://10.80.130.98:3000/manage/auth/cloudfoundry/callback'
     plans:
     - name: 5mb
@@ -70,7 +70,7 @@ defaults: &defaults
           - 10 MB storage
           - 40 concurrent connections
 
-  cc_api_uri: 'https://api.10.244.0.34.xip.io'
+  cc_api_uri: 'https://api.bosh-lite.com'
 
 assets:
   auth_password: 'secret'

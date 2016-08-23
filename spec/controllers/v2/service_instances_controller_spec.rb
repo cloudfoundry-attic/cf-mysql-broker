@@ -60,7 +60,7 @@ describe V2::ServiceInstancesController do
         make_request
 
         instance = JSON.parse(response.body)
-        expect(instance).to eq({'dashboard_url' => "http://pmysql.vcap.me/manage/instances/#{instance_id}"})
+        expect(instance).to eq({'dashboard_url' => "http://p-mysql.bosh-lite.com/manage/instances/#{instance_id}"})
       end
     end
 
@@ -104,7 +104,7 @@ describe V2::ServiceInstancesController do
         make_request
 
         instance = JSON.parse(response.body)
-        expect(instance).to eq({'dashboard_url' => "https://pmysql.vcap.me/manage/instances/#{instance_id}"})
+        expect(instance).to eq({'dashboard_url' => "https://p-mysql.bosh-lite.com/manage/instances/#{instance_id}"})
       end
     end
 
