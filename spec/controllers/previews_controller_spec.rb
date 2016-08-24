@@ -10,7 +10,7 @@ describe V2::PreviewsController do
 
     context 'when Rails.env is development' do
       before do
-        Rails.stub(env: ActiveSupport::StringInquirer.new("development"))
+        allow(Rails).to receive_messages(env: ActiveSupport::StringInquirer.new("development"))
       end
 
       it 'renders a view that helps developers make CSS/HTML changes' do

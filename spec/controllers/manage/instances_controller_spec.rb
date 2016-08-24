@@ -190,7 +190,7 @@ describe Manage::InstancesController do
 
       context 'when the user has permissions to manage the instance' do
         before do
-          Settings.stub(:cc_api_uri) { 'http://api.example.com' }
+          allow(Settings).to receive(:cc_api_uri) { 'http://api.example.com' }
 
           allow(ServiceInstanceAccessVerifier).to receive(:can_manage_instance?).
                                                     with('abc-123', anything).

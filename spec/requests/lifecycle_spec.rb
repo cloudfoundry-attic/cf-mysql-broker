@@ -33,7 +33,7 @@ describe 'the service lifecycle' do
   let(:username) { ServiceBinding.new(id: binding_id).username }
 
   before do
-    SecureRandom.stub(:base64).and_return(password, 'notthepassword')
+    allow(SecureRandom).to receive(:base64).and_return(password, 'notthepassword')
     cleanup_mysql_user(username)
     cleanup_mysql_database(dbname)
   end
@@ -92,7 +92,7 @@ describe 'the service lifecycle' do
     ##
     expect {
       create_mysql_client(username, password, dbname)
-    }.to raise_error
+    }.to raise_error(Mysql2::Error)
 
     ##
     ## Test that we have purged any data associated with the user

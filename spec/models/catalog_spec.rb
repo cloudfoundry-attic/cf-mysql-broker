@@ -59,7 +59,7 @@ describe Catalog do
   }
 
   before do
-    Settings.stub(:[]).with('services').and_return(services)
+    allow(Settings).to receive(:[]).with('services').and_return(services)
   end
 
   describe '.plans' do

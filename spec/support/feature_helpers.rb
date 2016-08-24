@@ -79,5 +79,5 @@ module FeatureHelpers
 end
 
 RSpec.configure do |config|
-  config.include FeatureHelpers, :example_group => { :file_path => %r(spec/features) }
+  config.include FeatureHelpers, :file_path => %r(spec/features)
 end

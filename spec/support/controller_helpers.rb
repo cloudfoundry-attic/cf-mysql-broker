@@ -10,7 +10,7 @@ end
 
 def get_logged_message(message_type)
   received_log_messages = []
-  Rails.logger.stub(:info) do |log_message|
+  allow(Rails.logger).to receive(:info) do |log_message|
     matching_message = log_message_matching_type(message_type, log_message)
     received_log_messages << matching_message unless matching_message.nil?
   end
@@ -67,4 +67,5 @@ end
 
 RSpec.configure do |config|
   config.include ControllerHelpers, type: :controller
+  config.infer_spec_type_from_file_location!
 end

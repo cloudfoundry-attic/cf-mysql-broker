@@ -8,9 +8,9 @@ describe ServiceInstanceManager do
   let(:max_storage_mb) { 300 }
 
   before do
-    Catalog.stub(:has_plan?).with(plan_id).and_return(true)
-    Catalog.stub(:has_plan?).with(non_existent_plan_id).and_return(false)
-    Catalog.stub(:storage_quota_for_plan_guid).with(plan_id).and_return(max_storage_mb)
+    allow(Catalog).to receive(:has_plan?).with(plan_id).and_return(true)
+    allow(Catalog).to receive(:has_plan?).with(non_existent_plan_id).and_return(false)
+    allow(Catalog).to receive(:storage_quota_for_plan_guid).with(plan_id).and_return(max_storage_mb)
   end
 
   describe '.database_name_from_service_instance_guid' do
@@ -110,8 +110,8 @@ describe ServiceInstanceManager do
     let!(:service_instance) { described_class.create(guid: instance_id, plan_guid: plan_id) }
 
     before do
-      Catalog.stub(:has_plan?).with(new_plan_id).and_return(true)
-      Catalog.stub(:storage_quota_for_plan_guid).with(new_plan_id).and_return(12)
+      allow(Catalog).to receive(:has_plan?).with(new_plan_id).and_return(true)
+      allow(Catalog).to receive(:storage_quota_for_plan_guid).with(new_plan_id).and_return(12)
     end
 
     it 'changes the plan_guid' do
@@ -190,7 +190,7 @@ describe ServiceInstanceManager do
 
         # increase plan size in Catalog
         new_plan_size = max_storage_mb + 100
-        Catalog.stub(:plans).and_return([
+        expect(Catalog).to receive(:plans).and_return([
             Plan.build('id' => plan_id,
                        'name' => 'plan_name',
                        'description' => 'plan description',

@@ -17,9 +17,9 @@ describe ServiceBinding do
   let(:connection_quota) { 12 }
 
   before do
-    SecureRandom.stub(:base64).and_return(password, 'notthepassword')
-    Database.stub(:exists?).with(database).and_return(true)
-    Catalog.stub(:connection_quota_for_plan_guid).with(plan_guid).and_return(connection_quota)
+    allow(SecureRandom).to receive(:base64).and_return(password, 'notthepassword')
+    allow(Database).to receive(:exists?).with(database).and_return(true)
+    allow(Catalog).to receive(:connection_quota_for_plan_guid).with(plan_guid).and_return(connection_quota)
   end
 
   after do
@@ -204,17 +204,17 @@ SQL
 
       expect {
         ServiceBinding.new(id: id, service_instance: instance).save
-      }.to raise_error
+      }.to raise_error(ActiveRecord::StatementInvalid)
 
       password_sql = "SELECT * FROM mysql.user WHERE user = '#{username}' AND password = PASSWORD('#{password}')"
       expect(connection.select_values(password_sql).count).to eq(1)
     end
 
     context 'when the database does not exist' do
-      before { Database.stub(:exists?).with(database).and_return(false) }
+      before { allow(Database).to receive(:exists?).with(database).and_return(false) }
 
       it 'raises an error' do
-        expect{binding.save}.to raise_error
+        expect{binding.save}.to raise_error(DatabaseNotFoundError)
       end
     end
   end

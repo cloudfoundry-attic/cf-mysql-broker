@@ -1,5 +1,6 @@
 require Rails.root.join('lib/service_instance_manager')
 
+class DatabaseNotFoundError < StandardError; end
 class ServiceBinding < BaseModel
   attr_accessor :id, :service_instance
 
@@ -86,7 +87,9 @@ class ServiceBinding < BaseModel
   end
 
   def save
-    raise "Service instance '#{service_instance.guid}' database does not exist" unless Database.exists?(database_name)
+    unless Database.exists?(database_name)
+      raise DatabaseNotFoundError.new("Service instance '#{service_instance.guid}' database does not exist")
+    end
 
     connection.execute("CREATE USER #{connection.quote(username)} IDENTIFIED BY #{connection.quote(password)}")
 

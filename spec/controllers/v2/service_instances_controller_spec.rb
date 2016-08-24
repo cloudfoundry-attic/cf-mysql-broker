@@ -42,9 +42,9 @@ describe V2::ServiceInstancesController do
     end
 
     before do
-      Settings.stub(:[]).with('services').and_return(services)
-      Settings.stub(:[]).with('ssl_enabled').and_return(true)
-      ServiceCapacity.stub(:can_allocate?).with(max_storage_mb).and_return(true)
+      allow(Settings).to receive(:[]).with('services').and_return(services)
+      allow(Settings).to receive(:[]).with('ssl_enabled').and_return(true)
+      allow(ServiceCapacity).to receive(:can_allocate?).with(max_storage_mb).and_return(true)
     end
 
     it_behaves_like 'a controller action that requires basic auth'
@@ -53,7 +53,7 @@ describe V2::ServiceInstancesController do
 
     context 'when ssl is set to false' do
       before do
-        Settings.stub(:[]).with('ssl_enabled').and_return(false)
+        allow(Settings).to receive(:[]).with('ssl_enabled').and_return(false)
       end
 
       it 'returns a dashboard URL without https' do
@@ -83,7 +83,7 @@ describe V2::ServiceInstancesController do
 
     context 'when creating additional instances is allowed' do
       before do
-        ServiceCapacity.stub(:can_allocate?).with(max_storage_mb) { true }
+        allow(ServiceCapacity).to receive(:can_allocate?).with(max_storage_mb) { true }
       end
 
       it 'returns a 201' do
@@ -110,7 +110,7 @@ describe V2::ServiceInstancesController do
 
     context 'when creating additional instances is not allowed' do
       before do
-        ServiceCapacity.stub(:can_allocate?).with(max_storage_mb) { false }
+        allow(ServiceCapacity).to receive(:can_allocate?).with(max_storage_mb) { false }
       end
 
       it 'returns a 507' do
@@ -133,7 +133,7 @@ describe V2::ServiceInstancesController do
     let(:make_request) { patch :set_plan, id: instance_id, plan_id: plan_id }
 
     before do
-      ServiceInstanceManager.stub(:set_plan)
+      allow(ServiceInstanceManager).to receive(:set_plan)
 
       request_body = {plan_id: 'new-plan-guid'}.to_json
       request.env['RAW_POST_DATA'] = request_body

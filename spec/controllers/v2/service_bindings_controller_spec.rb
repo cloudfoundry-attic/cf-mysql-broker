@@ -15,7 +15,7 @@ describe V2::ServiceBindingsController do
     authenticate
     instance.save
 
-    Database.stub(:exists?).with(database).and_return(true)
+    allow(Database).to receive(:exists?).with(database).and_return(true)
   end
 
   after { instance.destroy }
@@ -29,7 +29,7 @@ describe V2::ServiceBindingsController do
 
     let(:make_request) { put :update, id: binding_id, service_instance_id: instance_guid }
 
-    before { SecureRandom.stub(:base64).and_return(generated_password, 'notthepassword') }
+    before { allow(SecureRandom).to receive(:base64).and_return(generated_password, 'notthepassword') }
     after { ServiceBinding.new(id: binding_id, service_instance: instance).destroy }
 
     it_behaves_like 'a controller action that requires basic auth'

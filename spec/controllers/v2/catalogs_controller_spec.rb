@@ -34,7 +34,7 @@ describe V2::CatalogsController do
 
       context 'with invalid catalog data' do
         before do
-          Settings.stub(:[]).with('services').and_return(nil)
+          allow(Settings).to receive(:[]).with('services').and_return(nil)
         end
 
         it_behaves_like 'a controller action that logs its request and response headers and body'

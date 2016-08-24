@@ -20,7 +20,7 @@ describe Configuration do
   describe '#auth_server_url' do
     it 'uses the cc_api_uri to get the url for the auth server' do
       expect(Configuration.auth_server_url).to eql('http://login.bosh-lite.com')
-      a_request(:get, "#{Settings.cc_api_uri}/info").should have_been_made
+      expect(a_request(:get, "#{Settings.cc_api_uri}/info")).to have_been_made
     end
   end
 
@@ -33,7 +33,7 @@ describe Configuration do
   describe '#token_server_url' do
     it 'uses the cc_api_uri to get the url for the token server' do
       expect(Configuration.token_server_url).to eql('https://uaa.bosh-lite.com')
-      a_request(:get, "#{Settings.cc_api_uri}/info").should have_been_made
+      expect(a_request(:get, "#{Settings.cc_api_uri}/info")).to have_been_made
     end
   end
 
@@ -44,7 +44,7 @@ describe Configuration do
 
     context 'when the catalog is empty' do
       before do
-        Settings.stub(:services).and_return([])
+        allow(Settings).to receive(:services).and_return([])
       end
 
       it 'is nil' do
@@ -60,7 +60,7 @@ describe Configuration do
 
     context 'when the catalog is empty' do
       before do
-        Settings.stub(:services).and_return([])
+        allow(Settings).to receive(:services).and_return([])
       end
 
       it 'is nil' do
