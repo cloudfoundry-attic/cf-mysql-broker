@@ -1,5 +1,6 @@
 module Manage
   class AuthController < ApplicationController
+    protect_from_forgery with: :exception, only: :destroy
 
     def create
       auth                        = request.env['omniauth.auth'].to_hash
@@ -25,6 +26,11 @@ module Manage
 
     def failure
       render text: message_param[:message], status: 403
+    end
+
+    def destroy
+     session.clear
+     redirect_to ::Configuration.auth_server_logout_url
     end
 
     private

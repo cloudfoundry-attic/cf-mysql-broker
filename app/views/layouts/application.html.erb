@@ -4,6 +4,8 @@
       <title>MySQL Management Dashboard</title>
       <%= favicon_link_tag %>
       <%= stylesheet_link_tag "application", media: "all" %>
+      <%= javascript_include_tag :application %>
+      <%= csrf_meta_tags %>
     </head>
     <body>
       <div class="container-gmajor">
@@ -19,6 +21,7 @@
             <% if Configuration.support_url %>
                 <%= link_to "Support", Configuration.support_url, class: 'mlxl' %>
             <% end %>
+            <%= link_to "Logout", manage_auth_path, method: :delete, class: 'logout mlxl' %>
             </div>
           </div>
 

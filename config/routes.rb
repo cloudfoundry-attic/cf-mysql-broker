@@ -12,6 +12,7 @@ CfMysqlBroker::Application.routes.draw do
   namespace :manage do
     get 'auth/cloudfoundry/callback' => 'auth#create'
     get 'auth/failure' => 'auth#failure'
+    delete 'auth' => 'auth#destroy'
     resources :instances, only: [:show]
   end
 end

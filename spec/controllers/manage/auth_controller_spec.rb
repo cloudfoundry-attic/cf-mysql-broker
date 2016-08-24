@@ -99,4 +99,21 @@ describe Manage::AuthController do
       expect(response.body).to eq 'something broke'
     end
   end
+
+  describe '#destroy' do
+    before do
+      session[:foo] = 'bar'
+      allow(Configuration).to receive(:auth_server_logout_url).and_return('auth_server_logout_url')
+    end
+
+    it 'destroys the session' do
+      delete :destroy
+      expect(session).to be_empty
+    end
+
+    it 'redirects to GET #{auth_server}/logout.do' do
+      delete :destroy
+      expect(response).to redirect_to 'auth_server_logout_url'
+    end
+  end
 end

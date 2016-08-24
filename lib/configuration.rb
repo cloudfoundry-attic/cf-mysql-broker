@@ -17,6 +17,10 @@ module Configuration
     cc_api_info["authorization_endpoint"]
   end
 
+  def auth_server_logout_url
+    "#{cc_api_info["authorization_endpoint"]}/logout.do"
+  end
+
   def token_server_url
     cc_api_info["token_endpoint"]
   end

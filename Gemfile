@@ -4,6 +4,7 @@ ruby '2.3.1'
 
 gem 'rails', '4.2.7.1'
 gem 'rails-api'
+gem 'jquery-rails'
 gem 'settingslogic'
 gem 'mysql2'
 gem 'omniauth-uaa-oauth2', git: 'https://github.com/cloudfoundry/omniauth-uaa-oauth2'

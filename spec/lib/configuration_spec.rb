@@ -18,9 +18,15 @@ describe Configuration do
   end
 
   describe '#auth_server_url' do
-    it 'uses the cc_api_uri to get the uri for the auth server' do
+    it 'uses the cc_api_uri to get the url for the auth server' do
       expect(Configuration.auth_server_url).to eql('http://login.bosh-lite.com')
       a_request(:get, "#{Settings.cc_api_uri}/info").should have_been_made
+    end
+  end
+
+  describe '#auth_server_logout_url' do
+    it 'uses the cc_api_uri to return the auth server logout url' do
+      expect(Configuration.auth_server_logout_url).to eql('http://login.bosh-lite.com/logout.do')
     end
   end
 

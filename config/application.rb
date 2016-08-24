@@ -34,5 +34,6 @@ module CfMysqlBroker
 
     config.paths.add 'config/database', with: Settings.database_config_path
     config.middleware.use Rack::Session::Cookie, secret: Settings.cookie_secret, expire_after: Settings.session_expiry
+    config.middleware.insert_after 'Rack::Runtime', Rack::MethodOverride
   end
 end
