@@ -91,7 +91,11 @@ class ServiceBinding < BaseModel
       raise DatabaseNotFoundError.new("Service instance '#{service_instance.guid}' database does not exist")
     end
 
-    connection.execute("CREATE USER #{connection.quote(username)} IDENTIFIED BY #{connection.quote(password)}")
+    begin
+      connection.execute("CREATE USER #{connection.quote(username)} IDENTIFIED BY #{connection.quote(password)}")
+    rescue => e
+      raise e, e.message.gsub(password, 'redacted'), e.backtrace
+    end
 
     ServiceBinding.update_connection_quota_for_user(username, service_instance)
   end

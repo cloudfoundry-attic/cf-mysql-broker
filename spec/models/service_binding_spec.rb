@@ -217,6 +217,36 @@ SQL
         expect{binding.save}.to raise_error(DatabaseNotFoundError)
       end
     end
+
+    context 'when an error occurs creating the user' do
+
+      let(:db_error) do
+        ActiveRecord::StatementInvalid.new(
+          "Lost connection to MySQL server during query: CREATE USER '#{username}' IDENTIFIED BY '#{password}'")
+      end
+
+      before do
+        expect(connection).to receive(:execute).with(/CREATE USER/).and_raise(db_error)
+      end
+
+      it 'redacts the password before re-raising the error' do
+        expect{binding.save}.to raise_error { |error|
+          expect(error.message).to_not include password
+        }
+      end
+
+      it 'retains the original error message' do
+        expect{binding.save}.to raise_error { |error|
+          expect(error.message).to eq "Lost connection to MySQL server during query: CREATE USER '#{username}' IDENTIFIED BY 'redacted'"
+        }
+      end
+
+      it 'retains the original error backtrace' do
+        expect{binding.save}.to raise_error { |error|
+          expect(error.backtrace).to eq db_error.backtrace
+        }
+      end
+    end
   end
 
   describe '#destroy' do
