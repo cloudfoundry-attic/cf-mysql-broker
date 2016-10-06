@@ -1,37 +1,12 @@
-def log_message_matching_type(message_type, log_message)
-  match_data = /^\s+#{message_type}\s+(.*)/.match(log_message)
-  if match_data
-    json_info = match_data[1]
-
-    parsed_data = JSON.parse(json_info)
-    parsed_data if parsed_data.has_key?('headers') && parsed_data.has_key?('body')
-  end
-end
-
-def get_logged_message(message_type)
-  received_log_messages = []
-  allow(Rails.logger).to receive(:info) do |log_message|
-    matching_message = log_message_matching_type(message_type, log_message)
-    received_log_messages << matching_message unless matching_message.nil?
+shared_examples_for 'a controller action that does not log its request and response headers and body' do
+  it 'does not log the request' do
+    expect(Rails.logger).to_not receive(:info).with(/Request:/)
+    make_request
   end
 
-  make_request
-
-  expect(received_log_messages.length).to eq 1
-  received_log_messages.first
-end
-
-shared_examples_for 'a controller action that logs its request and response headers and body' do
-  it 'logs the request' do
-    message = get_logged_message("Request:")
-    expect(message).to have_key 'body'
-    expect(message['headers']).not_to be_empty
-  end
-
-  it 'logs the response' do
-    message = get_logged_message("Response:")
-    expect(message['body']).not_to be_empty
-    expect(message['headers']).not_to be_empty
+  it 'does not log the response' do
+    expect(Rails.logger).to_not receive(:info).with(/Response:/)
+    make_request
   end
 end
 

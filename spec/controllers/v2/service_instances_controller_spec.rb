@@ -49,7 +49,7 @@ describe V2::ServiceInstancesController do
 
     it_behaves_like 'a controller action that requires basic auth'
 
-    it_behaves_like 'a controller action that logs its request and response headers and body'
+    it_behaves_like 'a controller action that does not log its request and response headers and body'
 
     context 'when ssl is set to false' do
       before do
@@ -141,7 +141,7 @@ describe V2::ServiceInstancesController do
 
     it_behaves_like 'a controller action that requires basic auth'
 
-    it_behaves_like 'a controller action that logs its request and response headers and body'
+    it_behaves_like 'a controller action that does not log its request and response headers and body'
 
     context 'when the service instance exists' do
       before do
@@ -217,7 +217,7 @@ describe V2::ServiceInstancesController do
 
     it_behaves_like 'a controller action that requires basic auth'
 
-    it_behaves_like 'a controller action that logs its request and response headers and body'
+    it_behaves_like 'a controller action that does not log its request and response headers and body'
 
     context 'when the service instance exists' do
       before do
