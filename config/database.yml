@@ -36,7 +36,7 @@ test:
   database: test
   pool: 5
   username: root
-  password: password
+  password:
   host: localhost
   port: 3306
 

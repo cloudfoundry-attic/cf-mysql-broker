@@ -52,7 +52,7 @@ describe ServiceBinding do
 
   describe '.find_by_id_and_service_instance_guid' do
     context 'when the user exists and has all privileges' do
-      before { connection.execute("GRANT ALL PRIVILEGES ON `#{database}`.* TO '#{username}'@'%' IDENTIFIED BY '#{password}'") }
+      before { binding.save }
 
       it 'returns the binding' do
         binding = ServiceBinding.find_by_id_and_service_instance_guid(id, instance_guid)
@@ -123,7 +123,7 @@ SQL
 
   describe '.exists?' do
     context 'when the user exists and has all privileges' do
-      before { connection.execute("GRANT ALL PRIVILEGES ON `#{database}`.* TO '#{username}'@'%' IDENTIFIED BY '#{password}'") }
+      before { binding.save }
 
       it 'returns true' do
         expect(ServiceBinding.exists?(id: id, service_instance_guid: instance_guid)).to eq(true)
@@ -181,15 +181,19 @@ SQL
       }.from(0).to(1)
     end
 
-    it 'grants the user all privileges for the database' do
+    it 'grants the user all privileges except for LOCK TABLES' do
       expect {
         connection.select_values("SHOW GRANTS FOR #{username}")
       }.to raise_error(ActiveRecord::StatementInvalid, /no such grant/)
 
       binding.save
 
-      grant_sql = "GRANT ALL PRIVILEGES ON `#{database}`.* TO '#{username}'@'%'"
-      expect(connection.select_values("SHOW GRANTS FOR #{username}")).to include(grant_sql)
+      grants = connection.select_values("SHOW GRANTS FOR #{username}")
+
+      matching_grants = grants.select { |grant| grant.match(/GRANT .* ON `#{database}`\.\* TO '#{username}'@'%'/) }
+
+      expect(matching_grants.length).to eq(1)
+      expect(matching_grants[0]).not_to include("LOCK TABLES")
     end
 
     it 'sets the max connections to the value specified by the plan' do
@@ -254,8 +258,9 @@ SQL
       before { binding.save }
 
       it 'deletes the user' do
-        grant_sql = "GRANT ALL PRIVILEGES ON `#{database}`.* TO '#{username}'@'%'"
-        expect(connection.select_values("SHOW GRANTS FOR #{username}")).to include(grant_sql)
+        grant_sql_regex = /GRANT .* ON `#{database}`\.\* TO '#{username}'@'%'/
+        grants = connection.select_values("SHOW GRANTS FOR #{username}")
+        expect(grants.any? { |grant| grant.match(grant_sql_regex) }).to be_truthy
 
         binding.destroy
 

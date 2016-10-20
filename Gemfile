@@ -21,6 +21,8 @@ group :development, :test do
   gem 'rspec-rails'
   gem 'database_cleaner'
   gem 'brakeman'
+  gem 'pry'
+  gem 'rb-readline'
 end
 
 group :test do

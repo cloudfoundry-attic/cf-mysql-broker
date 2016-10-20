@@ -17,7 +17,7 @@ class ServiceBinding < BaseModel
     binding = new(id: id)
 
     begin
-      connection.execute("SHOW GRANTS FOR #{connection.quote(binding.username)}")
+      connection.execute("SHOW GRANTS FOR '#{binding.username}'")
       binding
     rescue ActiveRecord::StatementInvalid => e
       raise unless e.message =~ /no such grant/
@@ -35,12 +35,13 @@ class ServiceBinding < BaseModel
     binding = new(id: id)
 
     begin
-      grants = connection.select_values("SHOW GRANTS FOR #{connection.quote(binding.username)}")
+      grants = connection.select_values("SHOW GRANTS FOR '#{binding.username}'")
 
       database_name = ServiceInstanceManager.database_name_from_service_instance_guid(instance_guid)
       # Can we do this more elegantly, i.e., without checking for a
       # particular raw GRANT statement?
-      if grants.include?("GRANT ALL PRIVILEGES ON #{connection.quote_table_name(database_name)}.* TO #{connection.quote(binding.username)}@'%'")
+
+      if grants.any? { |grant| grant.match(Regexp.new("GRANT .* ON `#{database_name}`\\.\\* TO '#{binding.username}'@'%'")) }
         binding
       end
     rescue ActiveRecord::StatementInvalid => e
@@ -92,7 +93,7 @@ class ServiceBinding < BaseModel
     end
 
     begin
-      connection.execute("CREATE USER #{connection.quote(username)} IDENTIFIED BY #{connection.quote(password)}")
+      connection.execute("CREATE USER '#{username}' IDENTIFIED BY '#{password}'")
     rescue => e
       raise e, e.message.gsub(password, 'redacted'), e.backtrace
     end
@@ -102,9 +103,13 @@ class ServiceBinding < BaseModel
 
   def self.update_connection_quota_for_user(username, service_instance)
     max_user_connections = Catalog.connection_quota_for_plan_guid(service_instance.plan_guid)
-    grant_sql = "GRANT ALL PRIVILEGES ON #{connection.quote_table_name(service_instance.db_name)}.* TO #{connection.quote(username)}@'%'"
+
+    grant_sql = "GRANT ALL PRIVILEGES ON `#{service_instance.db_name}`.* TO '#{username}'@'%'"
     grant_sql = grant_sql +  " WITH MAX_USER_CONNECTIONS #{max_user_connections}" if max_user_connections
     connection.execute(grant_sql)
+
+    revoke_sql = "REVOKE LOCK TABLES ON `#{service_instance.db_name}`.* FROM '#{username}'@'%'"
+    connection.execute(revoke_sql)
     # Some MySQL installations, e.g., Travis, seem to need privileges
     # to be flushed even when using the appropriate account management
     # statements, despite what the MySQL documentation says:
@@ -114,7 +119,7 @@ class ServiceBinding < BaseModel
 
   def destroy
     begin
-      connection.execute("DROP USER #{connection.quote(username)}")
+      connection.execute("DROP USER '#{username}'")
     rescue ActiveRecord::StatementInvalid => e
       raise unless e.message =~ /DROP USER failed/
     else

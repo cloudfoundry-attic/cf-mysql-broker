@@ -71,12 +71,12 @@ RSpec.configure do |config|
     raise <<-TEXT.strip_heredoc unless variables['innodb_stats_on_metadata'] == 'ON'
     innodb_stats_on_metadata must be ON
       Option 1 (permanent): set innodb_stats_on_metadata=ON in my.cnf
-      Option 2 (temporary): in mysql CLI, "set global innodb_stats_on_metadata=ON"
+      Option 2 (temporary): `mysql -uroot -e "SET GLOBAL innodb_stats_on_metadata=ON"`
     TEXT
     raise <<-TEXT.strip_heredoc if variables['innodb_stats_persistent'] == 'ON'
     innodb_stats_persistent must be OFF
       Option 1 (permanent): set innodb_stats_persistent=OFF in my.cnf
-      Option 2 (temporary): in mysql CLI, "set global innodb_stats_persistent=OFF"
+      Option 2 (temporary): `mysql -uroot -e "SET GLOBAL innodb_stats_persistent=OFF"`
     TEXT
   end
 
