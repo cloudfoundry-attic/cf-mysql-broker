@@ -110,25 +110,12 @@ class ServiceBinding < BaseModel
 
     revoke_sql = "REVOKE LOCK TABLES ON `#{service_instance.db_name}`.* FROM '#{username}'@'%'"
     connection.execute(revoke_sql)
-    # Some MySQL installations, e.g., Travis, seem to need privileges
-    # to be flushed even when using the appropriate account management
-    # statements, despite what the MySQL documentation says:
-    # http://dev.mysql.com/doc/refman/5.6/en/privilege-changes.html
-    connection.execute('FLUSH PRIVILEGES')
   end
 
   def destroy
-    begin
-      connection.execute("DROP USER '#{username}'")
-    rescue ActiveRecord::StatementInvalid => e
-      raise unless e.message =~ /DROP USER failed/
-    else
-      # Some MySQL installations, e.g., Travis, seem to need privileges
-      # to be flushed even when using the appropriate account management
-      # statements, despite what the MySQL documentation says:
-      # http://dev.mysql.com/doc/refman/5.6/en/privilege-changes.html
-      connection.execute('FLUSH PRIVILEGES')
-    end
+    connection.execute("DROP USER '#{username}'")
+  rescue ActiveRecord::StatementInvalid => e
+    raise unless e.message =~ /DROP USER failed/
   end
 
   def to_json(*)
@@ -155,7 +142,6 @@ class ServiceBinding < BaseModel
         connection.execute(update_max_user_connection_for_user(user, plan))
       end
     end
-    connection.execute('FLUSH PRIVILEGES')
   end
 
   private

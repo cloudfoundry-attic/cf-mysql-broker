@@ -115,8 +115,6 @@ GRANT USAGE ON *.* TO '#{users[0]}'@'%'
 WITH MAX_USER_CONNECTIONS #{plan.max_user_connections}
 SQL
       )
-      expect(connection).to receive(:execute).with("FLUSH PRIVILEGES")
-
       ServiceBinding.update_all_max_user_connections
     end
   end
