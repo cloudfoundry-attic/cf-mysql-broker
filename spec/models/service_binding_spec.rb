@@ -179,19 +179,42 @@ SQL
       }.from(0).to(1)
     end
 
-    it 'grants the user all privileges except for LOCK TABLES' do
-      expect {
-        connection.select_values("SHOW GRANTS FOR #{username}")
-      }.to raise_error(ActiveRecord::StatementInvalid, /no such grant/)
+    context 'when table locks are enabled' do
+      it 'grants the user all privileges including for LOCK TABLES' do
+        expect {
+          connection.select_values("SHOW GRANTS FOR #{username}")
+        }.to raise_error(ActiveRecord::StatementInvalid, /no such grant/)
 
-      binding.save
+        binding.save
 
-      grants = connection.select_values("SHOW GRANTS FOR #{username}")
+        grants = connection.select_values("SHOW GRANTS FOR #{username}")
 
-      matching_grants = grants.select { |grant| grant.match(/GRANT .* ON `#{database}`\.\* TO '#{username}'@'%'/) }
+        matching_grants = grants.select { |grant| grant.match(/GRANT .* ON `#{database}`\.\* TO '#{username}'@'%'/) }
 
-      expect(matching_grants.length).to eq(1)
-      expect(matching_grants[0]).not_to include("LOCK TABLES")
+        expect(matching_grants.length).to eq(1)
+        expect(matching_grants[0]).to include("ALL PRIVILEGES")
+      end
+    end
+
+    context 'when table locks are disabled' do
+      before do
+        allow(Settings).to receive(:[]).with('disable_table_locks').and_return(true)
+      end
+
+      it 'grants the user all privileges except for LOCK TABLES' do
+        expect {
+          connection.select_values("SHOW GRANTS FOR #{username}")
+        }.to raise_error(ActiveRecord::StatementInvalid, /no such grant/)
+
+        binding.save
+
+        grants = connection.select_values("SHOW GRANTS FOR #{username}")
+
+        matching_grants = grants.select { |grant| grant.match(/GRANT .* ON `#{database}`\.\* TO '#{username}'@'%'/) }
+
+        expect(matching_grants.length).to eq(1)
+        expect(matching_grants[0]).not_to include("LOCK TABLES")
+      end
     end
 
     it 'sets the max connections to the value specified by the plan' do
