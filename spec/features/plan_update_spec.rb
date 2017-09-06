@@ -9,6 +9,10 @@ describe 'Plan Upgrade' do
   let(:max_storage_mb_0) { plan_0.max_storage_mb.to_i }
   let(:max_storage_mb_1) { plan_1.max_storage_mb.to_i }
 
+  before do
+    allow(Settings).to receive(:allow_table_locks).and_return(true)
+  end
+
   after do
     delete "/v2/service_instances/#{instance_id_0}/service_bindings/#{binding_id_0}"
     delete "/v2/service_instances/#{instance_id_0}"

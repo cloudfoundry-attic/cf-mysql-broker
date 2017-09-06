@@ -20,6 +20,7 @@ describe ServiceBinding do
     allow(SecureRandom).to receive(:base64).and_return(password, 'notthepassword')
     allow(Database).to receive(:exists?).with(database).and_return(true)
     allow(Catalog).to receive(:connection_quota_for_plan_guid).with(plan_guid).and_return(connection_quota)
+    allow(Settings).to receive(:allow_table_locks).and_return(true)
   end
 
   after do
@@ -198,7 +199,7 @@ SQL
 
     context 'when table locks are disabled' do
       before do
-        allow(Settings).to receive(:[]).with('disable_table_locks').and_return(true)
+        allow(Settings).to receive(:allow_table_locks).and_return(false)
       end
 
       it 'grants the user all privileges except for LOCK TABLES' do

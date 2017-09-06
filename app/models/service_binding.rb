@@ -108,7 +108,7 @@ class ServiceBinding < BaseModel
     grant_sql = grant_sql +  " WITH MAX_USER_CONNECTIONS #{max_user_connections}" if max_user_connections
     connection.execute(grant_sql)
 
-    if Settings['disable_table_locks']
+    if !Settings.allow_table_locks
       revoke_sql = "REVOKE LOCK TABLES ON `#{service_instance.db_name}`.* FROM '#{username}'@'%'"
       connection.execute(revoke_sql)
     end

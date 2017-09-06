@@ -16,6 +16,7 @@ describe V2::ServiceBindingsController do
     instance.save
 
     allow(Database).to receive(:exists?).with(database).and_return(true)
+    allow(Settings).to receive(:allow_table_locks).and_return(true)
   end
 
   after { instance.destroy }

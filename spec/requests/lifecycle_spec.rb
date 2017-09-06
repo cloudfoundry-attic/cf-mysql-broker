@@ -36,6 +36,7 @@ describe 'the service lifecycle' do
     allow(SecureRandom).to receive(:base64).and_return(password, 'notthepassword')
     cleanup_mysql_user(username)
     cleanup_mysql_database(dbname)
+    allow(Settings).to receive(:allow_table_locks).and_return(true)
   end
 
   after do

@@ -15,6 +15,7 @@ describe ServiceInstanceUsageQuery do
       allow(Catalog).to receive(:has_plan?).with(plan_guid).and_return(true)
       allow(Catalog).to receive(:storage_quota_for_plan_guid).with(plan_guid).and_return(max_storage_mb)
       ServiceInstanceManager.create(guid: instance_guid, plan_guid: plan_guid)
+      allow(Settings).to receive(:allow_table_locks).and_return(true)
       binding.save
       fill_db
     end
