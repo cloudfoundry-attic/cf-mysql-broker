@@ -214,6 +214,7 @@ SQL
         matching_grants = grants.select { |grant| grant.match(/GRANT .* ON `#{database}`\.\* TO '#{username}'@'%'/) }
 
         expect(matching_grants.length).to eq(1)
+        expect(matching_grants[0]).not_to include("ALL PRIVILEGES")
         expect(matching_grants[0]).not_to include("LOCK TABLES")
       end
     end
