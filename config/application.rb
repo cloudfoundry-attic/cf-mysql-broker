@@ -27,13 +27,14 @@ module CfMysqlBroker
     # config.i18n.load_path += Dir[Rails.root.join('my', 'locales', '*.{rb,yml}').to_s]
     # config.i18n.default_locale = :de
 
+    config.api_only = false
+
     config.assets.enabled = true
 
     config.autoload_paths += %W(#{config.root}/lib)
     config.autoload_paths += Dir["#{config.root}/lib/**/"]
 
     config.paths.add 'config/database', with: Settings.database_config_path
-    config.middleware.use Rack::Session::Cookie, secret: Settings.cookie_secret, expire_after: Settings.session_expiry
     config.middleware.insert_after 'Rack::Runtime', Rack::MethodOverride
   end
 end
