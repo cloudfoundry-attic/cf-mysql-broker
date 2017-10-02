@@ -121,7 +121,7 @@ class ServiceBinding < BaseModel
   end
 
   def to_json(*)
-    {
+    obj = {
       'credentials' => {
         'hostname' => host,
         'port' => port,
@@ -131,7 +131,12 @@ class ServiceBinding < BaseModel
         'uri' => uri,
         'jdbcUrl' => jdbc_url
       }
-    }.to_json
+    }
+
+    if Settings['tls_ca_certificate']
+      obj['credentials']['ca_certificate'] = Settings['tls_ca_certificate']
+    end
+    obj.to_json
   end
 
   def self.update_all_max_user_connections

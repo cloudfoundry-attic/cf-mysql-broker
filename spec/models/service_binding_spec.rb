@@ -316,8 +316,12 @@ SQL
     let(:port) { connection_config.fetch('port') }
     let(:uri) { "mysql://#{username}:#{password}@#{host}:#{port}/#{database}?reconnect=true" }
     let(:jdbc_url) { "jdbc:mysql://#{host}:#{port}/#{database}?user=#{username}&password=#{password}" }
+    let(:tls_ca_certificate) { nil }
 
-    before { binding.save }
+    before do
+      allow(Settings).to receive(:[]).with('tls_ca_certificate').and_return(tls_ca_certificate)
+      binding.save
+    end
 
     it 'includes the credentials' do
       hash = JSON.parse(binding.to_json)
@@ -329,6 +333,17 @@ SQL
       expect(credentials.fetch('password')).to eq(password)
       expect(credentials.fetch('uri')).to eq(uri)
       expect(credentials.fetch('jdbcUrl')).to eq(jdbc_url)
+      expect(credentials).to_not have_key('ca_certificate')
+    end
+
+    context 'when the broker starts with a ca cert' do
+      let(:tls_ca_certificate) { 'this-is-a-ca-certificate' }
+
+      it 'includes the ca_certificate' do
+        hash = JSON.parse(binding.to_json)
+        credentials = hash.fetch('credentials')
+        expect(credentials.fetch('ca_certificate')).to eq(tls_ca_certificate)
+      end
     end
   end
 end
