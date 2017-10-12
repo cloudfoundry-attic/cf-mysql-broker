@@ -344,6 +344,12 @@ SQL
         credentials = hash.fetch('credentials')
         expect(credentials.fetch('ca_certificate')).to eq(tls_ca_certificate)
       end
+
+      it 'adds useSSL to the jdbc url' do
+        hash = JSON.parse(binding.to_json)
+        credentials = hash.fetch('credentials')
+        expect(credentials.fetch('jdbcUrl')).to eq("#{jdbc_url}&useSSL=true")
+      end
     end
   end
 end

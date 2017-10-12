@@ -179,6 +179,7 @@ SQL
   end
 
   def jdbc_url
-    "jdbc:mysql://#{host}:#{port}/#{database_name}?user=#{username}&password=#{password}"
+    useSSL = '&useSSL=true' if Settings['tls_ca_certificate']
+    "jdbc:mysql://#{host}:#{port}/#{database_name}?user=#{username}&password=#{password}#{useSSL}"
   end
 end

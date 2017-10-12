@@ -20,8 +20,9 @@ The CF MySQL Broker integration specs will exercise the catalog fetch, create, b
   * The anonymous user (User='' and Host='localhost') must be deleted (see [spec/spec_helper])
   * Specific innodb settings are required (see [spec/spec_helper])
     - innodb_stats_on_metadata = ON
+      - `mysql -uroot -e "SET GLOBAL innodb_stats_on_metadata=ON"`
     - innodb_stats_persistent = OFF
-
+      - `mysql -uroot -e "SET GLOBAL innodb_stats_persistent=OFF"`
 2. Run the following commands
 
 ```
