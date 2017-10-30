@@ -348,7 +348,7 @@ SQL
       it 'adds useSSL to the jdbc url' do
         hash = JSON.parse(binding.to_json)
         credentials = hash.fetch('credentials')
-        expect(credentials.fetch('jdbcUrl')).to eq("#{jdbc_url}&useSSL=true")
+        expect(credentials.fetch('jdbcUrl')).to eq("#{jdbc_url}&useSSL=true&enabledTLSProtocols=TLSv1.2&enabledSslProtocolSuites=TLSv1.2")
       end
     end
   end
