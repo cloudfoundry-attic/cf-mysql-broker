@@ -178,8 +178,14 @@ SQL
     "mysql://#{username}:#{password}@#{host}:#{port}/#{database_name}?reconnect=true"
   end
 
+  def ssl_arguments
+    return unless Settings['tls_ca_certificate']
+    mysql_connector_j_flag = 'enabledTLSProtocols=TLSv1.2'
+    mariadb_connector_j_flag = 'enabledSslProtocolSuites=TLSv1.2'
+    "&useSSL=true&#{mysql_connector_j_flag}&#{mariadb_connector_j_flag}"
+  end
+
   def jdbc_url
-    useSSL = '&useSSL=true' if Settings['tls_ca_certificate']
-    "jdbc:mysql://#{host}:#{port}/#{database_name}?user=#{username}&password=#{password}#{useSSL}"
+    "jdbc:mysql://#{host}:#{port}/#{database_name}?user=#{username}&password=#{password}#{ssl_arguments}"
   end
 end
