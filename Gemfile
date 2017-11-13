@@ -26,6 +26,6 @@ group :development, :test do
 end
 
 group :test do
-  gem 'codeclimate-test-reporter', require: nil
+  gem 'codeclimate-test-reporter', '~> 0.6.0', require: nil
   gem 'webmock'
 end

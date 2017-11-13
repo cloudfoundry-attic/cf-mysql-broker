@@ -1,3 +1,5 @@
+require 'net/http'
+
 class CloudControllerHttpClient
   attr_reader :auth_header
   def initialize(auth_header=nil)
