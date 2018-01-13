@@ -31,6 +31,10 @@ class ServiceBinding < BaseModel
   # the binding id and the instance guid, it cannot currently be
   # used by the binding controller.
 
+  ## TODO: the comment above should be deleted.
+  ## The find_by_id_and_service_instance_guid? method is only called from .exists?, and is only used in tests.
+  ## It can potentially be deleted if it is not useful after the refactor.
+
   def self.find_by_id_and_service_instance_guid(id, instance_guid)
     binding = new(id: id)
 
@@ -54,6 +58,9 @@ class ServiceBinding < BaseModel
   # NOTE: This method uses +find_by_id_and_service_instance_guid+ to
   # verify true existence, and thus cannot currently be used by the
   # binding controller.
+
+  ## TODO: the comment above should be deleted.
+  ## The exists? method is only used by tests, and can potentially be deleted if it is not useful after the refactor.
 
   def self.exists?(conditions)
     id = conditions.fetch(:id)
@@ -87,6 +94,10 @@ class ServiceBinding < BaseModel
     @password ||= SecureRandom.base64(20).gsub(/[^a-zA-Z0-9]+/, '')[0...16]
   end
 
+  def read_only?
+
+  end
+
   def save
     unless Database.exists?(database_name)
       raise DatabaseNotFoundError.new("Service instance '#{service_instance.guid}' database does not exist")
@@ -101,6 +112,7 @@ class ServiceBinding < BaseModel
     ServiceBinding.update_connection_quota_for_user(username, service_instance)
   end
 
+  # TODO make this private or move to ServiceBindingManager
   def self.update_connection_quota_for_user(username, service_instance)
     max_user_connections = Catalog.connection_quota_for_plan_guid(service_instance.plan_guid)
 

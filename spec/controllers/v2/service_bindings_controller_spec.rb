@@ -66,6 +66,13 @@ describe V2::ServiceBindingsController do
           'uri' => "mysql://#{generated_username}:#{generated_password}@#{database_host}:#{database_port}/#{generated_dbname}?reconnect=true",
         )
       end
+
+      context 'when the read-only parameter is set' do
+        let(:make_request) { put :update, id: binding_id, service_instance_id: instance_guid, read_only: true }
+
+        pending 'tells the ServiceBindingManager to make a read only binding' do
+        end
+      end
     end
 
     context 'when the service instance does not exist' do

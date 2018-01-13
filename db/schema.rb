@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161220232718) do
+ActiveRecord::Schema.define(version: 20140918004518) do
 
   create_table "service_instances", force: :cascade do |t|
     t.string  "guid",           limit: 255
