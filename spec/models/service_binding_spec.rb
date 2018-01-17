@@ -274,6 +274,31 @@ SQL
         }
       end
     end
+
+    context 'when read_only is true' do
+      before do
+        binding.read_only = true
+      end
+
+      it 'creates an entry in the read-only table' do
+        binding.save
+
+        read_only_user = ReadOnlyUser.find_by_username(username)
+        expect(read_only_user).to be_present
+        expect(read_only_user.grantee).to eq("'#{username}'@'%'")
+      end
+
+      it 'grants the correct set of privileges' do
+        binding.save
+
+        grants = connection.select_values("SHOW GRANTS FOR #{username}")
+
+        matching_grants = grants.select { |grant| grant.match(/GRANT .* ON `#{database}`\.\* TO '#{username}'@'%'/) }
+
+        expect(matching_grants.length).to eq(1)
+        expect(matching_grants[0]).to include("GRANT SELECT ON")
+      end
+    end
   end
 
   describe '#destroy' do

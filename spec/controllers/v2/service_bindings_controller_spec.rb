@@ -66,6 +66,28 @@ describe V2::ServiceBindingsController do
           'uri' => "mysql://#{generated_username}:#{generated_password}@#{database_host}:#{database_port}/#{generated_dbname}?reconnect=true",
         )
       end
+
+      context 'when the read-only parameter is set' do
+        let(:make_request) { put :update, id: binding_id, service_instance_id: instance_guid, parameters: {read_only: true} }
+        before { allow(ServiceBinding).to receive(:new).and_call_original }
+
+        it 'creates a binding with read_only: true' do
+          make_request
+
+          expect(ServiceBinding).to have_received(:new).with(id: binding_id, service_instance: instance_of(ServiceInstance), read_only: true)
+        end
+      end
+
+      context 'when the read-only parameter is not set' do
+        let(:make_request) { put :update, id: binding_id, service_instance_id: instance_guid }
+        before { allow(ServiceBinding).to receive(:new).and_call_original }
+
+        it 'creates a binding with default read_only: false' do
+          make_request
+
+          expect(ServiceBinding).to have_received(:new).with(id: binding_id, service_instance: instance_of(ServiceInstance), read_only: false)
+        end
+      end
     end
 
     context 'when the service instance does not exist' do

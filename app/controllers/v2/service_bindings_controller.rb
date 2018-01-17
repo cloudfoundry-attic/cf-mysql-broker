@@ -5,7 +5,9 @@ class V2::ServiceBindingsController < V2::BaseController
       render status: 404, json: {}
       return
     end
-    binding = ServiceBinding.new(id: params.fetch(:id), service_instance: instance)
+
+    read_only = params.fetch(:parameters, {}).fetch(:read_only, false)
+    binding = ServiceBinding.new(id: params.fetch(:id), service_instance: instance, read_only: read_only)
     binding.save
 
     render status: 201, json: binding

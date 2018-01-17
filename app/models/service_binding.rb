@@ -2,16 +2,7 @@ require Rails.root.join('lib/service_instance_manager')
 
 class DatabaseNotFoundError < StandardError; end
 class ServiceBinding < BaseModel
-  attr_accessor :id, :service_instance
-
-  # Returns a given binding, if the MySQL user exists.
-  #
-  # NOTE: This method cannot currently check for the true existence of
-  # the binding. A binding is the association of a MySQL user with a
-  # database. We use the binding id to identify a user and the instance
-  # id to identify a database. As such, we really need both ids to be
-  # sure the binding exists. This problem is resolvable by persisting
-  # both ids and their relationship in a separate management database.
+  attr_accessor :id, :service_instance, :read_only
 
   def self.find_by_id(id)
     binding = new(id: id)
@@ -24,12 +15,6 @@ class ServiceBinding < BaseModel
     end
   end
 
-  # Returns a given binding, if it exists.
-  #
-  # NOTE: This method is only necessary because of the current
-  # shortcomings of +find_by_id+. And because it requires both
-  # the binding id and the instance guid, it cannot currently be
-  # used by the binding controller.
 
   def self.find_by_id_and_service_instance_guid(id, instance_guid)
     binding = new(id: id)
@@ -48,12 +33,6 @@ class ServiceBinding < BaseModel
       raise unless e.message =~ /no such grant/
     end
   end
-
-  # Checks to see if the given binding exists.
-  #
-  # NOTE: This method uses +find_by_id_and_service_instance_guid+ to
-  # verify true existence, and thus cannot currently be used by the
-  # binding controller.
 
   def self.exists?(conditions)
     id = conditions.fetch(:id)
@@ -98,20 +77,8 @@ class ServiceBinding < BaseModel
       raise e, e.message.gsub(password, 'redacted'), e.backtrace
     end
 
-    ServiceBinding.update_connection_quota_for_user(username, service_instance)
-  end
-
-  def self.update_connection_quota_for_user(username, service_instance)
-    max_user_connections = Catalog.connection_quota_for_plan_guid(service_instance.plan_guid)
-
-    grant_sql = "GRANT ALL PRIVILEGES ON `#{service_instance.db_name}`.* TO '#{username}'@'%'"
-    grant_sql = grant_sql +  " WITH MAX_USER_CONNECTIONS #{max_user_connections}" if max_user_connections
-    connection.execute(grant_sql)
-
-    if !Settings.allow_table_locks
-      revoke_sql = "REVOKE LOCK TABLES ON `#{service_instance.db_name}`.* FROM '#{username}'@'%'"
-      connection.execute(revoke_sql)
-    end
+    update_connection_quota_for_user
+    create_read_only_user if read_only
   end
 
   def destroy
@@ -152,6 +119,24 @@ class ServiceBinding < BaseModel
   end
 
   private
+
+  def update_connection_quota_for_user
+    max_user_connections = Catalog.connection_quota_for_plan_guid(service_instance.plan_guid)
+
+    privileges = read_only ? "SELECT" : "ALL PRIVILEGES"
+    grant_sql = "GRANT #{privileges} ON `#{service_instance.db_name}`.* TO '#{username}'@'%'"
+    grant_sql = grant_sql +  " WITH MAX_USER_CONNECTIONS #{max_user_connections}" if max_user_connections
+    connection.execute(grant_sql)
+
+    if !Settings.allow_table_locks
+      revoke_sql = "REVOKE LOCK TABLES ON `#{service_instance.db_name}`.* FROM '#{username}'@'%'"
+      connection.execute(revoke_sql)
+    end
+  end
+
+  def create_read_only_user
+    ReadOnlyUser.create(username: username, grantee: "'#{username}'@'%'")
+  end
 
   def self.update_max_user_connection_for_user(user, plan)
 <<-SQL
