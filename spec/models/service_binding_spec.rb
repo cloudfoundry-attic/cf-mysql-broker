@@ -316,6 +316,18 @@ SQL
           connection.select_values("SHOW GRANTS FOR #{username}")
         }.to raise_error(ActiveRecord::StatementInvalid, /no such grant/)
       end
+
+      context 'when the user is read-only' do
+        let(:binding) { ServiceBinding.new(id: id, service_instance: instance, read_only: true) }
+
+        it 'also deletes the ReadOnlyUser record' do
+          expect(ReadOnlyUser.find_by_username(binding.username)).to be_present
+
+          binding.destroy
+
+          expect(ReadOnlyUser.find_by_username(binding.username)).not_to be_present
+        end
+      end
     end
 
     context 'when the user does not exist' do

@@ -78,6 +78,7 @@ class ServiceBinding < BaseModel
 
   def destroy
     connection.execute("DROP USER '#{username}'")
+    ReadOnlyUser.find_by_username(username).try(:destroy)
   rescue ActiveRecord::StatementInvalid => e
     raise unless e.message =~ /DROP USER failed/
   end
