@@ -6,5 +6,8 @@ class CreateReadOnlyUsers < ActiveRecord::Migration
 
       t.timestamps null: false
     end
+
+    add_index :read_only_users, :username
+    add_index :read_only_users, :grantee
   end
 end
