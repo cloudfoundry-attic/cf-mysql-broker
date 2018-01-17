@@ -41,11 +41,6 @@ class ServiceBinding < BaseModel
     find_by_id_and_service_instance_guid(id, instance_guid).present?
   end
 
-  def self.count
-    cnt = connection.execute("SELECT COUNT(DISTINCT USER) FROM mysql.user").first[0]
-    cnt ? cnt : 0
-  end
-
   def host
     connection_config.fetch('host')
   end

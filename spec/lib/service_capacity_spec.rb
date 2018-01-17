@@ -7,7 +7,6 @@ describe ServiceCapacity do
       allow(Settings).to receive(:[]).with('gcache_size').and_return(10)
       allow(Settings).to receive(:[]).with('ib_log_file_size').and_return(5)
       allow(ServiceInstance).to receive(:reserved_space_in_mb).and_return(900)
-      allow(ServiceBinding).to receive(:count).and_return(10)
       allow(ServiceInstance).to receive_message_chain(:all, :count).and_return(5)
     end
 
@@ -20,7 +19,7 @@ describe ServiceCapacity do
     end
 
     it 'returns false when the allocated space + requested space is > the storage capacity' do
-      expect(described_class.can_allocate?(15.948)).to eq false
+      expect(described_class.can_allocate?(16)).to eq false
     end
   end
 end

@@ -17,13 +17,12 @@ class ServiceCapacity
     ib_log_file_size = 2 * Settings['ib_log_file_size']
 
     current_db_overhead = 0.073 * ServiceInstance.all.count
-    current_binding_overhead = 0.0008 * ServiceBinding.count
 
     #can edit, for the sake of safety... undeleted GRA_*.logs & other logs
     buffer = 50
 
     ibdata_file_size + broker_db_size + gcache_size +
       mysql_db_size + performance_db_size + ib_log_file_size +
-      current_db_overhead + current_binding_overhead + buffer
+      current_db_overhead + buffer
   end
 end
