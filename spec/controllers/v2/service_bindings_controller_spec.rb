@@ -68,7 +68,7 @@ describe V2::ServiceBindingsController do
       end
 
       context 'when the read-only parameter is set' do
-        let(:make_request) { put :update, id: binding_id, service_instance_id: instance_guid, parameters: {read_only: true} }
+        let(:make_request) { put :update, id: binding_id, service_instance_id: instance_guid, parameters: {'read-only' => true} }
         before { allow(ServiceBinding).to receive(:new).and_call_original }
 
         it 'creates a binding with read_only: true' do

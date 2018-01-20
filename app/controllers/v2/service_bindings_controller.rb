@@ -6,7 +6,7 @@ class V2::ServiceBindingsController < V2::BaseController
       return
     end
 
-    read_only = params.fetch(:parameters, {}).fetch(:read_only, false)
+    read_only = params.fetch(:parameters, {}).fetch('read-only', false)
     binding = ServiceBinding.new(id: params.fetch(:id), service_instance: instance, read_only: read_only)
     binding.save
 
