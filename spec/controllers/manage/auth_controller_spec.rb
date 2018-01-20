@@ -30,7 +30,7 @@ describe Manage::AuthController do
       }
 
       it 'authenticates the user based on the permissions from UAA' do
-        get :create, some: 'stuff'
+        get :create, params: { some: 'stuff' }
         expect(response.status).to eql(302)
         expect(response).to redirect_to(manage_instance_path(instance_id))
 
@@ -59,7 +59,7 @@ describe Manage::AuthController do
       }
 
       it 'renders the approvals error page' do
-        get :create, some: 'stuff'
+        get :create, params: { some: 'stuff' }
 
         expect(response.status).to eql(200)
         expect(response).to render_template 'errors/approvals_error'
@@ -80,7 +80,7 @@ describe Manage::AuthController do
       }
 
       it 'renders the approvals error page' do
-        get :create, some: 'stuff'
+        get :create, params: { some: 'stuff' }
 
         expect(response.status).to eql(200)
         expect(response).to render_template 'errors/approvals_error'
@@ -95,7 +95,7 @@ describe Manage::AuthController do
     end
 
     it 'echos the passed message param as the failure message' do
-      get :failure, message: 'something broke'
+      get :failure, params: { message: 'something broke' }
       expect(response.body).to eq 'something broke'
     end
   end

@@ -25,7 +25,7 @@ module Manage
     end
 
     def failure
-      render text: message_param[:message], status: 403
+      render plain: message_param[:message], status: 403
     end
 
     def destroy

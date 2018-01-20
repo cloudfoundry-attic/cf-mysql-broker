@@ -35,7 +35,7 @@ describe V2::ServiceInstancesController do
     end
     let(:plan_id) { 'plan_id' }
     let(:make_request) do
-      put :update, {
+      put :update, params: {
           id: instance_id,
           plan_id: plan_id
       }
@@ -130,7 +130,7 @@ describe V2::ServiceInstancesController do
 
   describe '#set_plan' do
     let(:plan_id) { 'new-plan-guid' }
-    let(:make_request) { patch :set_plan, id: instance_id, plan_id: plan_id }
+    let(:make_request) { patch :set_plan, params: { id: instance_id, plan_id: plan_id } }
 
     before do
       allow(ServiceInstanceManager).to receive(:set_plan)
@@ -213,7 +213,7 @@ describe V2::ServiceInstancesController do
   end
 
   describe '#destroy' do
-    let(:make_request) { delete :destroy, id: instance_id }
+    let(:make_request) { delete :destroy, params: { id: instance_id } }
 
     it_behaves_like 'a controller action that requires basic auth'
 

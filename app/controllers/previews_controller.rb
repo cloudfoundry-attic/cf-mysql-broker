@@ -1,5 +1,5 @@
 class PreviewsController < ApplicationController
-  before_filter :restrict_to_development
+  before_action :restrict_to_development
 
   def show
     @quota = 100

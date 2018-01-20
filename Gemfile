@@ -2,8 +2,7 @@ source 'https://rubygems.org'
 
 ruby '~> 2.3'
 
-gem 'rails', '~> 4.2'
-gem 'rails-api'
+gem 'rails'
 gem 'jquery-rails'
 gem 'settingslogic'
 gem 'mysql2'
@@ -28,4 +27,5 @@ end
 group :test do
   gem 'codeclimate-test-reporter', '~> 0.6.0', require: nil
   gem 'webmock'
+  gem 'rails-controller-testing'
 end

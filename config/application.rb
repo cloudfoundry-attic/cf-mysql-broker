@@ -35,6 +35,6 @@ module CfMysqlBroker
     config.autoload_paths += Dir["#{config.root}/lib/**/"]
 
     config.paths.add 'config/database', with: Settings.database_config_path
-    config.middleware.insert_after 'Rack::Runtime', Rack::MethodOverride
+    #config.middleware.insert_after 'Rack::Runtime', Rack::MethodOverride
   end
 end

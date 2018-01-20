@@ -19,8 +19,8 @@ describe 'Plan Upgrade' do
   end
 
   specify 'User updates to a plan with a larger quota' do
-    put "/v2/service_instances/#{instance_id_0}", {plan_id: plan_0.id}
-    put "/v2/service_instances/#{instance_id_0}/service_bindings/#{binding_id_0}"
+    put "/v2/service_instances/#{instance_id_0}", params: {plan_id: plan_0.id}, env: env
+    put "/v2/service_instances/#{instance_id_0}/service_bindings/#{binding_id_0}", env: env
     binding_0 = JSON.parse(response.body)
     credentials_0 = binding_0.fetch('credentials')
 
@@ -29,7 +29,7 @@ describe 'Plan Upgrade' do
     create_table_and_write_data(client_0, max_storage_mb_0)
 
     # Change instance to plan 1
-    patch "/v2/service_instances/#{instance_id_0}", { plan_id: plan_1.id, previous_values: {} }
+    patch "/v2/service_instances/#{instance_id_0}", params: {plan_id: plan_1.id, previous_values: {}}
     expect(response.status).to eq 200
 
     # Verify that we can write
@@ -39,7 +39,7 @@ describe 'Plan Upgrade' do
 
   specify 'User tries to downgrade to a plan with a smaller quota than he is currently using' do
     # Create db with larger quota
-    put "/v2/service_instances/#{instance_id_0}", {plan_id: plan_1.id}
+    put "/v2/service_instances/#{instance_id_0}", params: {plan_id: plan_1.id}
     put "/v2/service_instances/#{instance_id_0}/service_bindings/#{binding_id_0}"
     binding_0 = JSON.parse(response.body)
     credentials_0 = binding_0.fetch('credentials')
@@ -49,7 +49,7 @@ describe 'Plan Upgrade' do
     create_table_and_write_data(client_0, max_storage_mb_0 + 1)
 
     # Attempt to change instance to plan 0
-    patch "/v2/service_instances/#{instance_id_0}", { plan_id: plan_0.id, previous_values: {} }
+    patch "/v2/service_instances/#{instance_id_0}", params: {plan_id: plan_0.id, previous_values: {}}
     expect(response.status).to eq 422
   end
 end

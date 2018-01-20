@@ -14,7 +14,7 @@ describe Manage::InstancesController do
     describe 'redirecting a user that is not logged in' do
       context 'when there is no session' do
         it 'redirects the user' do
-          get :show, id: 'abc-123'
+          get :show, params: { id: 'abc-123' }
           expect(response).to redirect_to('/manage/auth/cloudfoundry')
         end
       end
@@ -35,7 +35,7 @@ describe Manage::InstancesController do
           end
 
           it 'redirects to auth' do
-            get :show, id: 'abc-123'
+            get :show, params: { id: 'abc-123' }
             expect(response).to redirect_to('/manage/auth/cloudfoundry')
           end
         end
@@ -71,13 +71,13 @@ describe Manage::InstancesController do
 
         it 'does not redirect http requests to https' do
           @request.env['HTTPS'] = nil
-          get :show, id: 'abc-123'
+          get :show, params: { id: 'abc-123' }
           expect(response.status).to eq 200
         end
 
         it 'does not redirect https requests' do
           @request.env['HTTPS'] = 'on'
-          get :show, id: 'abc-123'
+          get :show, params: { id: 'abc-123' }
           expect(response.status).to eq 200
         end
       end
@@ -89,13 +89,13 @@ describe Manage::InstancesController do
 
         it 'redirects http requests to https' do
           @request.env['HTTPS'] = nil
-          get :show, id: 'abc-123'
+          get :show, params: { id: 'abc-123' }
           expect(response).to redirect_to("https://#{request.host}#{request.path_info}")
         end
 
         it 'does not redirect https requests' do
           @request.env['HTTPS'] = 'on'
-          get :show, id: 'abc-123', ssl: true
+          get :show, params: { id: 'abc-123', ssl: true }
           expect(response.status).to eq 200
         end
       end
@@ -127,7 +127,7 @@ describe Manage::InstancesController do
         let(:has_retried) { 'true' }
 
         it 'renders the approval errors page' do
-          get :show, id: 'abc-123'
+          get :show, params: { id: 'abc-123' }
 
           expect(response.status).to eq 200
           expect(response.body).to include('This application requires the following permissions')
@@ -140,7 +140,7 @@ describe Manage::InstancesController do
           let(:has_retried) { nil }
 
           it 'redirects to the auth endpoint' do
-            get :show, id: 'abc-123'
+            get :show, params: { id: 'abc-123' }
 
             expect(response).to redirect_to '/manage/auth/cloudfoundry'
           end
@@ -150,7 +150,7 @@ describe Manage::InstancesController do
 
     context 'when the user is not authenticated' do
       it 'stores the instance id in the session and redirects to the auth endpoint' do
-        get :show, id: 'abc-123'
+        get :show, params: { id: 'abc-123' }
         expect(session[:instance_id]).to eql('abc-123')
         expect(response.status).to eql(302)
         expect(response).to redirect_to('/manage/auth/cloudfoundry')
@@ -184,7 +184,7 @@ describe Manage::InstancesController do
 
       it 'updates the last_seen' do
         expect {
-          get(:show, id: 'abc-123')
+          get(:show, params: { id: 'abc-123' })
         }.to change { session[:last_seen] }
       end
 
@@ -198,13 +198,13 @@ describe Manage::InstancesController do
         end
 
         it 'updates the uaa access token' do
-          get :show, id: 'abc-123'
+          get :show, params: { id: 'abc-123' }
 
           expect(session[:uaa_access_token]).to eql('new_access_token')
         end
 
         it 'updates the uaa refresh token' do
-          get :show, id: 'abc-123'
+          get :show, params: { id: 'abc-123' }
 
           expect(session[:uaa_refresh_token]).to eql('new_refresh_token')
         end
@@ -212,7 +212,7 @@ describe Manage::InstancesController do
         it 'displays the usage information for the given instance' do
           quota = instance.max_storage_mb
 
-          get :show, id: 'abc-123'
+          get :show, params: { id: 'abc-123' }
 
           expect(response.status).to eql(200)
           expect(response.body).to match(/10\.3 MB of #{quota} MB used./)
@@ -224,7 +224,7 @@ describe Manage::InstancesController do
             allow(query).to receive(:execute).and_return(120)
           end
           it 'displays a warning' do
-            get :show, id: 'abc-123'
+            get :show, params: { id: 'abc-123' }
             expect(response.body).to include("Warning:")
           end
         end
@@ -238,7 +238,7 @@ describe Manage::InstancesController do
         end
 
         it 'displays a "not authorized" message' do
-          get :show, id: 'abc-123'
+          get :show, params: { id: 'abc-123' }
           expect(response.status).to eql(200)
           expect(response.body).to match(/Not\ Authorized/)
           expect(query).not_to have_received(:execute)

@@ -14,22 +14,26 @@ module RequestHelpers
   end
 
   def get(*args)
-    args[2] ||= env
+    args[1] ||= {}
+    args[1][:env] ||= env
     super(*args)
   end
 
   def post(*args)
-    args[2] ||= env
+    args[1] ||= {}
+    args[1][:env] ||= env
     super(*args)
   end
 
   def put(*args)
-    args[2] ||= env
+    args[1] ||= {}
+    args[1][:env] ||= env
     super(*args)
   end
 
   def delete(*args)
-    args[2] ||= env
+    args[1] ||= {}
+    args[1][:env] ||= env
     super(*args)
   end
 end

@@ -1,7 +1,7 @@
 class V2::BaseController < ActionController::API
   include ActionController::HttpAuthentication::Basic::ControllerMethods
 
-  before_filter :authenticate
+  before_action :authenticate
 
   protected
 
