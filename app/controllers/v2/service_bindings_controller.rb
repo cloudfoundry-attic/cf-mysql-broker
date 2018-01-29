@@ -1,4 +1,6 @@
 class V2::ServiceBindingsController < V2::BaseController
+  ALLOWED_BINDING_PARAMETERS = ['read-only']
+
   def update
     instance = ServiceInstance.find_by_guid(params.fetch(:service_instance_id))
     if instance.nil?
@@ -6,8 +8,21 @@ class V2::ServiceBindingsController < V2::BaseController
       return
     end
 
-    read_only = params.fetch(:parameters, {}).fetch('read-only', false)
-    binding = ServiceBinding.new(id: params.fetch(:id), service_instance: instance, read_only: read_only)
+    binding_parameters = params.fetch(:parameters, {})
+    binding_parameters_include_unknown_key = binding_parameters.keys.any? {|key| !ALLOWED_BINDING_PARAMETERS.include?(key)}
+
+    read_only = binding_parameters['read-only']
+    read_only_parameter_has_invalid_value = !read_only.in?(['true', nil])
+
+    if binding_parameters_include_unknown_key || read_only_parameter_has_invalid_value
+      render status: 422, json: {
+        "error" => "Error creating service binding",
+        "description" => "Invalid arbitrary parameter syntax. Please check the documentation for supported arbitrary parameters.",
+      }
+      return
+    end
+
+    binding = ServiceBinding.new(id: params.fetch(:id), service_instance: instance, read_only: 'true' == read_only)
     binding.save
 
     render status: 201, json: binding

@@ -68,7 +68,7 @@ describe V2::ServiceBindingsController do
       end
 
       context 'when the read-only parameter is set' do
-        let(:make_request) { put :update, id: binding_id, service_instance_id: instance_guid, parameters: {'read-only' => true} }
+        let(:make_request) { put :update, id: binding_id, service_instance_id: instance_guid, parameters: {'read-only' => 'true'} }
         before { allow(ServiceBinding).to receive(:new).and_call_original }
 
         it 'creates a binding with read_only: true' do
@@ -86,6 +86,44 @@ describe V2::ServiceBindingsController do
           make_request
 
           expect(ServiceBinding).to have_received(:new).with(id: binding_id, service_instance: instance_of(ServiceInstance), read_only: false)
+        end
+      end
+
+      context 'when the read-only parameter has an invalid value' do
+        let(:make_request) { put :update, id: binding_id, service_instance_id: instance_guid, parameters: {'read-only' => 'bad-value'} }
+
+        it 'does not create a binding' do
+          make_request
+          expect(ServiceBinding.exists?(id: binding_id, service_instance_guid: instance_guid)).to eq(false)
+        end
+
+        it 'returns a 422 and an error message' do
+          make_request
+
+          expect(response.status).to eq(422)
+          expect(JSON.parse(response.body)).to eq({
+            "error" => "Error creating service binding",
+            "description" => "Invalid arbitrary parameter syntax. Please check the documentation for supported arbitrary parameters.",
+          })
+        end
+      end
+
+      context 'when an invalid parameter is provided' do
+        let(:make_request) { put :update, id: binding_id, service_instance_id: instance_guid, parameters: {'unexpected-parameter' => true} }
+
+        it 'does not create a binding' do
+          make_request
+          expect(ServiceBinding.exists?(id: binding_id, service_instance_guid: instance_guid)).to eq(false)
+        end
+
+        it 'returns a 422 and an error message' do
+          make_request
+
+          expect(response.status).to eq(422)
+          expect(JSON.parse(response.body)).to eq({
+            "error" => "Error creating service binding",
+            "description" => "Invalid arbitrary parameter syntax. Please check the documentation for supported arbitrary parameters.",
+          })
         end
       end
     end
