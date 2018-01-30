@@ -11,8 +11,8 @@ class V2::ServiceBindingsController < V2::BaseController
     binding_parameters = params.fetch(:parameters, {})
     binding_parameters_include_unknown_key = binding_parameters.keys.any? {|key| !ALLOWED_BINDING_PARAMETERS.include?(key)}
 
-    read_only = binding_parameters['read-only']
-    read_only_parameter_has_invalid_value = !read_only.in?(['true', nil])
+    read_only = binding_parameters.fetch('read-only', false)
+    read_only_parameter_has_invalid_value = !read_only.in?([true, false])
 
     if binding_parameters_include_unknown_key || read_only_parameter_has_invalid_value
       render status: 422, json: {
@@ -22,7 +22,7 @@ class V2::ServiceBindingsController < V2::BaseController
       return
     end
 
-    binding = ServiceBinding.new(id: params.fetch(:id), service_instance: instance, read_only: 'true' == read_only)
+    binding = ServiceBinding.new(id: params.fetch(:id), service_instance: instance, read_only: read_only)
     binding.save
 
     render status: 201, json: binding

@@ -24,7 +24,6 @@ def create_mysql_client(username=Rails.configuration.database_configuration[Rail
   )
 end
 
-
 describe 'the service lifecycle' do
   let(:instance_id) {'instance-1'}
   let(:dbname) {'cf_instance_1'}
@@ -32,6 +31,7 @@ describe 'the service lifecycle' do
   let(:binding_id) {'binding-1'}
   let(:password) {'somepassword'}
   let(:username) {ServiceBinding.new(id: binding_id).username}
+  let(:headers) {{"CONTENT_TYPE" => "application/json"}}
 
   before do
     cleanup_mysql_user(username)
@@ -100,7 +100,10 @@ describe 'the service lifecycle' do
         ##
         ## Bind with incorrect arbitrary parameters
         ##
-        put "/v2/service_instances/#{instance_id}/service_bindings/#{binding_id}", {parameters: {read_oonly: true}}
+        put "/v2/service_instances/#{instance_id}/service_bindings/#{binding_id}",
+          JSON.dump({"parameters" => {"read-oooonly" => true}}),
+          headers.merge(env)
+
         expect(response.status).to eq(422)
         expect(JSON.parse(response.body)).to eq({
           "error" => "Error creating service binding",
@@ -110,7 +113,10 @@ describe 'the service lifecycle' do
         ##
         ## Bind with invalid value for read-only parameter
         ##
-        put "/v2/service_instances/#{instance_id}/service_bindings/#{binding_id}", {parameters: {"read-only" => "tomato"}}
+        put "/v2/service_instances/#{instance_id}/service_bindings/#{binding_id}",
+          JSON.dump({"parameters" => {"read-only" => "tomato"}}),
+          headers.merge(env)
+
         expect(response.status).to eq(422)
         expect(JSON.parse(response.body)).to eq({
           "error" => "Error creating service binding",
@@ -152,7 +158,9 @@ describe 'the service lifecycle' do
         ##
         ## Make a read-only binding
         ##
-        put "/v2/service_instances/#{instance_id}/service_bindings/#{binding_id}", {parameters: {'read-only' => true}}
+        put "/v2/service_instances/#{instance_id}/service_bindings/#{binding_id}",
+          JSON.dump({"parameters" => {"read-only" => true}}),
+          headers.merge(env)
 
         expect(response.status).to eq(201)
         instance = JSON.parse(response.body)

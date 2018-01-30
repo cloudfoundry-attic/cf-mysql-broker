@@ -67,8 +67,8 @@ describe V2::ServiceBindingsController do
         )
       end
 
-      context 'when the read-only parameter is set' do
-        let(:make_request) { put :update, id: binding_id, service_instance_id: instance_guid, parameters: {'read-only' => 'true'} }
+      context 'when the read-only parameter is set to the boolean value true' do
+        let(:make_request) { put :update, id: binding_id, service_instance_id: instance_guid, parameters: {'read-only' => true} }
         before { allow(ServiceBinding).to receive(:new).and_call_original }
 
         it 'creates a binding with read_only: true' do
@@ -89,8 +89,8 @@ describe V2::ServiceBindingsController do
         end
       end
 
-      context 'when the read-only parameter has an invalid value' do
-        let(:make_request) { put :update, id: binding_id, service_instance_id: instance_guid, parameters: {'read-only' => 'bad-value'} }
+      context 'when the read-only parameter has a non-boolean value' do
+        let(:make_request) { put :update, id: binding_id, service_instance_id: instance_guid, parameters: {'read-only' => 'true'} }
 
         it 'does not create a binding' do
           make_request
