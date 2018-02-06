@@ -95,7 +95,7 @@ GEM
       eventmachine (~> 1.0, = 1.0.7)
       json_pure (~> 1.8, >= 1.8.1)
       thin (~> 1.6, >= 1.6.3)
-    nokogiri (1.8.1)
+    nokogiri (1.8.2)
       mini_portile2 (~> 2.3.0)
     omniauth (1.7.1)
       hashie (>= 3.4.6, < 3.6.0)
@@ -229,4 +229,4 @@ RUBY VERSION
    ruby 2.3.1p112
 
 BUNDLED WITH
-   1.15.4
+   1.16.0
