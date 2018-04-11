@@ -97,10 +97,10 @@ describe V2::ServiceBindingsController do
           expect(ServiceBinding.exists?(id: binding_id, service_instance_guid: instance_guid)).to eq(false)
         end
 
-        it 'returns a 422 and an error message' do
+        it 'returns a 400 and an error message' do
           make_request
 
-          expect(response.status).to eq(422)
+          expect(response.status).to eq(400)
           expect(JSON.parse(response.body)).to eq({
             "error" => "Error creating service binding",
             "description" => "Invalid arbitrary parameter syntax. Please check the documentation for supported arbitrary parameters.",
@@ -116,10 +116,10 @@ describe V2::ServiceBindingsController do
           expect(ServiceBinding.exists?(id: binding_id, service_instance_guid: instance_guid)).to eq(false)
         end
 
-        it 'returns a 422 and an error message' do
+        it 'returns a 400 and an error message' do
           make_request
 
-          expect(response.status).to eq(422)
+          expect(response.status).to eq(400)
           expect(JSON.parse(response.body)).to eq({
             "error" => "Error creating service binding",
             "description" => "Invalid arbitrary parameter syntax. Please check the documentation for supported arbitrary parameters.",

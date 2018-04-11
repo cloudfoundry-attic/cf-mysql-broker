@@ -15,7 +15,7 @@ class V2::ServiceBindingsController < V2::BaseController
     read_only_parameter_has_invalid_value = !read_only.in?([true, false])
 
     if binding_parameters_include_unknown_key || read_only_parameter_has_invalid_value
-      render status: 422, json: {
+      render status: 400, json: {
         "error" => "Error creating service binding",
         "description" => "Invalid arbitrary parameter syntax. Please check the documentation for supported arbitrary parameters.",
       }

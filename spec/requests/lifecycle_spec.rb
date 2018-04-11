@@ -104,7 +104,7 @@ describe 'the service lifecycle' do
           JSON.dump({"parameters" => {"read-oooonly" => true}}),
           headers.merge(env)
 
-        expect(response.status).to eq(422)
+        expect(response.status).to eq(400)
         expect(JSON.parse(response.body)).to eq({
           "error" => "Error creating service binding",
           "description" => "Invalid arbitrary parameter syntax. Please check the documentation for supported arbitrary parameters.",
@@ -117,7 +117,7 @@ describe 'the service lifecycle' do
           JSON.dump({"parameters" => {"read-only" => "tomato"}}),
           headers.merge(env)
 
-        expect(response.status).to eq(422)
+        expect(response.status).to eq(400)
         expect(JSON.parse(response.body)).to eq({
           "error" => "Error creating service binding",
           "description" => "Invalid arbitrary parameter syntax. Please check the documentation for supported arbitrary parameters.",
