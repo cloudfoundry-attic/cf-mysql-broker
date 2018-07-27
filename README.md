@@ -18,6 +18,8 @@ The CF MySQL Broker integration specs will exercise the catalog fetch, create, b
   * Specs have only been tested with MySQL 5.6
   * Specs assume MySQL root user without a password
   * The anonymous user (User='' and Host='localhost') must be deleted (see [spec/spec_helper])
+    - `delete from mysql.user where name='';`
+    - `flush privileges`
   * Specific innodb settings are required (see [spec/spec_helper])
     - innodb_stats_on_metadata = ON
       - `mysql -uroot -e "SET GLOBAL innodb_stats_on_metadata=ON"`
